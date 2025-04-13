@@ -12,6 +12,7 @@ import android.Manifest;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
@@ -42,8 +43,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Inicializar los botones de navegación
-        Button prevPageButton = findViewById(R.id.prevPageButton);
-        Button nextPageButton = findViewById(R.id.nextPageButton);
+        ImageButton prevPageButton = findViewById(R.id.prevPageButton);
+        ImageButton nextPageButton = findViewById(R.id.nextPageButton);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
