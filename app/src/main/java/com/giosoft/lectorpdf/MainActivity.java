@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
             // Abrir la nueva página
             currentPage = pdfRenderer.openPage(currentPageIndex);
 
-            // Ajustar tamaño según el factor de escala
+            // Ajustar tamaño según el factor de escala, pero limitando a un tamaño razonable
             int baseWidth = currentPage.getWidth();
             int baseHeight = currentPage.getHeight();
 
@@ -182,9 +182,16 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
+            // Limitar el tamaño del bitmap para evitar errores de memoria
+            int maxWidth = 2048;  // Máxima anchura del bitmap
+            int maxHeight = 2048; // Máxima altura del bitmap
+
             int width = (int) (baseWidth * scaleFactor);
             int height = (int) (baseHeight * scaleFactor);
 
+            // Limitar el tamaño del bitmap
+            width = Math.min(width, maxWidth);
+            height = Math.min(height, maxHeight);
 
             // Crear el bitmap con las nuevas dimensiones
             Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -196,6 +203,7 @@ public class MainActivity extends AppCompatActivity {
             pdfImageView.setImageBitmap(bitmap);
         }
     }
+
 
     private void loadPage(int pageIndex) {
         if (pdfRenderer != null && pageIndex >= 0 && pageIndex < pdfRenderer.getPageCount()) {
@@ -225,9 +233,19 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        // Asegúrate de que el evento toque se pase correctamente al detector de gestos
         if (scaleGestureDetector != null) {
             scaleGestureDetector.onTouchEvent(event);
         }
         return super.onTouchEvent(event);
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (pdfRenderer != null) {
+            pdfRenderer.close();  // Cierra el PdfRenderer
+        }
+    }
+
 }

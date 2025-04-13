@@ -33,9 +33,9 @@
         android:id="@+id/pdfImageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/toolbar"
-        android:scaleType="fitCenter"
-        android:contentDescription="Vista del PDF" />
+        android:scaleType="matrix"
+        android:contentDescription="PDF view"/>
+
 
     <!-- Flecha izquierda -->
     <ImageButton
