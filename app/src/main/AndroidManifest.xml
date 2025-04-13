@@ -16,7 +16,35 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.LectorPDFGioSoft"
-        tools:targetApi="31" />
+        tools:targetApi="31" >
+
+        <!-- Intent Filter para abrir archivos PDF -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+
+            <!-- Lanzador principal -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Para abrir PDFs desde otras apps -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" android:mimeType="application/pdf" />
+                <data android:scheme="file" android:mimeType="application/pdf" />
+            </intent-filter>
+
+        </activity>
+
+
+
+
+
+    </application>
 
 
 
