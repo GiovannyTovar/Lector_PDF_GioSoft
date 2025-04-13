@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
 import android.Manifest;
 
 import android.view.MotionEvent;
@@ -15,6 +14,9 @@ import android.view.ScaleGestureDetector;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
+import androidx.appcompat.widget.Toolbar;
+
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -23,6 +25,7 @@ import java.io.IOException;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_PICK_PDF = 1;
+    private static final int PERMISSION_REQUEST_CODE = 100;
 
     private PdfRenderer pdfRenderer;
     private PdfRenderer.Page currentPage;
@@ -38,19 +41,19 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        pdfImageView = findViewById(R.id.pdfImageView);  // Asegúrate de inicializar tu ImageView
-
-        Button selectPdfButton = findViewById(R.id.selectPdfButton);
-        selectPdfButton.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.setType("application/pdf");
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            startActivityForResult(intent, 1001);
-        });
-
         // Inicializar los botones de navegación
         Button prevPageButton = findViewById(R.id.prevPageButton);
         Button nextPageButton = findViewById(R.id.nextPageButton);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        pdfImageView = findViewById(R.id.pdfImageView);  // Asegúrate de inicializar tu ImageView
+
+        Button selectPdfButton = findViewById(R.id.selectPdfButton);
+        selectPdfButton.setOnClickListener(v -> openFilePicker());
+
+
 
         prevPageButton.setOnClickListener(v -> {
             if (currentPageIndex > 0) {
@@ -98,37 +101,47 @@ public class MainActivity extends AppCompatActivity {
                     != PackageManager.PERMISSION_GRANTED) {
 
                 ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-            }
-        }
-
-        // Aquí puedes continuar con tu lógica para abrir PDFs desde intent
-        Intent intent = getIntent();
-        String action = intent.getAction();
-        String type = intent.getType();
-
-        if (Intent.ACTION_VIEW.equals(action) && type != null && type.equals("application/pdf")) {
-            Uri pdfUri = intent.getData();
-            if (pdfUri != null) {
-                Log.d("PDF", "PDF recibido desde otra app: " + pdfUri.toString());
-                // Aquí puedes visualizar el PDF
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
             }
         }
     }
 
+    // Método para abrir el selector de archivos PDF
     private void openFilePicker() {
-        // Crear un intent para abrir el selector de archivos PDF
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.setType("application/pdf");
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        startActivityForResult(intent, REQUEST_CODE_PICK_PDF);
+        // Verificar permisos antes de continuar
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED) {
+            // Crear un intent para abrir el selector de archivos PDF
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.setType("application/pdf");
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            startActivityForResult(intent, REQUEST_CODE_PICK_PDF);
+        } else {
+            // Si no tienes el permiso, solicita el permiso
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
+        }
+    }
+
+    // Manejo de la respuesta del permiso
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Si el permiso es concedido, abre el selector de archivos
+                openFilePicker();
+            } else {
+                Toast.makeText(this, "Permiso denegado para acceder al almacenamiento", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == 1001 && resultCode == RESULT_OK && data != null) {
+        if (requestCode == REQUEST_CODE_PICK_PDF && resultCode == RESULT_OK && data != null) {
             Uri selectedPdfUri = data.getData();
             if (selectedPdfUri != null) {
                 try {
@@ -139,7 +152,8 @@ public class MainActivity extends AppCompatActivity {
                         pdfRenderer = new PdfRenderer(parcelFileDescriptor);
 
                         // Renderizar la primera página
-                        renderPdf(0);  // Mostrar la primera página del PDF
+                        currentPageIndex = 0;
+                        renderPdf(scaleFactor); // ✅ Usa el factor actual Mostrar la primera página del PDF
                     }
                 } catch (IOException e) {
                     Toast.makeText(this, "Error al abrir el PDF", Toast.LENGTH_SHORT).show();
@@ -159,8 +173,17 @@ public class MainActivity extends AppCompatActivity {
             currentPage = pdfRenderer.openPage(currentPageIndex);
 
             // Ajustar tamaño según el factor de escala
-            int width = (int) (currentPage.getWidth() * scaleFactor);
-            int height = (int) (currentPage.getHeight() * scaleFactor);
+            int baseWidth = currentPage.getWidth();
+            int baseHeight = currentPage.getHeight();
+
+            if (baseWidth <= 0 || baseHeight <= 0) {
+                Toast.makeText(this, "No se pudo renderizar el PDF: tamaño inválido", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            int width = (int) (baseWidth * scaleFactor);
+            int height = (int) (baseHeight * scaleFactor);
+
 
             // Crear el bitmap con las nuevas dimensiones
             Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -181,14 +204,21 @@ public class MainActivity extends AppCompatActivity {
 
             currentPage = pdfRenderer.openPage(pageIndex);
 
-            // Ajustar tamaño según el factor de escala
-            int width = (int) (currentPage.getWidth() * scaleFactor);
-            int height = (int) (currentPage.getHeight() * scaleFactor);
+            int baseWidth = currentPage.getWidth();
+            int baseHeight = currentPage.getHeight();
+
+            if (baseWidth <= 0 || baseHeight <= 0) {
+                Toast.makeText(this, "No se pudo renderizar la página: tamaño inválido", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            int width = (int) (baseWidth * scaleFactor);
+            int height = (int) (baseHeight * scaleFactor);
 
             Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             currentPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-
             pdfImageView.setImageBitmap(bitmap);
+
         }
     }
 
@@ -199,6 +229,4 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onTouchEvent(event);
     }
-
-
 }
