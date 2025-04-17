@@ -2,6 +2,7 @@ package com.giosoft.lectorpdf;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
 import android.os.Build;
@@ -9,243 +10,181 @@ import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.Manifest;
 
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
+import com.artifex.mupdf.viewer.BuildConfig;
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+
 public class MainActivity extends AppCompatActivity {
 
-    private static final int REQUEST_CODE_PICK_PDF = 1;
-    private static final int PERMISSION_REQUEST_CODE = 100;
+    private static final int REQUEST_CODE_OPEN_DOCUMENT = 1;
 
-    private PdfRenderer pdfRenderer;
-    private PdfRenderer.Page currentPage;
-    private int currentPageIndex = 0;
-    private ImageView pdfImageView;
-
-    // Variables para zoom
-    private ScaleGestureDetector scaleGestureDetector;
-    private float scaleFactor = 1.f;
+    private String lastOpenedPdfPath = null; // Ruta del último PDF abierto
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Inicializar los botones de navegación
-        ImageButton prevPageButton = findViewById(R.id.prevPageButton);
-        ImageButton nextPageButton = findViewById(R.id.nextPageButton);
-
+        // Configuración de Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        pdfImageView = findViewById(R.id.pdfImageView);  // Asegúrate de inicializar tu ImageView
-
-        Button selectPdfButton = findViewById(R.id.selectPdfButton);
-        selectPdfButton.setOnClickListener(v -> openFilePicker());
-
+        // Botón para abrir el PDF
+        Button openPdfButton = findViewById(R.id.openPdfButton);
+        openPdfButton.setOnClickListener(v -> openPdfFile());
 
 
-        prevPageButton.setOnClickListener(v -> {
-            if (currentPageIndex > 0) {
-                currentPageIndex--;
-                loadPage(currentPageIndex);
-            }
-        });
-
-        nextPageButton.setOnClickListener(v -> {
-            if (currentPageIndex < pdfRenderer.getPageCount() - 1) {
-                currentPageIndex++;
-                loadPage(currentPageIndex);
-            }
-        });
-
-        // Inicializar el detector de gestos de escala
-        scaleGestureDetector = new ScaleGestureDetector(this, new ScaleGestureDetector.OnScaleGestureListener() {
-            @Override
-            public boolean onScale(ScaleGestureDetector detector) {
-                // Ajustamos el factor de escala basado en el gesto
-                scaleFactor *= detector.getScaleFactor();
-                scaleFactor = Math.max(0.1f, Math.min(scaleFactor, 10.0f));
-
-                // Renderizar la página con el nuevo factor de escala
-                if (currentPage != null) {
-                    renderPdf(scaleFactor);
-                }
-                return true;
-            }
-
-            @Override
-            public boolean onScaleBegin(ScaleGestureDetector detector) {
-                return true;  // Comienza el gesto de escala
-            }
-
-            @Override
-            public void onScaleEnd(ScaleGestureDetector detector) {
-                // No hacemos nada cuando termina el gesto de escala
-            }
-        });
-
-        // Solicitar permiso para leer almacenamiento (Android < 13)
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
-            }
-        }
     }
 
-    // Método para abrir el selector de archivos PDF
-    private void openFilePicker() {
-        // Verificar permisos antes de continuar
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_GRANTED) {
-            // Crear un intent para abrir el selector de archivos PDF
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            intent.setType("application/pdf");
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            startActivityForResult(intent, REQUEST_CODE_PICK_PDF);
-        } else {
-            // Si no tienes el permiso, solicita el permiso
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
-        }
-    }
-
-    // Manejo de la respuesta del permiso
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Si el permiso es concedido, abre el selector de archivos
-                openFilePicker();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflar el menú de la Action Bar
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    // Acción al seleccionar "Compartir"
+    //@Override
+    /*public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_share) {
+            if (lastOpenedPdfPath != null) {
+                sharePdf(lastOpenedPdfPath);
             } else {
-                Toast.makeText(this, "Permiso denegado para acceder al almacenamiento", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Primero abre un PDF para compartirlo", Toast.LENGTH_SHORT).show();
             }
+            return true;
         }
+        return super.onOptionsItemSelected(item);
+    }*/
+
+    private void openPdfFile() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("application/pdf");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        startActivityForResult(intent, REQUEST_CODE_OPEN_DOCUMENT);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_CODE_PICK_PDF && resultCode == RESULT_OK && data != null) {
-            Uri selectedPdfUri = data.getData();
-            if (selectedPdfUri != null) {
-                try {
-                    // Abrir el PDF con un ParcelFileDescriptor
-                    ParcelFileDescriptor parcelFileDescriptor = getContentResolver().openFileDescriptor(selectedPdfUri, "r");
-                    if (parcelFileDescriptor != null) {
-                        // Inicializar el PdfRenderer con el descriptor del archivo
-                        pdfRenderer = new PdfRenderer(parcelFileDescriptor);
+        if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
+            Uri uri = data.getData();
 
-                        // Renderizar la primera página
-                        currentPageIndex = 0;
-                        renderPdf(scaleFactor); // ✅ Usa el factor actual Mostrar la primera página del PDF
-                    }
-                } catch (IOException e) {
-                    Toast.makeText(this, "Error al abrir el PDF", Toast.LENGTH_SHORT).show();
+            Log.d("PDF_DEBUG", "URI seleccionada: " + uri);
+
+            if (uri != null) {
+                getContentResolver().takePersistableUriPermission(
+                        uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                );
+
+                String path = copyPdfToExternalStorage(uri);
+                if (path != null) {
+                    lastOpenedPdfPath = path; // Guardamos para compartir después
+                    openPdfWithMuPDF(path);
+                } else {
+                    Toast.makeText(this, "Error al copiar el PDF", Toast.LENGTH_SHORT).show();
                 }
             }
         }
     }
 
-    private void renderPdf(float scaleFactor) {
-        if (pdfRenderer != null && currentPageIndex >= 0 && currentPageIndex < pdfRenderer.getPageCount()) {
-            // Cerrar la página anterior si está abierta
-            if (currentPage != null) {
-                currentPage.close();
+
+
+    private String copyPdfToExternalStorage(Uri uri) {
+        try {
+            InputStream inputStream = getContentResolver().openInputStream(uri);
+
+            File externalDir = getExternalFilesDir(null); // Ruta válida externa
+            File outFile = new File(externalDir, "documento.pdf");
+
+            OutputStream outputStream = new FileOutputStream(outFile);
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
             }
 
-            // Abrir la nueva página
-            currentPage = pdfRenderer.openPage(currentPageIndex);
+            inputStream.close();
+            outputStream.close();
 
-            // Ajustar tamaño según el factor de escala, pero limitando a un tamaño razonable
-            int baseWidth = currentPage.getWidth();
-            int baseHeight = currentPage.getHeight();
+            Log.d("PDF_DEBUG", "Archivo copiado a: " + outFile.getAbsolutePath());
+            Log.d("PDF_DEBUG", "Existe: " + outFile.exists() + " | Tamaño: " + outFile.length());
 
-            if (baseWidth <= 0 || baseHeight <= 0) {
-                Toast.makeText(this, "No se pudo renderizar el PDF: tamaño inválido", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            // Limitar el tamaño del bitmap para evitar errores de memoria
-            int maxWidth = 2048;  // Máxima anchura del bitmap
-            int maxHeight = 2048; // Máxima altura del bitmap
-
-            int width = (int) (baseWidth * scaleFactor);
-            int height = (int) (baseHeight * scaleFactor);
-
-            // Limitar el tamaño del bitmap
-            width = Math.min(width, maxWidth);
-            height = Math.min(height, maxHeight);
-
-            // Crear el bitmap con las nuevas dimensiones
-            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-
-            // Renderizar la página
-            currentPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-
-            // Mostrar el PDF en el ImageView
-            pdfImageView.setImageBitmap(bitmap);
+            return outFile.getAbsolutePath();
+        } catch (Exception e) {
+            Log.e("PDF_DEBUG", "Error al copiar PDF", e);
+            return null;
         }
     }
 
+    private void openPdfWithMuPDF(String filePath) {
+        try {
+            File file = new File(filePath);
+            Uri uri = Uri.fromFile(file); // Esta URI es válida para MuPDF
 
-    private void loadPage(int pageIndex) {
-        if (pdfRenderer != null && pageIndex >= 0 && pageIndex < pdfRenderer.getPageCount()) {
-            if (currentPage != null) {
-                currentPage.close();
-            }
+            Log.d("PDF_DEBUG", "¿Existe el archivo? " + file.exists());
+            Log.d("PDF_DEBUG", "Abriendo con MuPDF: " + file.getAbsolutePath());
 
-            currentPage = pdfRenderer.openPage(pageIndex);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(uri, "application/pdf");
+            intent.setClassName("com.giosoft.lectorpdf", "com.artifex.mupdf.viewer.DocumentActivity");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 
-            int baseWidth = currentPage.getWidth();
-            int baseHeight = currentPage.getHeight();
-
-            if (baseWidth <= 0 || baseHeight <= 0) {
-                Toast.makeText(this, "No se pudo renderizar la página: tamaño inválido", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            int width = (int) (baseWidth * scaleFactor);
-            int height = (int) (baseHeight * scaleFactor);
-
-            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            currentPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-            pdfImageView.setImageBitmap(bitmap);
-
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e("PDF_DEBUG", "Error al abrir con MuPDF", e);
+            Toast.makeText(this, "No se puede abrir el documento: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        // Asegúrate de que el evento toque se pase correctamente al detector de gestos
-        if (scaleGestureDetector != null) {
-            scaleGestureDetector.onTouchEvent(event);
+    private void sharePdf(String filePath) {
+        File file = new File(filePath);
+        if (!file.exists()) {
+            Toast.makeText(this, "Archivo no encontrado", Toast.LENGTH_SHORT).show();
+            return;
         }
-        return super.onTouchEvent(event);
+
+        Uri contentUri = FileProvider.getUriForFile(
+                this,
+                BuildConfig.APPLICATION_ID + ".fileprovider", // Muy importante que coincida con el authorities del manifest
+                file
+        );
+
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("application/pdf");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        startActivity(Intent.createChooser(shareIntent, "Compartir PDF usando"));
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (pdfRenderer != null) {
-            pdfRenderer.close();  // Cierra el PdfRenderer
-        }
-    }
+
 
 }
+

@@ -10,8 +10,8 @@ android {
         applicationId "com.giosoft.lectorpdf"
         minSdk 30
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -30,9 +30,12 @@ android {
 
 dependencies {
     implementation 'com.karumi:dexter:6.2.3'  // Dexter para permisos
+    api 'com.artifex.mupdf:viewer:1.15.+' // MuPDF
     implementation libs.appcompat
     implementation libs.material
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.6.0' // o versión más reciente
 }

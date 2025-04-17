@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+<!-- Acceso a archivos en almacenamiento externo privado -->
+<external-files-path name="external_files" path="." />
+
+<!-- Acceso a archivos en almacenamiento interno -->
+<files-path name="files" path="." />
+
+<!-- Acceso a la carpeta cache -->
+<cache-path name="cache" path="." />
+
+<!-- Para acceder a archivos en la raíz del almacenamiento externo -->
+<root-path name="root" path="." />
+</paths>
