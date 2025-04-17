@@ -1,6 +1,8 @@
 package com.giosoft.lectorpdf;
+
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.pdf.PdfRenderer;
@@ -10,6 +12,7 @@ import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.Manifest;
 
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,14 +31,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.artifex.mupdf.viewer.BuildConfig;
+import com.giosoft.lectorpdf.adapter.PdfAdapter;
+import com.giosoft.lectorpdf.model.PdfHistoryManager;
+import com.giosoft.lectorpdf.model.PdfItem;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -43,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_OPEN_DOCUMENT = 1;
 
     private String lastOpenedPdfPath = null; // Ruta del último PDF abierto
+    private PdfAdapter pdfAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +62,13 @@ public class MainActivity extends AppCompatActivity {
         // Configuración de Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        RecyclerView recyclerView = findViewById(R.id.pdfRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        List<PdfItem> history = PdfHistoryManager.getPdfHistory(this);
+        pdfAdapter = new PdfAdapter(this, history);
+        recyclerView.setAdapter(pdfAdapter);
+
 
         // Botón para abrir el PDF
         Button openPdfButton = findViewById(R.id.openPdfButton);
@@ -67,19 +84,6 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    // Acción al seleccionar "Compartir"
-    //@Override
-    /*public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_share) {
-            if (lastOpenedPdfPath != null) {
-                sharePdf(lastOpenedPdfPath);
-            } else {
-                Toast.makeText(this, "Primero abre un PDF para compartirlo", Toast.LENGTH_SHORT).show();
-            }
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }*/
 
     private void openPdfFile() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
@@ -102,10 +106,16 @@ public class MainActivity extends AppCompatActivity {
                         uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
                 );
 
-                String path = copyPdfToExternalStorage(uri);
-                if (path != null) {
-                    lastOpenedPdfPath = path; // Guardamos para compartir después
-                    openPdfWithMuPDF(path);
+                String fileName = getFileNameFromUri(uri);
+                String copiedPath = copyPdfToExternalStorage(uri, fileName);
+                if (copiedPath != null) {
+                    lastOpenedPdfPath = copiedPath;
+
+                    String name = getFileNameFromUri(uri);
+                    PdfHistoryManager.savePdfItem(this, new PdfItem(copiedPath, name, System.currentTimeMillis()));
+
+                    pdfAdapter.updateData(PdfHistoryManager.getPdfHistory(this));
+                    openPdfWithMuPDF(copiedPath);
                 } else {
                     Toast.makeText(this, "Error al copiar el PDF", Toast.LENGTH_SHORT).show();
                 }
@@ -114,13 +124,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-    private String copyPdfToExternalStorage(Uri uri) {
+    private String copyPdfToExternalStorage(Uri uri, String fileName) {
         try {
             InputStream inputStream = getContentResolver().openInputStream(uri);
 
-            File externalDir = getExternalFilesDir(null); // Ruta válida externa
-            File outFile = new File(externalDir, "documento.pdf");
+            File externalDir = getExternalFilesDir(null);
+            File outFile = new File(externalDir, fileName); // Usar nombre original
 
             OutputStream outputStream = new FileOutputStream(outFile);
             byte[] buffer = new byte[4096];
@@ -133,15 +142,30 @@ public class MainActivity extends AppCompatActivity {
             inputStream.close();
             outputStream.close();
 
-            Log.d("PDF_DEBUG", "Archivo copiado a: " + outFile.getAbsolutePath());
-            Log.d("PDF_DEBUG", "Existe: " + outFile.exists() + " | Tamaño: " + outFile.length());
-
             return outFile.getAbsolutePath();
         } catch (Exception e) {
             Log.e("PDF_DEBUG", "Error al copiar PDF", e);
             return null;
         }
     }
+
+
+    private String getFileNameFromUri(Uri uri) {
+        String result = null;
+        if ("content".equals(uri.getScheme())) {
+            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
+                }
+            }
+        }
+        if (result == null) {
+            result = uri.getLastPathSegment();
+        }
+        return result;
+    }
+
+
 
     private void openPdfWithMuPDF(String filePath) {
         try {
@@ -183,7 +207,6 @@ public class MainActivity extends AppCompatActivity {
 
         startActivity(Intent.createChooser(shareIntent, "Compartir PDF usando"));
     }
-
 
 
 }

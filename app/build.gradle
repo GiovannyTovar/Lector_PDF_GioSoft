@@ -31,6 +31,7 @@ android {
 dependencies {
     implementation 'com.karumi:dexter:6.2.3'  // Dexter para permisos
     api 'com.artifex.mupdf:viewer:1.15.+' // MuPDF
+    implementation 'com.google.code.gson:gson:2.10.1' //Gson
     implementation libs.appcompat
     implementation libs.material
     testImplementation libs.junit
