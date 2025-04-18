@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center_horizontal">
+
+    <ImageView
+        android:id="@+id/appIcon"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@mipmap/ic_launcher"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/aboutTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/about_title"
+        android:textSize="13sp"
+        android:lineSpacingExtra="4dp"
+        android:textAlignment="center"
+        android:layout_marginBottom="5dp"/>
+
+    <TextView
+        android:id="@+id/aboutversion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/about_version"
+        android:textSize="13sp"
+        android:lineSpacingExtra="4dp"
+        android:textAlignment="center"
+        android:layout_marginBottom="5dp"/>
+
+    <TextView
+        android:id="@+id/aboutYear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/about_year"
+        android:textSize="13sp"
+        android:lineSpacingExtra="4dp"
+        android:textAlignment="center"
+        android:layout_marginBottom="5dp"/>
+
+    <TextView
+        android:id="@+id/aboutDeveloped"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/about_developed_by"
+        android:textSize="13sp"
+        android:lineSpacingExtra="4dp"
+        android:textAlignment="center"
+        android:layout_marginBottom="20dp"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#355165"
+        android:layout_marginBottom="20dp"/>
+
+    <TextView
+        android:id="@+id/aboutText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/about_text"
+        android:textSize="13sp"
+        android:lineSpacingExtra="4dp"
+        android:justificationMode="inter_word"
+        android:textAlignment="viewStart"
+        android:layout_marginBottom="20dp"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#355165"
+        android:layout_marginBottom="20dp"/>
+
+    <TextView
+        android:id="@+id/donationText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/about_donation_text"
+        android:textSize="13sp"
+        android:lineSpacingExtra="4dp"
+        android:justificationMode="inter_word"
+        android:textAlignment="viewStart"
+        android:layout_marginBottom="10dp"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="8dp">
+
+        <TextView
+            android:id="@+id/donationBank"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/about_donation_bank"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:layout_marginEnd="4dp" />
+
+        <TextView
+            android:id="@+id/donationAccount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/about_donation_account"
+            android:textSize="16sp"
+            android:textAlignment="center"
+            android:textIsSelectable="true"
+            android:textColor="@color/purple_700"
+            android:layout_marginBottom="20dp"/>
+    </LinearLayout>
+
+
+
+    <TextView
+        android:id="@+id/thaks"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/about_thanks"
+        android:textSize="13sp"
+        android:lineSpacingExtra="4dp"
+        android:textAlignment="center" />
+</LinearLayout>

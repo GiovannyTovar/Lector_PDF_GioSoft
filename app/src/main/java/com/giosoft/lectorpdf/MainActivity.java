@@ -15,15 +15,18 @@ import android.Manifest;
 
 import android.provider.OpenableColumns;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
@@ -66,9 +69,12 @@ public class MainActivity extends AppCompatActivity {
         getTheme().applyStyle(R.style.Theme_LectorPDFGioSoft, true);
         setContentView(R.layout.activity_main);
 
-        // 1. Configurar RecyclerView y Adapter ANTES de procesar la URI externa
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // Forzar el color blanco en el ícono de los tres puntos
+        toolbar.getOverflowIcon().setTint(ContextCompat.getColor(this, android.R.color.white));
+
 
         RecyclerView recyclerView = findViewById(R.id.pdfRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -95,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
         Button openPdfButton = findViewById(R.id.openPdfButton);
         openPdfButton.setOnClickListener(v -> openPdfFile());
 
-        // 2. Procesar si se lanzó desde otra app DESPUÉS de tener todo inicializado
+
         Intent intent = getIntent();
         String action = intent.getAction();
         Uri data = intent.getData();
@@ -121,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
                             Log.e("PDF_DEBUG", "Error al leer PDF: " + e.getMessage());
                         }
 
-                        // Opción 2 (recomendado): Pedir permisos persistentes manualmente
+                        // Opción 2: Pedir permisos persistentes manualmente
                         Intent openIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                         openIntent.addCategory(Intent.CATEGORY_OPENABLE);
                         openIntent.setType("application/pdf");
@@ -132,27 +138,24 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-
-
-            // Usar método que encapsula todo:
             openPdfFromUri(data);
         }
     }
 
     private void openPdfFromUri(Uri uri) {
         // Verificar si la URI es un enlace web (comienza con http:// o https://)
-        Log.d("PDF_DEBUG", "URI seleccionada: " + uri.toString());  // Depuración
+        Log.d("PDF_DEBUG", "URI seleccionada: " + uri.toString());
 
         // Comprobar si la URI es un enlace web, usando los esquemas 'http' o 'https'
         String uriString = uri.toString().toLowerCase();
 
         if (uriString.startsWith("http://") || uriString.startsWith("https://")) {
-            Log.d("PDF_DEBUG", "Es un enlace web, no un archivo PDF.");  // Depuración
+            Log.d("PDF_DEBUG", "Es un enlace web, no un archivo PDF.");
             Toast.makeText(this, "Este es un enlace, no un archivo PDF", Toast.LENGTH_SHORT).show();
             return; // Detener la ejecución si es un enlace
         }
 
-        // Continuar con la lógica solo si la URI no es un enlace
+        // Continuar solo si la URI no es un enlace
         try {
             String fileName = getFileNameFromUri(uri);
             String copiedPath = copyPdfToExternalStorage(uri, fileName);
@@ -168,7 +171,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Error al procesar el archivo", Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
-            // Captura cualquier excepción y muestra el error
             Log.e("PDF_DEBUG", "Error al copiar PDF: " + e.getMessage(), e);  // Depuración
             Toast.makeText(this, "Error al copiar el PDF: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
@@ -184,6 +186,28 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_about) {
+            showDialogAbout();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void showDialogAbout() { LayoutInflater inflater = getLayoutInflater();
+        View view = inflater.inflate(R.layout.dialog_about, null);
+
+        new AlertDialog.Builder(this)
+                .setView(view)
+                .setPositiveButton("Cerrar", null)
+                .show();
+    }
+
 
 
     private void openPdfFile() {
@@ -273,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
     private void openPdfWithMuPDF(String filePath) {
         try {
             File file = new File(filePath);
-            Uri uri = Uri.fromFile(file); // Esta URI es válida para MuPDF
+            Uri uri = Uri.fromFile(file); // URI válida para MuPDF
 
             Log.d("PDF_DEBUG", "¿Existe el archivo? " + file.exists());
             Log.d("PDF_DEBUG", "Abriendo con MuPDF: " + file.getAbsolutePath());
