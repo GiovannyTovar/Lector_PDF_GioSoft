@@ -30,6 +30,21 @@
         <item name="android:textColor">@android:color/white</item>
     </style>
 
+    <style name="BorderlessButton" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+    </style>
+
+    <style name="IconButtonStyle" parent="Widget.AppCompat.ImageButton">
+        <item name="android:tint">?attr/colorPrimary</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
+    </style>
+
     <style name="MyToolbarStyle" parent="Widget.MaterialComponents.Toolbar">
         <item name="titleTextColor">@android:color/white</item>
         <item name="android:textColorPrimary">@android:color/white</item>

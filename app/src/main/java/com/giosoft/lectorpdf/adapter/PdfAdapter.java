@@ -3,9 +3,11 @@ package com.giosoft.lectorpdf.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -18,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.artifex.mupdf.viewer.BuildConfig;
 import com.giosoft.lectorpdf.R;
+import com.giosoft.lectorpdf.model.PdfHistoryManager;
 import com.giosoft.lectorpdf.model.PdfItem;
 
 import java.io.File;
@@ -44,7 +47,17 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
         PdfItem item = pdfList.get(position);
         holder.pdfNameTextView.setText(item.getName());
         holder.pdfPathTextView.setText(item.getPath());
-        holder.pdfIcon.setImageResource(R.drawable.ic_pdf); // icono PDF vector
+        holder.pdfIcon.setImageResource(R.drawable.ic_pdf);
+
+        // Configurar clic en toda la tarjeta
+        holder.itemView.setOnClickListener(v -> {
+            File file = new File(item.getPath());
+            if (file.exists()) {
+                openPdfWithMuPDF(context, item.getPath());
+            } else {
+                Toast.makeText(context, "Archivo no encontrado", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         holder.shareButton.setOnClickListener(v -> {
             File file = new File(item.getPath());
@@ -66,6 +79,42 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
 
             context.startActivity(Intent.createChooser(shareIntent, "Compartir PDF usando"));
         });
+    }
+
+    // Método para abrir PDF (similar al de MainActivity)
+    private void openPdfWithMuPDF(Context context, String filePath) {
+        try {
+            File file = new File(filePath);
+            Uri uri = Uri.fromFile(file);
+
+            // Actualizar el historial ANTES de abrir el PDF
+            for (PdfItem item : pdfList) {
+                if (item.getPath().equals(filePath)) {
+                    // Guardar como recientemente abierto
+                    PdfHistoryManager.savePdfItem(context, new PdfItem(
+                            item.getPath(),
+                            item.getName(),
+                            System.currentTimeMillis() // Actualiza timestamp
+                    ));
+                    break;
+                }
+            }
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(uri, "application/pdf");
+            intent.setClassName("com.giosoft.lectorpdf", "com.artifex.mupdf.viewer.DocumentActivity");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+
+            context.startActivity(intent);
+
+            // Actualizar la lista después de abrir
+            List<PdfItem> updatedHistory = PdfHistoryManager.getPdfHistory(context);
+            updateData(updatedHistory);
+
+        } catch (Exception e) {
+            Toast.makeText(context, "Error al abrir el PDF", Toast.LENGTH_SHORT).show();
+            Log.e("PDF_ADAPTER", "Error al abrir PDF", e);
+        }
     }
 
     @Override

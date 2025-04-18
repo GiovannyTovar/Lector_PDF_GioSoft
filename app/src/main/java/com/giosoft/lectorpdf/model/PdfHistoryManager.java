@@ -18,10 +18,10 @@ public class PdfHistoryManager {
     public static void savePdfItem(Context context, PdfItem item) {
         List<PdfItem> history = getPdfHistory(context);
 
-        // Evitar duplicados por path
-        for (PdfItem i : history) {
-            if (i.getPath().equals(item.getPath())) {
-                history.remove(i);
+        // Eliminar si ya existe (para evitar duplicados)
+        for (PdfItem existingItem : history) {
+            if (existingItem.getPath().equals(item.getPath())) {
+                history.remove(existingItem);
                 break;
             }
         }
@@ -45,4 +45,13 @@ public class PdfHistoryManager {
         List<PdfItem> history = new Gson().fromJson(json, listType);
         return history != null ? history : Collections.emptyList();
     }
+
+
+        public static void clearHistory(Context context) {
+            SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.remove(KEY_HISTORY);
+            editor.apply();
+        }
+
 }

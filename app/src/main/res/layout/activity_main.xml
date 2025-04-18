@@ -17,15 +17,32 @@
         app:title="@string/app_name"
         app:titleTextColor="@android:color/white" />
 
-    <TextView
-        android:id="@+id/historyTitle"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Historial"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:padding="16dp"
-        android:textColor="?attr/colorPrimary" />
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/historyTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Historial"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorPrimary" />
+
+        <ImageButton
+            android:id="@+id/btnClearHistory"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/outline_delete_24"
+            style="@style/IconButtonStyle"
+            android:contentDescription="Eliminar historial"
+            android:background="@drawable/icon_button_selector" />
+    </LinearLayout>
 
     <View
         android:layout_width="match_parent"

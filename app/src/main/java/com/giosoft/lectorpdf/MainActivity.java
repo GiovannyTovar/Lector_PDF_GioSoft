@@ -1,5 +1,6 @@
 package com.giosoft.lectorpdf;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -45,6 +46,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -74,6 +76,20 @@ public class MainActivity extends AppCompatActivity {
         pdfAdapter = new PdfAdapter(this, history);
         recyclerView.setAdapter(pdfAdapter);
 
+        // Boton Eliminar historial
+        ImageButton btnClearHistory = findViewById(R.id.btnClearHistory);
+        btnClearHistory.setOnClickListener(v -> {
+            new AlertDialog.Builder(this)
+                    .setTitle("Eliminar historial")
+                    .setMessage("¿Estás seguro de que quieres eliminar todo el historial?")
+                    .setPositiveButton("Eliminar", (dialog, which) -> {
+                        PdfHistoryManager.clearHistory(this);
+                        pdfAdapter.updateData(new ArrayList<>());
+                        Toast.makeText(this, "Historial eliminado", Toast.LENGTH_SHORT).show();
+                    })
+                    .setNegativeButton("Cancelar", null)
+                    .show();
+        });
 
         // Botón para abrir el PDF
         Button openPdfButton = findViewById(R.id.openPdfButton);
