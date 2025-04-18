@@ -8,4 +8,6 @@
     <color name="black">#FF000000</color>
     <color name="white">#E4DFDF</color>
     <color name="card_background">#FFFFFF</color>
+    <color name="deleteRed">#D32F2F</color>
+
 </resources>

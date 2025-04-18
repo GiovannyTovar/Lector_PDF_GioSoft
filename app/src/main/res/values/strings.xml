@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Lector PDF GioSoft</string>
     <string name="about_title">Lector de PDF GioSoft</string>
-    <string name="about_version">Versión: <strong>2.0</strong></string>
+    <string name="about_version">Versión: 3.0</string>
     <string name="about_year">2025</string>
     <string name="about_developed_by">Desarrollado por: Giovanny Tovar</string>
     <string name="about_text">Esta aplicación fue creada con el propósito de ofrecer una alternativa libre de publicidad para la lectura de documentos PDF. \n\nEstá dirigida especialmente a amigos, familiares y conocidos, con el objetivo de facilitar el manejo de sus archivos de forma rápida, privada y sin interrupciones.</string>

@@ -41,7 +41,9 @@
             android:layout_height="48dp"
             android:background="@drawable/icon_button_selector"
             android:contentDescription="Eliminar historial"
-            android:src="@drawable/outline_delete_24" />
+            android:src="@drawable/outline_delete_24"
+            android:tint="@color/deleteRed" />
+
     </LinearLayout>
 
     <View
