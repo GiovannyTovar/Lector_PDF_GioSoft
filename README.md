@@ -40,7 +40,7 @@ Está dirigida especialmente a **amigos, familiares y conocidos**, con el objeti
 2. El visor mostrará el PDF con soporte completo para enlaces y contraseñas.
 3. Los documentos abiertos se guardan automáticamente en el historial agrupado por fecha de apertura.
 4. Puedes **compartir** o **eliminar** elementos desde el historial fácilmente.
-
+  
 ---
 
 ## 📦 Instalación
@@ -49,3 +49,15 @@ Clona este repositorio y ábrelo con Android Studio:
 
 ```bash
 git clone https://github.com/tu_usuario/tu_repositorio.git
+```
+
+Luego compílalo y ejecútalo en un dispositivo o emulador.
+
+---
+
+## 📄 Licencia
+Este proyecto está bajo la licencia MIT. Consulta el archivo LICENSE para más información.
+
+---
+
+Desarrollado con ❤️ por Giovanny Tovar – Para todos los que valoran la simplicidad, la privacidad y el control sobre sus archivos.
