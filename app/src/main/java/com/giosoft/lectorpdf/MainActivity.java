@@ -37,6 +37,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.artifex.mupdf.viewer.BuildConfig;
+import com.artifex.mupdf.viewer.DocumentActivity;
 import com.giosoft.lectorpdf.adapter.PdfAdapter;
 import com.giosoft.lectorpdf.model.PdfHistoryManager;
 import com.giosoft.lectorpdf.model.PdfItem;
@@ -54,19 +55,18 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_OPEN_DOCUMENT = 1;
 
+    private Uri uriPendiente = null;
     private String lastOpenedPdfPath = null; // Ruta del último PDF abierto
     private PdfAdapter pdfAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Forzar tema claro antes de cualquier inicialización
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
-        // Aplicar configuración de tema antes de setContentView
         getTheme().applyStyle(R.style.Theme_LectorPDFGioSoft, true);
         setContentView(R.layout.activity_main);
 
-        // Configuración de Toolbar
+        // 1. Configurar RecyclerView y Adapter ANTES de procesar la URI externa
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -95,8 +95,88 @@ public class MainActivity extends AppCompatActivity {
         Button openPdfButton = findViewById(R.id.openPdfButton);
         openPdfButton.setOnClickListener(v -> openPdfFile());
 
+        // 2. Procesar si se lanzó desde otra app DESPUÉS de tener todo inicializado
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        Uri data = intent.getData();
 
+        if (Intent.ACTION_VIEW.equals(action) && data != null) {
+            uriPendiente = data;
+
+            if ("content".equals(data.getScheme())) {
+                try {
+                    // Obtener solo READ o WRITE (ignorar PERSISTABLE)
+                    int takeFlags = intent.getFlags() &
+                            (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+                    if (takeFlags != 0) {
+                        // Solo tomar permisos persistentes si hay READ o WRITE
+                        getContentResolver().takePersistableUriPermission(data, takeFlags);
+                    } else {
+                        Log.w("PDF_DEBUG", "El Intent no otorgó READ/WRITE. Usando acceso temporal.");
+                        // Opción 1: Abrir el PDF sin persistencia (temporal)
+                        try (InputStream pdfStream = getContentResolver().openInputStream(data)) {
+                            // Leer el PDF (permiso temporal)
+                        } catch (IOException e) {
+                            Log.e("PDF_DEBUG", "Error al leer PDF: " + e.getMessage());
+                        }
+
+                        // Opción 2 (recomendado): Pedir permisos persistentes manualmente
+                        Intent openIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                        openIntent.addCategory(Intent.CATEGORY_OPENABLE);
+                        openIntent.setType("application/pdf");
+                        startActivityForResult(openIntent, 101); // 101 = Código de solicitud
+                    }
+                } catch (SecurityException e) {
+                    Log.e("PDF_DEBUG", "Error de permisos: " + e.getMessage());
+                }
+            }
+
+
+
+            // Usar método que encapsula todo:
+            openPdfFromUri(data);
+        }
     }
+
+    private void openPdfFromUri(Uri uri) {
+        // Verificar si la URI es un enlace web (comienza con http:// o https://)
+        Log.d("PDF_DEBUG", "URI seleccionada: " + uri.toString());  // Depuración
+
+        // Comprobar si la URI es un enlace web, usando los esquemas 'http' o 'https'
+        String uriString = uri.toString().toLowerCase();
+
+        if (uriString.startsWith("http://") || uriString.startsWith("https://")) {
+            Log.d("PDF_DEBUG", "Es un enlace web, no un archivo PDF.");  // Depuración
+            Toast.makeText(this, "Este es un enlace, no un archivo PDF", Toast.LENGTH_SHORT).show();
+            return; // Detener la ejecución si es un enlace
+        }
+
+        // Continuar con la lógica solo si la URI no es un enlace
+        try {
+            String fileName = getFileNameFromUri(uri);
+            String copiedPath = copyPdfToExternalStorage(uri, fileName);
+
+            if (copiedPath != null) {
+                // Guardar en el historial
+                PdfHistoryManager.savePdfItem(this, new PdfItem(copiedPath, fileName, System.currentTimeMillis()));
+                pdfAdapter.updateData(PdfHistoryManager.getPdfHistory(this));
+
+                // Intent para abrir con MuPDF
+                openPdfWithMuPDF(copiedPath);
+            } else {
+                Toast.makeText(this, "Error al procesar el archivo", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            // Captura cualquier excepción y muestra el error
+            Log.e("PDF_DEBUG", "Error al copiar PDF: " + e.getMessage(), e);  // Depuración
+            Toast.makeText(this, "Error al copiar el PDF: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -143,32 +223,34 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-
     private String copyPdfToExternalStorage(Uri uri, String fileName) {
-        try {
-            InputStream inputStream = getContentResolver().openInputStream(uri);
+        if (uri == null || fileName == null) return null;
+        File externalDir = getExternalFilesDir(null);
+        File outFile = new File(externalDir, fileName);
 
-            File externalDir = getExternalFilesDir(null);
-            File outFile = new File(externalDir, fileName); // Usar nombre original
+        if (outFile.exists()) {
+            Log.d("PDF_DEBUG", "Archivo ya existe: " + outFile.getAbsolutePath());
+            return outFile.getAbsolutePath();
+        }
 
-            OutputStream outputStream = new FileOutputStream(outFile);
+        try (InputStream inputStream = getContentResolver().openInputStream(uri);
+             OutputStream outputStream = new FileOutputStream(outFile)) {
+
             byte[] buffer = new byte[4096];
             int bytesRead;
-
             while ((bytesRead = inputStream.read(buffer)) != -1) {
                 outputStream.write(buffer, 0, bytesRead);
             }
 
-            inputStream.close();
-            outputStream.close();
-
             return outFile.getAbsolutePath();
+
         } catch (Exception e) {
             Log.e("PDF_DEBUG", "Error al copiar PDF", e);
             return null;
         }
     }
+
+
 
 
     private String getFileNameFromUri(Uri uri) {
