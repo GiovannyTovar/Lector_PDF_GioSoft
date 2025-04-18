@@ -57,11 +57,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        //Deshabilitar modo oscuro
+        // Forzar tema claro antes de cualquier inicialización
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        super.onCreate(savedInstanceState);
+        // Aplicar configuración de tema antes de setContentView
+        getTheme().applyStyle(R.style.Theme_LectorPDFGioSoft, true);
+        setContentView(R.layout.activity_main);
 
         // Configuración de Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
