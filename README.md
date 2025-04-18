@@ -38,7 +38,7 @@ Está dirigida especialmente a **amigos, familiares y conocidos**, con el objeti
 
 1. Toca el botón **"Buscar PDF en el dispositivo"** para seleccionar un archivo.
 2. El visor mostrará el PDF con soporte completo para enlaces y contraseñas.
-3. Los documentos abiertos se guardan automáticamente en el historial.
+3. Los documentos abiertos se guardan automáticamente en el historial agrupado por fecha de apertura.
 4. Puedes **compartir** o **eliminar** elementos desde el historial fácilmente.
 
 ---
