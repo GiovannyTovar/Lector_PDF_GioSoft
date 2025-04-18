@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +44,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
         PdfItem item = pdfList.get(position);
         holder.pdfNameTextView.setText(item.getName());
         holder.pdfPathTextView.setText(item.getPath());
+        holder.pdfIcon.setImageResource(R.drawable.ic_pdf); // icono PDF vector
 
         holder.shareButton.setOnClickListener(v -> {
             File file = new File(item.getPath());
@@ -52,7 +55,7 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
 
             Uri contentUri = FileProvider.getUriForFile(
                     context,
-                    context.getPackageName() + ".fileprovider", // Usa el package actual
+                    context.getPackageName() + ".fileprovider", // Usa tu nombre de paquete
                     file
             );
 
@@ -77,14 +80,15 @@ public class PdfAdapter extends RecyclerView.Adapter<PdfAdapter.PdfViewHolder> {
 
     static class PdfViewHolder extends RecyclerView.ViewHolder {
         TextView pdfNameTextView, pdfPathTextView;
-        Button shareButton;
+        ImageView pdfIcon;
+        ImageButton shareButton;
 
         public PdfViewHolder(@NonNull View itemView) {
             super(itemView);
-            pdfNameTextView = itemView.findViewById(R.id.pdfNameTextView);
-            pdfPathTextView = itemView.findViewById(R.id.pdfPathTextView);
+            pdfNameTextView = itemView.findViewById(R.id.pdfName);
+            pdfIcon = itemView.findViewById(R.id.pdfIcon);
+            pdfPathTextView = itemView.findViewById(R.id.pdfPath);
             shareButton = itemView.findViewById(R.id.shareButton);
         }
     }
 }
-
