@@ -42,6 +42,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.artifex.mupdf.viewer.BuildConfig;
 import com.artifex.mupdf.viewer.DocumentActivity;
 import com.giosoft.lectorpdf.adapter.PdfAdapter;
+import com.giosoft.lectorpdf.model.PdfGroup;
 import com.giosoft.lectorpdf.model.PdfHistoryManager;
 import com.giosoft.lectorpdf.model.PdfItem;
 
@@ -78,8 +79,8 @@ public class MainActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.pdfRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        List<PdfItem> history = PdfHistoryManager.getPdfHistory(this);
-        pdfAdapter = new PdfAdapter(this, history);
+        List<PdfGroup> groupedHistory = PdfHistoryManager.getPdfHistoryGrouped(this);
+        pdfAdapter = new PdfAdapter(this, groupedHistory);
         recyclerView.setAdapter(pdfAdapter);
 
         // Boton Eliminar historial
@@ -90,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
                     .setMessage("¿Estás seguro de que quieres eliminar todo el historial?")
                     .setPositiveButton("Eliminar", (dialog, which) -> {
                         PdfHistoryManager.clearHistory(this);
-                        pdfAdapter.updateData(new ArrayList<>());
+                        pdfAdapter.updateData(PdfHistoryManager.getPdfHistoryGrouped(this));
                         Toast.makeText(this, "Historial eliminado", Toast.LENGTH_SHORT).show();
                     })
                     .setNegativeButton("Cancelar", null)
@@ -163,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
             if (copiedPath != null) {
                 // Guardar en el historial
                 PdfHistoryManager.savePdfItem(this, new PdfItem(copiedPath, fileName, System.currentTimeMillis()));
-                pdfAdapter.updateData(PdfHistoryManager.getPdfHistory(this));
+                pdfAdapter.updateData(PdfHistoryManager.getPdfHistoryGrouped(this));
 
                 // Intent para abrir con MuPDF
                 openPdfWithMuPDF(copiedPath);
@@ -239,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
                     String name = getFileNameFromUri(uri);
                     PdfHistoryManager.savePdfItem(this, new PdfItem(copiedPath, name, System.currentTimeMillis()));
 
-                    pdfAdapter.updateData(PdfHistoryManager.getPdfHistory(this));
+                    pdfAdapter.updateData(PdfHistoryManager.getPdfHistoryGrouped(this));
                     openPdfWithMuPDF(copiedPath);
                 } else {
                     Toast.makeText(this, "Error al copiar el PDF", Toast.LENGTH_SHORT).show();
