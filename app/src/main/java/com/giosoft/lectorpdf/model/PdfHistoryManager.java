@@ -115,4 +115,24 @@ public class PdfHistoryManager {
                 cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
 
+
+    public static void removePdfItem(Context context, PdfItem itemToRemove) {
+        List<PdfItem> history = getPdfHistory(context);
+
+        // Buscar y eliminar el item
+        for (PdfItem item : history) {
+            if (item.getPath().equals(itemToRemove.getPath())) {
+                history.remove(item);
+                break;
+            }
+        }
+
+        // Guardar la lista actualizada
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        String json = new Gson().toJson(history);
+        editor.putString(KEY_HISTORY, json);
+        editor.apply();
+    }
+
 }

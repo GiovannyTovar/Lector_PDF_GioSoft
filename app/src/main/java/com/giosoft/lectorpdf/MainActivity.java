@@ -8,8 +8,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
 import android.os.Build;
@@ -42,6 +45,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -90,7 +94,112 @@ public class MainActivity extends AppCompatActivity {
         pdfAdapter = new PdfAdapter(this, groupedHistory);
         recyclerView.setAdapter(pdfAdapter);
 
-        // Boton Eliminar historial
+
+        // Configurar el gesto de deslizar para eliminar
+        ItemTouchHelper.SimpleCallback swipeToDeleteCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false; // No permitir arrastrar y soltar
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+
+                // Verificar que no sea un encabezado
+                if (pdfAdapter.isHeaderPosition(position)) {
+                    pdfAdapter.notifyItemChanged(position);
+                    return;
+                }
+
+                // Obtener el item a eliminar
+                PdfItem item = pdfAdapter.getItemForPosition(position);
+                if (item != null) {
+                    // Mostrar diálogo de confirmación
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Eliminar documento")
+                            .setMessage("¿Estás seguro de que quieres eliminar este documento del historial?")
+                            .setPositiveButton("Eliminar", (dialog, which) -> {
+                                // Eliminar el archivo copiado
+                                File file = new File(item.getPath());
+                                if (file.exists()) {
+                                    file.delete();
+                                }
+
+                                // Eliminar del historial
+                                PdfHistoryManager.removePdfItem(MainActivity.this, item);
+
+                                // Actualizar la lista
+                                pdfAdapter.updateData(PdfHistoryManager.getPdfHistoryGrouped(MainActivity.this));
+
+                                Toast.makeText(MainActivity.this, "Documento eliminado", Toast.LENGTH_SHORT).show();
+                            })
+                            .setNegativeButton("Cancelar", (dialog, which) -> {
+                                // Restaurar el item si se cancela
+                                pdfAdapter.notifyItemChanged(position);
+                            })
+                            .show();
+                } else {
+                    pdfAdapter.notifyItemChanged(position); // Restaurar el item si no se puede eliminar
+                }
+            }
+
+            @Override
+            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView,
+                                    @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY,
+                                    int actionState, boolean isCurrentlyActive) {
+
+                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                    View itemView = viewHolder.itemView;
+                    Paint paint = new Paint();
+
+                    // Configurar fondo rojo claro al deslizar
+                    if (dX > 0) {
+                        // Deslizando hacia la derecha
+                        paint.setColor(Color.parseColor("#FFCDD2")); // Rojo claro
+                        c.drawRect((float) itemView.getLeft(), (float) itemView.getTop(), dX,
+                                (float) itemView.getBottom(), paint);
+                    } else {
+                        // Deslizando hacia la izquierda
+                        paint.setColor(Color.parseColor("#FFCDD2")); // Rojo claro
+                        c.drawRect((float) itemView.getRight() + dX, (float) itemView.getTop(),
+                                (float) itemView.getRight(), (float) itemView.getBottom(), paint);
+                    }
+
+                    // Dibujar icono de eliminar
+                    Drawable deleteIcon = ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_delete);
+                    if (deleteIcon != null) {
+                        int iconMargin = (itemView.getHeight() - deleteIcon.getIntrinsicHeight()) / 2;
+                        int iconTop = itemView.getTop() + (itemView.getHeight() - deleteIcon.getIntrinsicHeight()) / 2;
+                        int iconBottom = iconTop + deleteIcon.getIntrinsicHeight();
+
+                        if (dX > 0) {
+                            // Deslizando hacia la derecha
+                            int iconLeft = itemView.getLeft() + iconMargin;
+                            int iconRight = itemView.getLeft() + iconMargin + deleteIcon.getIntrinsicWidth();
+                            deleteIcon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+                        } else {
+                            // Deslizando hacia la izquierda
+                            int iconLeft = itemView.getRight() - iconMargin - deleteIcon.getIntrinsicWidth();
+                            int iconRight = itemView.getRight() - iconMargin;
+                            deleteIcon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+                        }
+
+                        deleteIcon.draw(c);
+                    }
+                }
+
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+            }
+        };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
+
+
+
+
+        // Boton Eliminar el historial completo
         ImageButton btnClearHistory = findViewById(R.id.btnClearHistory);
         btnClearHistory.setOnClickListener(v -> {
             new AlertDialog.Builder(this)

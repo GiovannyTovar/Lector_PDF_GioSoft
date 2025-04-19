@@ -57,6 +57,18 @@ public class PdfAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         throw new IllegalArgumentException("Invalid position");
     }
 
+
+    // interfaz para manejar los eventos de deslizar
+    public interface OnItemSwipeListener {
+        void onItemSwiped(int position);
+    }
+
+    private OnItemSwipeListener swipeListener;
+
+    public void setOnItemSwipeListener(OnItemSwipeListener listener) {
+        this.swipeListener = listener;
+    }
+
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -140,7 +152,7 @@ public class PdfAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
 
-    private PdfItem getItemForPosition(int position) {
+    public PdfItem getItemForPosition(int position) {
         int accumulatedPosition = 0;
         for (PdfGroup group : pdfGroups) {
             int groupSize = group.getItems().size() + 1; // +1 for header
@@ -238,5 +250,14 @@ public class PdfAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             pdfPathTextView = itemView.findViewById(R.id.pdfPath);
             shareButton = itemView.findViewById(R.id.shareButton);
         }
+    }
+
+    // Añadir métodos públicos para acceder a la funcionalidad
+    public boolean isHeaderPosition(int position) {
+        return getItemViewType(position) == TYPE_HEADER;
+    }
+
+    public PdfItem getPdfItemAtPosition(int position) {
+        return getItemForPosition(position);
     }
 }
