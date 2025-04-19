@@ -1,10 +1,14 @@
 package com.giosoft.lectorpdf;
 
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
@@ -14,6 +18,7 @@ import android.os.ParcelFileDescriptor;
 import android.Manifest;
 
 import android.provider.OpenableColumns;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,6 +29,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -45,6 +51,7 @@ import com.giosoft.lectorpdf.adapter.PdfAdapter;
 import com.giosoft.lectorpdf.model.PdfGroup;
 import com.giosoft.lectorpdf.model.PdfHistoryManager;
 import com.giosoft.lectorpdf.model.PdfItem;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -156,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
             return; // Detener la ejecución si es un enlace
         }
 
-        // Continuar solo si la URI no es un enlace
+        // Si la URI no es un enlace
         try {
             String fileName = getFileNameFromUri(uri);
             String copiedPath = copyPdfToExternalStorage(uri, fileName);
@@ -178,9 +185,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflar el menú de la Action Bar
@@ -200,15 +204,56 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void showDialogAbout() { LayoutInflater inflater = getLayoutInflater();
+
+    private void showDialogAbout() {
+        LayoutInflater inflater = getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_about, null);
 
-        new AlertDialog.Builder(this)
+        // Crear el diálogo sin botones predeterminados
+        AlertDialog dialog = new AlertDialog.Builder(this)
                 .setView(view)
-                .setPositiveButton("Cerrar", null)
-                .show();
-    }
+                .setCancelable(true)
+                .create();
 
+        dialog.show();
+
+        // Configurar el click listener del botón personalizado
+        Button closeButton = dialog.findViewById(R.id.closeButton);
+        if (closeButton != null) {
+            closeButton.setOnClickListener(v -> dialog.dismiss());
+        }
+
+        // Configurar la copia al portapapeles
+        TextView donationAccount = dialog.findViewById(R.id.donationAccount);
+        if (donationAccount != null) {
+            donationAccount.setOnClickListener(v -> {
+                // Copiar al portapapeles
+                String accountNumber = donationAccount.getText().toString();
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("Número de cuenta", accountNumber);
+                clipboard.setPrimaryClip(clip);
+
+                // Mostrar Snackbar SOBRE el diálogo
+                View dialogView = dialog.getWindow().getDecorView();
+                Snackbar snackbar = Snackbar.make(dialogView, "Número Nequi copiado", Snackbar.LENGTH_LONG);
+
+                // Personalización opcional del Snackbar
+                View sbView = snackbar.getView();
+                sbView.setBackgroundColor(ContextCompat.getColor(this, R.color.teal_700)); // Color del fondo
+                TextView textView = sbView.findViewById(com.google.android.material.R.id.snackbar_text);
+                textView.setTextColor(Color.WHITE); // Color del texto
+
+                snackbar.setAction("OK", v1 -> snackbar.dismiss());
+                snackbar.setActionTextColor(Color.WHITE);
+                snackbar.show();
+            });
+
+            // Esto evita que el sistema lo interprete como número telefónico
+            donationAccount.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+            donationAccount.setAutoLinkMask(0);
+            donationAccount.setLinksClickable(false);
+        }
+    }
 
 
     private void openPdfFile() {
@@ -248,6 +293,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
     private String copyPdfToExternalStorage(Uri uri, String fileName) {
         if (uri == null || fileName == null) return null;
         File externalDir = getExternalFilesDir(null);
@@ -276,8 +322,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
     private String getFileNameFromUri(Uri uri) {
         String result = null;
         if ("content".equals(uri.getScheme())) {
@@ -292,7 +336,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return result;
     }
-
 
 
     private void openPdfWithMuPDF(String filePath) {
@@ -324,7 +367,7 @@ public class MainActivity extends AppCompatActivity {
 
         Uri contentUri = FileProvider.getUriForFile(
                 this,
-                BuildConfig.APPLICATION_ID + ".fileprovider", // Muy importante que coincida con el authorities del manifest
+                BuildConfig.APPLICATION_ID + ".fileprovider", // Importante que coincida con el authorities del manifest
                 file
         );
 

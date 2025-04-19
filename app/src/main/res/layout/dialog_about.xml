@@ -1,130 +1,173 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center_horizontal">
-
-    <ImageView
-        android:id="@+id/appIcon"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:src="@mipmap/ic_launcher"
-        android:layout_marginBottom="16dp" />
-
-    <TextView
-        android:id="@+id/aboutTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/about_title"
-        android:textSize="13sp"
-        android:lineSpacingExtra="4dp"
-        android:textAlignment="center"
-        android:layout_marginBottom="5dp"/>
-
-    <TextView
-        android:id="@+id/aboutversion"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/about_version"
-        android:textSize="13sp"
-        android:lineSpacingExtra="4dp"
-        android:textAlignment="center"
-        android:layout_marginBottom="5dp"/>
-
-    <TextView
-        android:id="@+id/aboutYear"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/about_year"
-        android:textSize="13sp"
-        android:lineSpacingExtra="4dp"
-        android:textAlignment="center"
-        android:layout_marginBottom="5dp"/>
-
-    <TextView
-        android:id="@+id/aboutDeveloped"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/about_developed_by"
-        android:textSize="13sp"
-        android:lineSpacingExtra="4dp"
-        android:textAlignment="center"
-        android:layout_marginBottom="20dp"/>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#355165"
-        android:layout_marginBottom="20dp"/>
-
-    <TextView
-        android:id="@+id/aboutText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/about_text"
-        android:textSize="13sp"
-        android:lineSpacingExtra="4dp"
-        android:justificationMode="inter_word"
-        android:textAlignment="viewStart"
-        android:layout_marginBottom="20dp"/>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#355165"
-        android:layout_marginBottom="20dp"/>
-
-    <TextView
-        android:id="@+id/donationText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/about_donation_text"
-        android:textSize="13sp"
-        android:lineSpacingExtra="4dp"
-        android:justificationMode="inter_word"
-        android:textAlignment="viewStart"
-        android:layout_marginBottom="10dp"/>
+    android:background="@drawable/dialog_background"
+    android:fillViewport="true">
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_horizontal"
-        android:layout_marginTop="8dp">
-
-        <TextView
-            android:id="@+id/donationBank"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/about_donation_bank"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textAlignment="center"
-            android:layout_marginEnd="4dp" />
-
-        <TextView
-            android:id="@+id/donationAccount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/about_donation_account"
-            android:textSize="16sp"
-            android:textAlignment="center"
-            android:textIsSelectable="true"
-            android:textColor="@color/purple_700"
-            android:layout_marginBottom="20dp"/>
-    </LinearLayout>
-
-
-
-    <TextView
-        android:id="@+id/thaks"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/about_thanks"
-        android:textSize="13sp"
-        android:lineSpacingExtra="4dp"
-        android:textAlignment="center" />
-</LinearLayout>
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingBottom="16dp">
+
+            <ImageView
+                android:id="@+id/appIcon"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginBottom="8dp"
+                android:contentDescription="@string/app_name"
+                android:elevation="4dp"
+                android:src="@mipmap/ic_launcher" />
+
+            <TextView
+                android:id="@+id/aboutTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:gravity="center"
+                android:letterSpacing="0.03"
+                android:text="@string/about_title"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+
+            <TextView
+                android:id="@+id/aboutversion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/about_version"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="13sp" />
+
+
+            <TextView
+                android:id="@+id/aboutYear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/about_year"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="13sp" />
+
+
+            <TextView
+                android:id="@+id/aboutDeveloped"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/about_developed_by"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <!-- Separador fino -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="8dp"
+            android:background="#EEEEEE" />
+
+        <!-- Content section -->
+        <TextView
+            android:id="@+id/aboutText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="1dp"
+            android:text="@string/about_text"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="14sp" />
+
+        <!-- Separador fino -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="8dp"
+            android:background="#EEEEEE" />
+
+        <!-- Donation section -->
+        <TextView
+            android:id="@+id/donationText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
+            android:text="@string/about_donation_text"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="14sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/donationBank"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/about_donation_bank"
+                android:textColor="#23001E"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/donationAccount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:autoLink="none"
+                android:clickable="true"
+                android:focusable="false"
+                android:paddingStart="8dp"
+                android:text="@string/about_donation_account"
+                android:textColor="#DB0081"
+                android:textIsSelectable="true"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Separador fino -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="8dp"
+            android:background="#EEEEEE" />
+
+        <!-- Footer section -->
+        <TextView
+            android:id="@+id/thaks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="8dp"
+            android:text="@string/about_thanks"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="14sp"
+            android:textStyle="italic" />
+
+        <!-- Close button -->
+        <Button
+            android:id="@+id/closeButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/button_background"
+            android:elevation="2dp"
+            android:text="Cerrar"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="16sp" />
+    </LinearLayout>
+</ScrollView>
