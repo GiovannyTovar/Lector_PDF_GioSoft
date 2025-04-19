@@ -6,11 +6,13 @@ import android.content.SharedPreferences;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.File;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -18,26 +20,34 @@ public class PdfHistoryManager {
 
     private static final String PREF_NAME = "pdf_history_prefs";
     private static final String KEY_HISTORY = "pdf_history";
+    private static final int MAX_HISTORY_ITEMS = 50; // Límite de 50 items
 
     public static void savePdfItem(Context context, PdfItem item) {
         List<PdfItem> history = getPdfHistory(context);
 
-        // Eliminar si ya existe (para evitar duplicados)
-        for (PdfItem existingItem : history) {
+        // Eliminar duplicados
+        Iterator<PdfItem> iterator = history.iterator();
+        while (iterator.hasNext()) {
+            PdfItem existingItem = iterator.next();
             if (existingItem.getPath().equals(item.getPath())) {
-                history.remove(existingItem);
+                iterator.remove();
                 break;
             }
         }
 
-        history.add(0, item); // Insertar al inicio (último abierto)
+        // Añadir nuevo item
+        history.add(0, item);
 
-        // Guardar como JSON
+        // Aplicar límite
+        while (history.size() > MAX_HISTORY_ITEMS) {
+            PdfItem oldestItem = history.remove(history.size() - 1);
+            // Eliminar archivo físico
+            new File(oldestItem.getPath()).delete();
+        }
+
+        // Guardar
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-        String json = new Gson().toJson(history);
-        editor.putString(KEY_HISTORY, json);
-        editor.apply();
+        prefs.edit().putString(KEY_HISTORY, new Gson().toJson(history)).apply();
     }
 
     public static List<PdfItem> getPdfHistory(Context context) {

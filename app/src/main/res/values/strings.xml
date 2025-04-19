@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Lector PDF GioSoft</string>
     <string name="about_title">Lector de PDF GioSoft</string>
-    <string name="about_version">Versión: 4.0</string>
+    <string name="about_version">Versión: 4.1.0</string>
     <string name="about_year">2025</string>
     <string name="about_developed_by">Desarrollado por <b>Giovanny Tovar</b></string>
 

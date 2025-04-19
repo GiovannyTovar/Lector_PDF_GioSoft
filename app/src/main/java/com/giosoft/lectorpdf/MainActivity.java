@@ -64,6 +64,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -112,35 +113,63 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
-                // Obtener el item a eliminar
-                PdfItem item = pdfAdapter.getItemForPosition(position);
-                if (item != null) {
-                    // Mostrar diálogo de confirmación
-                    new AlertDialog.Builder(MainActivity.this)
-                            .setTitle("Eliminar documento")
-                            .setMessage("¿Estás seguro de que quieres eliminar este documento del historial?")
-                            .setPositiveButton("Eliminar", (dialog, which) -> {
-                                // Eliminar el archivo copiado
-                                File file = new File(item.getPath());
-                                if (file.exists()) {
-                                    file.delete();
-                                }
+                final PdfItem item = pdfAdapter.getItemForPosition(position);
+                if (item == null) {
+                    pdfAdapter.notifyItemChanged(position);
+                    return;
+                }
 
-                                // Eliminar del historial
-                                PdfHistoryManager.removePdfItem(MainActivity.this, item);
+                // Crear el mensaje personalizado con el nombre del archivo
+                String message = String.format(Locale.getDefault(),
+                        "¿Estás seguro de eliminar el documento \"%s\" del historial?" +
+                                "\n\nEsto no borra el documento del almacenamiento, solo del historial" +
+                                "\n\nEsta accion no puede deshacerce.",
+                        item.getName());
 
-                                // Actualizar la lista
-                                pdfAdapter.updateData(PdfHistoryManager.getPdfHistoryGrouped(MainActivity.this));
+                // Mostrar diálogo con manejo completo de cancelación
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("Eliminar documento del Historial")
+                        .setMessage(message)
+                        .setPositiveButton("Eliminar", (dialog, which) -> {
+                            // Lógica para eliminar
+                            performItemDeletion(item);
+                        })
+                        .setNegativeButton("Cancelar", null) // Se maneja en OnDismissListener
+                        .setOnDismissListener(dialog -> {
+                            // Se ejecuta cuando el diálogo se cierra de cualquier forma
+                            pdfAdapter.notifyItemChanged(position);
+                        });
 
-                                Toast.makeText(MainActivity.this, "Documento eliminado", Toast.LENGTH_SHORT).show();
-                            })
-                            .setNegativeButton("Cancelar", (dialog, which) -> {
-                                // Restaurar el item si se cancela
-                                pdfAdapter.notifyItemChanged(position);
-                            })
-                            .show();
-                } else {
-                    pdfAdapter.notifyItemChanged(position); // Restaurar el item si no se puede eliminar
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+                // Personalización opcional de los botones
+                Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                if (positiveButton != null) {
+                    positiveButton.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.deleteRed));
+                }
+            }
+
+            private void performItemDeletion(PdfItem item) {
+                try {
+                    // Eliminar archivo físico
+                    File file = new File(item.getPath());
+                    if (file.exists() && !file.delete()) {
+                        Log.w("DELETE", "No se pudo eliminar el archivo: " + item.getPath());
+                    }
+
+                    // Eliminar del historial
+                    PdfHistoryManager.removePdfItem(MainActivity.this, item);
+
+                    // Actualizar RecyclerView
+                    pdfAdapter.updateData(PdfHistoryManager.getPdfHistoryGrouped(MainActivity.this));
+
+                    Toast.makeText(MainActivity.this,
+                            "Documento eliminado", Toast.LENGTH_SHORT).show();
+                } catch (SecurityException e) {
+                    Log.e("DELETE", "Error de permisos: " + e.getMessage());
+                    Toast.makeText(MainActivity.this,
+                            "Error al eliminar el documento", Toast.LENGTH_SHORT).show();
                 }
             }
 
