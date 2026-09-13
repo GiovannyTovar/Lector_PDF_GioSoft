@@ -322,7 +322,7 @@ fun LibraryScreen(
                     top = padding.calculateTopPadding() + 8.dp,
                     bottom = padding.calculateBottomPadding() + 16.dp,
                 ),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 if (!searching) {
                     item(key = "titulo-historial") {
@@ -337,11 +337,8 @@ fun LibraryScreen(
                     item(key = "header-${group.title}") {
                         GroupHeader(group.title)
                     }
-                    item(key = "grupo-${group.title}") {
-                        DocumentGroupCard(
-                            documents = group.documents,
-                            actions = documentActions,
-                        )
+                    items(group.documents, key = { "${group.title}-${it.uri}" }) { document ->
+                        DocumentCard(document = document, actions = documentActions)
                     }
                 }
             }

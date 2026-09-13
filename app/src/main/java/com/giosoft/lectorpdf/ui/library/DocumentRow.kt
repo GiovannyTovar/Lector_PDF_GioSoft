@@ -60,39 +60,20 @@ data class DocumentActions(
     val onSaveToMisPdf: (DocumentEntity) -> Unit,
 )
 
-/**
- * Tarjeta que agrupa todos los documentos de un bloque, separados por finas
- * lineas, en vez de una tarjeta suelta por documento.
- *
- * Ademas de verse mas ordenado, reduce el "ruido" de bordes repetidos cuando
- * hay muchos documentos del mismo dia.
- */
+/** Cada documento en su propia tarjeta blanca, con sombra muy suave. */
 @Composable
-fun DocumentGroupCard(
-    documents: List<DocumentEntity>,
+fun DocumentCard(
+    document: DocumentEntity,
     actions: DocumentActions,
     modifier: Modifier = Modifier,
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(18.dp),
         shadowElevation = 1.dp,
     ) {
-        Column {
-            documents.forEachIndexed { index, document ->
-                DocumentRow(document, actions)
-                if (index < documents.lastIndex) {
-                    HorizontalDivider(
-                        // Sangrada hasta donde empieza el texto, para que la
-                        // linea no corte el icono.
-                        modifier = Modifier.padding(start = 64.dp, end = 16.dp),
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant,
-                    )
-                }
-            }
-        }
+        DocumentRow(document, actions)
     }
 }
 
