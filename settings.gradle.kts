@@ -11,23 +11,14 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
-        // MuPDF (se elimina en la Fase 2, al migrar el visor a PDFium).
-        maven {
-            url 'https://maven.ghostscript.com'
-            content { includeGroup 'com.artifex.mupdf' }
-        }
-        // PDFium / android-pdf-viewer (fork mantenido de mhiew).
-        maven {
-            url 'https://jitpack.io'
-            content { includeGroupByRegex 'com\\.github\\..*' }
-        }
     }
 }
 
 rootProject.name = "Lector PDF GioSoft"
-include ':app'
+include(":app")
