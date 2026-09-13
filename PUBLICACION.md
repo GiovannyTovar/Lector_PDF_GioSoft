@@ -105,13 +105,26 @@ justificación de `MANAGE_EXTERNAL_STORAGE` y acelera la revisión.
 
 ## Notas técnicas del proyecto
 
-- `compileSdk` / `targetSdk`: **36** · `minSdk`: **28**
-- AGP **8.10.1**, Gradle **8.11.1**, Java **17**
+- `compileSdk` **37** (lo exigen las AndroidX recientes; AGP lo descarga solo)
+- `targetSdk` **36** · `minSdk` **31** (Android 12)
+- AGP **9.4.0**, Gradle **9.7.1**, Java **17**, Kotlin integrado en AGP
+- Kotlin + Jetpack Compose; el motor de PDF es `androidx.pdf` (Apache 2.0)
 - Release con **R8** (`minifyEnabled`) y `shrinkResources` activos
-- Reglas de R8 en `app/proguard-rules.pro`. **Los modelos de `model/` están
-  protegidos a propósito**: sus nombres de campo son el formato de datos
-  guardado; si R8 los renombra, los usuarios pierden el historial al actualizar.
-- El build de debug usa `applicationIdSuffix .debug`, así puedes tener instaladas
-  la versión de Play y la de desarrollo a la vez.
-- Si en el futuro Play exige un `targetSdk` mayor, verifica el nivel actual
-  requerido en Play Console: cambia cada año (suele ser agosto).
+- **APK de release: ~4,2 MB** (la v4.1.0 con MuPDF pesaba 27 MB)
+- Todas las librerías nativas están alineadas a **16 KB**, requisito de Play
+  para apps que apuntan a Android 15+. Comprobado leyendo las cabeceras ELF
+  del APK generado.
+- El build de debug usa `applicationIdSuffix .debug`, así puedes tener
+  instaladas la versión de Play y la de desarrollo a la vez.
+- Si en el futuro Play exige un `targetSdk` mayor, verifica el nivel vigente
+  en Play Console: cambia cada año (suele ser en agosto).
+
+## Sin permisos peligrosos
+
+La app no declara **ningún** permiso en el manifiesto. Los archivos se abren
+con el selector del sistema (SAF), que concede acceso archivo por archivo, y el
+escáner corre dentro de los servicios de Google Play, así que ni siquiera hace
+falta declarar el permiso de cámara.
+
+Esto simplifica mucho el formulario de **Seguridad de los datos**: la app no
+recoge ni comparte nada, y todo el procesamiento es local.

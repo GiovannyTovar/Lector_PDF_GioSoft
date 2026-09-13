@@ -17,6 +17,7 @@
     <string name="action_open">Abrir</string>
     <string name="action_rename">Renombrar</string>
     <string name="action_share">Compartir</string>
+    <string name="action_print">Imprimir</string>
     <string name="action_favorite">Añadir a favoritos</string>
     <string name="action_unfavorite">Quitar de favoritos</string>
     <string name="action_remove_from_history">Quitar del historial</string>

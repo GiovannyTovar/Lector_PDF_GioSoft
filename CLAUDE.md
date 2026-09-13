@@ -4,67 +4,117 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Proyecto
 
-"Lector PDF GioSoft" (`com.giosoft.lectorpdf`): visor de PDF para Android sin publicidad, con historial de archivos abiertos. Java puro (sin Kotlin, sin Compose), Gradle con Groovy DSL, un solo módulo `:app`.
+"Lector PDF GioSoft" (`com.giosoft.lectorpdf`): visor de PDF para Android sin publicidad, con historial, escáner de documentos e impresión. **Kotlin + Jetpack Compose**, un solo módulo `:app`.
 
-El código, los comentarios, los strings de UI y los mensajes de commit están en **español**. Mantener ese idioma al editar.
+El código, comentarios, strings de UI y mensajes de commit están en **español**. Mantener ese idioma.
+
+**Mensajes de commit: máximo 100 caracteres**, una sola línea.
+
+La versión anterior (Java + MuPDF, v4.1.0) está preservada en el tag `v4.1.0-java` y la rama `legado-java-v4.1.0`. No borrarlos.
 
 ## Comandos
 
-Desde la raíz del proyecto (Windows: usar `.\gradlew.bat`, Git Bash: `./gradlew`):
-
 ```bash
-./gradlew assembleDebug          # Compilar APK debug
-./gradlew installDebug           # Compilar e instalar en dispositivo/emulador conectado
-./gradlew assembleRelease        # APK release (minify desactivado)
+./gradlew assembleDebug          # APK debug (applicationId acaba en .debug)
+./gradlew installDebug           # Instalar en dispositivo conectado
+./gradlew assembleRelease        # APK release con R8
+./gradlew bundleRelease          # .aab firmado para Play (requiere keystore.properties)
+./gradlew lint                   # Android Lint
 ./gradlew test                   # Tests unitarios JVM
-./gradlew connectedAndroidTest   # Tests instrumentados (requiere dispositivo)
-./gradlew lint                   # Android Lint -> app/build/reports/lint-results-debug.html
-./gradlew clean
 ```
 
-Ejecutar un solo test:
+Logs en ejecución: los tags son `ViewerViewModel`, `SafDocuments`, `DocumentScanner`, `PdfPrinter`.
+
 ```bash
-./gradlew test --tests "com.giosoft.lectorpdf.ExampleUnitTest"
-./gradlew connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.giosoft.lectorpdf.ExampleInstrumentedTest
+adb logcat -s ViewerViewModel:D SafDocuments:D DocumentScanner:E PdfPrinter:E
 ```
 
-Solo existen los tests de plantilla generados por Android Studio; no hay suite real.
+## Toolchain
 
-Logs útiles en tiempo de ejecución: los tags son `PDF_DEBUG`, `PDF_ADAPTER`, `DELETE`.
-```bash
-adb logcat -s PDF_DEBUG:D PDF_ADAPTER:E DELETE:W
+| Pieza | Versión | Nota |
+|---|---|---|
+| AGP | 9.4.0 | **Kotlin va integrado**: aplicar `org.jetbrains.kotlin.android` da error |
+| Gradle | 9.7.1 | |
+| compileSdk | 37 | Lo exigen las AndroidX recientes; AGP lo descarga solo |
+| targetSdk | 36 | Lo que pide Play; verificar el mínimo vigente antes de publicar |
+| minSdk | 31 | Android 12. Subido desde 28 en la v5 |
+| Java | 17 | |
+
+Build en KTS (`.gradle.kts`) con version catalog en `gradle/libs.versions.toml`.
+
+## Decisiones de arquitectura que no son obvias
+
+### El motor de PDF es `androidx.pdf`, y la elección importa
+
+Se descartaron dos alternativas por motivos concretos:
+
+- **MuPDF** (lo que usaba la v4.x): licencia **AGPL v3**, incompatible con el MIT que declara el README. Además es un AAR precompilado: su `DocumentActivity` es una caja negra y no permite cambiar ni el scroll ni el diálogo de contraseña.
+- **`com.github.mhiew:pdfium-android`**: sus `.so` de `arm64-v8a` están alineadas a 4 KB y **fallan el requisito de 16 KB** de Play (verificado leyendo las cabeceras ELF).
+
+`androidx.pdf` es Apache 2.0, **no empaqueta ninguna librería nativa** (por eso el APK bajó de 27 MB a 4,2 MB) y usa el renderizador del sistema.
+
+### La app NUNCA copia el PDF del usuario
+
+La v4.x copiaba cada PDF a `getExternalFilesDir()` y guardaba la ruta de la copia. De ahí venían el bug de renombrado y un bug silencioso: dos PDFs distintos con el mismo nombre hacían que el segundo nunca se abriera.
+
+Ahora **la clave de identidad de un documento es su URI de SAF** (`DocumentEntity.uri`, clave primaria en Room). `SafDocuments.rename()` llama a `DocumentsContract.renameDocument()` sobre el archivo real.
+
+La única copia que existe en el código es `DocumentScanner.saveTo()`, y solo porque el escáner produce un archivo nuevo que aún no tiene sitio.
+
+### Quitar del historial no borra nada
+
+`DocumentRepository` **no tiene ninguna operación de borrado sobre el almacenamiento del usuario**, a propósito. En la v4.x el diálogo prometía "esto no borra el documento" mientras el código llamaba a `File.delete()`. Si se añade cualquier función de borrado, debe ser explícita y estar claramente separada.
+
+### Renombrar puede cambiar la URI
+
+Algunos proveedores emiten una URI nueva tras renombrar. Como la URI es la clave primaria, `DocumentRepository.rename()` reinserta la fila con la clave nueva y borra la antigua. Romper esto deja el historial apuntando a URIs muertas.
+
+### PDF con contraseña: hay un límite real del sistema
+
+`androidx.pdf` elige renderizador según la versión de Android (decompilando `PdfDocumentRendererFactoryImpl`):
+
+- API 35+ → `PdfDocumentRendererAdapter(pfd, password)` ✅
+- Android 12 + **SDK Extension ≥ 13** → `PdfDocumentRendererPreVAdapter(pfd, password)` ✅
+- Por debajo → `PdfRendererCompatAdapter(pfd)`, **cuyo constructor ni recibe contraseña** ❌
+
+`ViewerViewModel.supportsPasswordProtectedPdf()` comprueba la extensión para dar un mensaje honesto en lugar de un error genérico.
+
+### El diálogo de contraseña es nuestro porque cargamos el documento nosotros
+
+El componible `PdfViewer` recibe un `PdfDocument` **ya abierto**. La app llama a `PdfLoader.openDocument(uri, password)` y captura `PdfPasswordException`, así que el flujo de contraseña es enteramente de la app. Por eso `proguard-rules.pro` conserva `PdfPasswordException`: el visor distingue por tipo de excepción, y fusionarla con otra `SecurityException` daría el mensaje equivocado.
+
+### URIs no persistibles
+
+Un PDF que llega compartido desde WhatsApp o Gmail trae una URI de un FileProvider ajeno, que **no se puede persistir**. Esos documentos se guardan con `persistable = false` y `DocumentRow` muestra un aviso, para que al caducar el acceso el usuario entienda qué pasó en lugar de pensar que es un fallo.
+
+### Proceso aislado
+
+`SandboxedPdfLoader` parsea los PDF en un proceso separado: un documento malformado no puede afectar al proceso de la app.
+
+## Estructura
+
+```
+com.giosoft.lectorpdf/
+├── LectorPdfApp.kt          Application + AppContainer (DI a mano, sin Hilt)
+├── MainActivity.kt          Única Activity; recibe los intents VIEW/SEND
+├── data/
+│   ├── SafDocuments.kt      SAF: permisos, nombre, tamaño, renombrar
+│   ├── DocumentRepository.kt
+│   └── db/                  Room
+├── scan/DocumentScanner.kt  ML Kit: devuelve el PDF ya armado
+├── print/PdfPrinter.kt      Vuelca el archivo tal cual a la impresora
+└── ui/
+    ├── AppNavigation.kt
+    ├── library/             Lista, renombrar, favoritos, buscar
+    ├── viewer/              Visor, contraseña, última página
+    ├── about/
+    └── theme/
 ```
 
-Versionado: `versionCode` / `versionName` se editan a mano en `app/build.gradle`. Los commits de release siguen el patrón `"Version X.Y.Z Funcional. <cambios>"`.
+## Avisos
 
-## Arquitectura
-
-Cuatro clases Java, sin capa de dominio ni inyección de dependencias. Toda la lógica vive en la Activity, el Adapter y un manager estático.
-
-**Flujo central — todo PDF se copia antes de abrirse:**
-
-1. El usuario elige un PDF (SAF `ACTION_OPEN_DOCUMENT`) o el sistema envía un `ACTION_VIEW` con mime `application/pdf` (la app está registrada como visor de PDF en el manifest).
-2. `MainActivity.copyPdfToExternalStorage()` copia el contenido de la `content://` URI a `getExternalFilesDir(null)` usando el display name como nombre de archivo. Si ya existe un archivo con ese nombre **no se sobreescribe**: se reutiliza la copia previa.
-3. La ruta absoluta resultante se guarda en el historial y se pasa a MuPDF.
-4. `openPdfWithMuPDF()` lanza `com.artifex.mupdf.viewer.DocumentActivity` por nombre de clase explícito con una `file://` URI y `FLAG_ACTIVITY_NO_HISTORY`.
-
-Consecuencia importante: la **ruta del archivo copiado es la clave de identidad** de un item del historial (deduplicación, borrado, comparación). No es la URI original.
-
-**Persistencia — `model/PdfHistoryManager`:** API estática sobre `SharedPreferences` (`pdf_history_prefs` / clave `pdf_history`), serializando `List<PdfItem>` a JSON con Gson. No hay Room pese a lo que sugiere el README. Límite de `MAX_HISTORY_ITEMS = 50`: al superarlo, `savePdfItem()` descarta los items más antiguos **y borra su archivo físico** de `getExternalFilesDir`. `savePdfItem()` también se usa para "tocar" un item existente (se reinserta con nuevo timestamp al reabrirlo), de modo que actúa como upsert, no solo como insert.
-
-**Agrupación por fecha:** `getPdfHistoryGrouped()` ordena por timestamp descendente y produce `List<PdfGroup>` con títulos "Hoy", "Ayer" o `EEEE, d MMMM` en el locale del dispositivo. La UI siempre consume esta forma agrupada.
-
-**`adapter/PdfAdapter`:** RecyclerView de dos tipos de vista (`TYPE_HEADER` / `TYPE_ITEM`) sobre la lista aplanada de grupos. La posición del RecyclerView se traduce a grupo/item recorriendo los grupos y acumulando `items.size() + 1` por cabecera — ver `getItemForPosition()`, `getGroupForPosition()`, `getItemViewType()`. **Cualquier cambio en la estructura de grupos debe mantener esas tres funciones coherentes entre sí**; `getItemForPosition()` devuelve `null` para cabeceras y los callers dependen de ello. Refresco siempre vía `updateData(PdfHistoryManager.getPdfHistoryGrouped(context))`, que hace `notifyDataSetChanged()`.
-
-**Swipe para eliminar:** el `ItemTouchHelper.SimpleCallback` está definido inline en `MainActivity.onCreate()`, incluido su `onChildDraw()` personalizado (fondo rojo + icono). Ignora las cabeceras y, tras el `AlertDialog`, siempre llama a `notifyItemChanged(position)` en `setOnDismissListener` para restaurar la fila sea cual sea la salida del diálogo. El borrado elimina el archivo copiado **y** la entrada del historial.
-
-**Compartir:** vía `FileProvider` con authority `${applicationId}.fileprovider`, configurado en `res/xml/file_paths.xml`.
-
-## Detalles que suelen sorprender
-
-- `MainActivity` y `PdfAdapter` importan `com.artifex.mupdf.viewer.BuildConfig`, no el `BuildConfig` de la app. Funciona porque `APPLICATION_ID` coincide, pero es frágil: preferir `context.getPackageName()` (como ya hace `PdfAdapter`).
-- El modo noche está forzado a `MODE_NIGHT_NO` en `onCreate()` antes de `super.onCreate()`, aunque existe `values-night/themes.xml`.
-- MuPDF viene de un repositorio Maven propio (`https://maven.ghostscript.com`) declarado en `settings.gradle`, con rango de versión abierto `1.15.+`.
-- Dependencias duplicadas en `app/build.gradle`: `appcompat` y `material` se declaran tanto por version catalog (`libs.*`) como con coordenadas literales de versión menor.
-- Java 17 como source/target; `compileSdk`/`targetSdk` 34, `minSdk` 28.
-- Dexter está en las dependencias pero no se usa en el código; el manifest no declara permisos (el acceso es solo por SAF).
+- **`versionCode` se edita a mano** en `app/build.gradle.kts`; Play rechaza repetidos.
+- La firma se lee de `keystore.properties` (ignorado por git). Sin ese archivo el release compila **sin firmar** y el build no falla, a propósito.
+- Las reglas de R8 conservan `data/db/**` porque los nombres de campo son las columnas de Room.
+- `androidx.pdf` está en **beta**: su API puede cambiar antes de 1.0. Las llamadas van marcadas con `@OptIn(ExperimentalPdfApi::class)`.
+- El diálogo "Acerca de" **ya no incluye el número de cuenta para donaciones** que tenía la v4.x; ver `PUBLICACION.md`.
