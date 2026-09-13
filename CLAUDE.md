@@ -59,7 +59,14 @@ La v4.x copiaba cada PDF a `getExternalFilesDir()` y guardaba la ruta de la copi
 
 Ahora **la clave de identidad de un documento es su URI de SAF** (`DocumentEntity.uri`, clave primaria en Room). `SafDocuments.rename()` llama a `DocumentsContract.renameDocument()` sobre el archivo real.
 
-La única copia que existe en el código es `DocumentScanner.saveTo()`, y solo porque el escáner produce un archivo nuevo que aún no tiene sitio.
+Hay exactamente **dos** sitios donde se copia, ambos deliberados y visibles para el usuario:
+
+1. **Escaneos**: el escáner produce un archivo nuevo que aún no tiene sitio.
+2. **`DocumentRepository.preserveTemporary()`**: los documentos que llegan con URI temporal (WhatsApp, correo) se copian a `Documentos/Mis PDF` **automáticamente**, porque si no la entrada del historial dejaría de abrir al caducar el permiso.
+
+Antes de copiar, `preserveTemporary()` compara el **SHA-256 del contenido** (`PublicDocuments.contentHash`) contra lo ya conservado. Si el usuario reabre el mismo PDF desde WhatsApp diez veces, se reutiliza la copia existente en lugar de acumular `factura(1).pdf`, `factura(2).pdf`… El hash identifica el documento con independencia del nombre y de la URI.
+
+**`registerOpened()` puede devolver una URI distinta de la que recibió.** Los llamantes (`MainActivity`, `LibraryScreen`) deben navegar a `entity.uri`, nunca a la URI original: si no, el visor abriría la temporal mientras el historial apunta a la copia.
 
 ### Quitar del historial no borra nada
 

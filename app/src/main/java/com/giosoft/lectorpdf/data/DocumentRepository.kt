@@ -28,6 +28,46 @@ class DocumentRepository(
      * Si ya existia, conserva favorito y ultima pagina leida.
      */
     suspend fun registerOpened(uri: Uri, persistable: Boolean): DocumentEntity {
+        // Los documentos que llegan compartidos (WhatsApp, correo) traen una URI
+        // temporal que caduca. En vez de dejar una entrada que dejara de abrir,
+        // se conservan en "Documentos/Mis PDF" y el historial apunta ya a la
+        // copia estable. Devuelve null si no hizo falta o no se pudo.
+        if (!persistable) {
+            preserveTemporary(uri)?.let { return it }
+        }
+        return register(uri, persistable, contentHash = null)
+    }
+
+    /**
+     * Conserva un documento de acceso temporal.
+     *
+     * Antes de copiar comprueba la huella del contenido: si ya guardamos ese
+     * mismo documento (aunque el usuario lo reabra una y otra vez desde
+     * WhatsApp), se reutiliza la copia existente en lugar de acumular
+     * "factura(1).pdf", "factura(2).pdf"...
+     */
+    private suspend fun preserveTemporary(uri: Uri): DocumentEntity? {
+        val hash = PublicDocuments.contentHash(context, uri) ?: return null
+
+        dao.findByHash(hash)?.let { existing ->
+            // Solo sirve si la copia sigue existiendo; el usuario pudo borrarla.
+            if (SafDocuments.isAvailable(context, Uri.parse(existing.uri))) {
+                val now = System.currentTimeMillis()
+                dao.touch(existing.uri, now)
+                return existing.copy(lastOpened = now)
+            }
+        }
+
+        val name = SafDocuments.displayName(context, uri) ?: "documento.pdf"
+        val saved = PublicDocuments.save(context, uri, name).getOrNull() ?: return null
+        return register(saved, persistable = true, contentHash = hash)
+    }
+
+    private suspend fun register(
+        uri: Uri,
+        persistable: Boolean,
+        contentHash: String?,
+    ): DocumentEntity {
         val key = uri.toString()
         val existing = dao.findByUri(key)
         val name = SafDocuments.displayName(context, uri)
@@ -45,6 +85,7 @@ class DocumentRepository(
             isFavorite = existing?.isFavorite ?: false,
             persistable = persistable || (existing?.persistable ?: false),
             location = SafDocuments.locationLabel(context, uri) ?: existing?.location,
+            contentHash = contentHash ?: existing?.contentHash,
         )
         dao.upsert(entity)
         return entity

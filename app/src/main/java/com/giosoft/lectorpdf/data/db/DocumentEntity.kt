@@ -1,6 +1,7 @@
 package com.giosoft.lectorpdf.data.db
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
@@ -15,7 +16,7 @@ import androidx.room.PrimaryKey
  * que caduca; esos se guardan con `persistable = false` y la interfaz avisa de
  * que puede dejar de estar disponible.
  */
-@Entity(tableName = "documents")
+@Entity(tableName = "documents", indices = [Index("contentHash")])
 data class DocumentEntity(
     @PrimaryKey val uri: String,
     val name: String,
@@ -31,4 +32,9 @@ data class DocumentEntity(
      * ya que la clave real es la URI y no el nombre.
      */
     val location: String? = null,
+    /**
+     * Huella SHA-256 del contenido. Identifica el documento con independencia
+     * del nombre y de la URI, para no volver a copiar uno que ya conservamos.
+     */
+    val contentHash: String? = null,
 )

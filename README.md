@@ -8,7 +8,8 @@ Creada para amigos, familiares y conocidos, con el objetivo de manejar sus docum
 
 ## ✨ Características
 
-- 📂 **Abre tus archivos originales**, estén donde estén: Descargas, documentos de WhatsApp, Drive… La app **no hace copias**.
+- 📂 **Abre tus archivos originales**, estén donde estén: Descargas, documentos de WhatsApp, Drive… La app **no hace copias** de lo que ya tienes guardado.
+- 💾 **Los PDF que te comparten no se pierden**: los que llegan por WhatsApp o correo traen un acceso temporal, así que se conservan solos en `Documentos/Mis PDF`. Si reabres el mismo, se reutiliza la copia en lugar de duplicarla.
 - ✏️ **Renombra el documento real** en tu celular, no una copia.
 - 📜 **Desplazamiento vertical y continuo** entre páginas.
 - 🔖 **Retoma la lectura** en la página donde la dejaste.

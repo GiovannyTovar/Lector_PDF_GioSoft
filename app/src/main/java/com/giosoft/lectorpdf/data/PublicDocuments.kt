@@ -8,6 +8,7 @@ import android.provider.MediaStore
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.security.MessageDigest
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -86,6 +87,32 @@ object PublicDocuments {
                 )
                 destination
             }.onFailure { Log.e(TAG, "Fallo al guardar en $displayPath", it) }
+        }
+
+    /**
+     * Huella SHA-256 del contenido del archivo.
+     *
+     * Responde a "¿es el mismo documento?" sin depender del nombre ni de la
+     * URI: dos archivos llamados igual pero distintos dan huellas distintas, y
+     * el mismo documento reenviado por WhatsApp da siempre la misma. Es lo que
+     * evita acumular "factura(1).pdf", "factura(2).pdf" al reabrirlo.
+     */
+    suspend fun contentHash(context: Context, uri: Uri): String? =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val digest = MessageDigest.getInstance("SHA-256")
+                context.contentResolver.openInputStream(uri).use { input ->
+                    requireNotNull(input)
+                    val buffer = ByteArray(64 * 1024)
+                    while (true) {
+                        val read = input.read(buffer)
+                        if (read <= 0) break
+                        digest.update(buffer, 0, read)
+                    }
+                }
+                digest.digest().joinToString("") { "%02x".format(it) }
+            }.onFailure { Log.d(TAG, "No se pudo calcular la huella de $uri: ${it.message}") }
+                .getOrNull()
         }
 
     private fun ensurePdfExtension(name: String): String =

@@ -15,6 +15,10 @@ interface DocumentDao {
     @Query("SELECT * FROM documents WHERE uri = :uri")
     suspend fun findByUri(uri: String): DocumentEntity?
 
+    /** Busca un documento ya conservado con el mismo contenido exacto. */
+    @Query("SELECT * FROM documents WHERE contentHash = :hash AND persistable = 1 LIMIT 1")
+    suspend fun findByHash(hash: String): DocumentEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(document: DocumentEntity)
 

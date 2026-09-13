@@ -87,8 +87,8 @@ fun LibraryScreen(
         val uri = result.data?.data ?: return@rememberLauncherForActivityResult
         scope.launch {
             val persistable = SafDocuments.takePersistablePermission(context, uri)
-            viewModel.registerPickedDocument(uri, persistable)
-            onOpenDocument(uri.toString())
+            val document = viewModel.registerPickedDocument(uri, persistable)
+            onOpenDocument(document.uri)
         }
     }
 
@@ -106,12 +106,12 @@ fun LibraryScreen(
             DocumentScanner.saveTo(context, source, destination)
                 .onSuccess {
                     val persistable = SafDocuments.takePersistablePermission(context, destination)
-                    viewModel.registerPickedDocument(destination, persistable)
+                    val saved = viewModel.registerPickedDocument(destination, persistable)
                     val open = snackbarHost.showSnackbar(
                         message = context.getString(R.string.scan_saved),
                         actionLabel = context.getString(R.string.action_open_now),
                     )
-                    if (open == SnackbarResult.ActionPerformed) onOpenDocument(destination.toString())
+                    if (open == SnackbarResult.ActionPerformed) onOpenDocument(saved.uri)
                 }
                 .onFailure { snackbarHost.showSnackbar(context.getString(R.string.scan_failed)) }
         }

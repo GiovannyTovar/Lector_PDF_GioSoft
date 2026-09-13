@@ -65,9 +65,11 @@ class MainActivity : ComponentActivity() {
 
         lifecycleScope.launch {
             val persistable = SafDocuments.takePersistablePermission(this@MainActivity, uri)
-            (application as LectorPdfApp).container.documentRepository
+            val document = (application as LectorPdfApp).container.documentRepository
                 .registerOpened(uri, persistable)
-            pendingDocument = uri.toString()
+            // Puede no ser la URI recibida: si el acceso era temporal, el
+            // repositorio ya conservo el documento y devuelve la copia estable.
+            pendingDocument = document.uri
         }
     }
 }
