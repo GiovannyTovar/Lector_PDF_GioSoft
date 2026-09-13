@@ -53,7 +53,7 @@ Se descartaron dos alternativas por motivos concretos:
 
 `androidx.pdf` es Apache 2.0, **no empaqueta ninguna librería nativa** (por eso el APK bajó de 27 MB a 4,2 MB) y usa el renderizador del sistema.
 
-### La app NUNCA copia el PDF del usuario
+### La app no copia los PDF que el usuario ya tiene guardados
 
 La v4.x copiaba cada PDF a `getExternalFilesDir()` y guardaba la ruta de la copia. De ahí venían el bug de renombrado y un bug silencioso: dos PDFs distintos con el mismo nombre hacían que el segundo nunca se abriera.
 
@@ -92,7 +92,9 @@ El componible `PdfViewer` recibe un `PdfDocument` **ya abierto**. La app llama a
 
 ### URIs no persistibles
 
-Un PDF que llega compartido desde WhatsApp o Gmail trae una URI de un FileProvider ajeno, que **no se puede persistir**. Esos documentos se guardan con `persistable = false` y `DocumentRow` muestra un aviso, para que al caducar el acceso el usuario entienda qué pasó en lugar de pensar que es un fallo.
+Un PDF que llega compartido desde WhatsApp o Gmail trae una URI de un FileProvider ajeno, que **no se puede persistir**: no es una limitación del código, es cómo esas apps exponen sus archivos. Por eso `preserveTemporary()` los conserva automáticamente (ver arriba).
+
+Si la copia falla (sin espacio, por ejemplo), se registra la URI temporal con `persistable = false`; entonces `DocumentRow` muestra un aviso y ofrece "Guardar en Mis PDF" en su menú, para que el usuario pueda reintentarlo a mano.
 
 ### Proceso aislado
 
