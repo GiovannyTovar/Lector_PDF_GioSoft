@@ -44,6 +44,7 @@ import android.content.Intent
 import android.net.Uri
 import com.giosoft.lectorpdf.R
 import com.giosoft.lectorpdf.print.PdfPrinter
+import com.giosoft.lectorpdf.ui.theme.LocalIsDarkTheme
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,6 +55,7 @@ fun ViewerScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val isDark = LocalIsDarkTheme.current
 
     Scaffold(
         topBar = {
@@ -99,7 +101,26 @@ fun ViewerScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    containerColor = if (isDark) {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    },
+                    titleContentColor = if (isDark) {
+                        MaterialTheme.colorScheme.onSurface
+                    } else {
+                        MaterialTheme.colorScheme.onPrimary
+                    },
+                    navigationIconContentColor = if (isDark) {
+                        MaterialTheme.colorScheme.onSurface
+                    } else {
+                        MaterialTheme.colorScheme.onPrimary
+                    },
+                    actionIconContentColor = if (isDark) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.onPrimary
+                    },
                 ),
             )
         },

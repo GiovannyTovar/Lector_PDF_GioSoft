@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
         val settings = (application as LectorPdfApp).container.settingsRepository
 
         setContent {
-            val themeMode by settings.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
+            val themeMode by settings.themeMode.collectAsState(initial = ThemeMode.LIGHT)
             val systemDark = isSystemInDarkTheme()
 
             LectorPdfTheme(themeMode = themeMode) {

@@ -34,7 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -64,6 +64,7 @@ import com.giosoft.lectorpdf.data.PublicDocuments
 import com.giosoft.lectorpdf.scan.DocumentScanner
 import com.giosoft.lectorpdf.ui.scan.ScanSaveDialog
 import com.giosoft.lectorpdf.ui.about.AboutDialog
+import com.giosoft.lectorpdf.ui.theme.LocalIsDarkTheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,6 +79,7 @@ fun LibraryScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHost = remember { SnackbarHostState() }
+    val isDark = LocalIsDarkTheme.current
 
     var searching by remember { mutableStateOf(false) }
     var showAbout by remember { mutableStateOf(false) }
@@ -208,18 +210,50 @@ fun LibraryScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    containerColor = if (isDark) {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    },
+                    titleContentColor = if (isDark) {
+                        MaterialTheme.colorScheme.onSurface
+                    } else {
+                        MaterialTheme.colorScheme.onPrimary
+                    },
+                    actionIconContentColor = if (isDark) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                        MaterialTheme.colorScheme.onPrimary
+                    },
                 ),
             )
         },
         floatingActionButton = {
             Column(horizontalAlignment = Alignment.End) {
-                SmallFloatingActionButton(onClick = startScan) {
-                    Icon(Icons.Default.DocumentScanner, stringResource(R.string.scan_to_pdf))
+                FloatingActionButton(
+                    onClick = startScan,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DocumentScanner,
+                        contentDescription = stringResource(R.string.scan_to_pdf),
+                        modifier = Modifier.size(28.dp),
+                    )
                 }
                 Spacer(Modifier.height(12.dp))
                 ExtendedFloatingActionButton(
                     onClick = { pickDocument.launch(SafDocuments.openDocumentIntent()) },
+                    containerColor = if (isDark) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    },
+                    contentColor = if (isDark) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onPrimary
+                    },
                     icon = { Icon(Icons.Default.FolderOpen, null) },
                     text = { Text(stringResource(R.string.open_pdf)) },
                 )

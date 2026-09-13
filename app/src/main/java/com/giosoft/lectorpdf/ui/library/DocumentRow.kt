@@ -1,5 +1,6 @@
 package com.giosoft.lectorpdf.ui.library
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -62,7 +63,9 @@ fun DocumentRow(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(12.dp),
-        tonalElevation = 1.dp,
+        // Borde sutil: en tema claro la tarjeta es blanca sobre un fondo casi
+        // blanco, y sin el no se distinguiria donde acaba cada una.
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Row(
             modifier = Modifier
@@ -136,18 +139,16 @@ fun DocumentRow(
                 }
             }
 
-            IconButton(onClick = onToggleFavorite) {
+            // Solo se marca la estrella cuando ya es favorito; anadirlo o
+            // quitarlo vive en el menu, para dejar sitio al nombre.
+            if (document.isFavorite) {
                 Icon(
-                    imageVector = if (document.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
-                    contentDescription = stringResource(
-                        if (document.isFavorite) R.string.action_unfavorite else R.string.action_favorite,
-                    ),
-                    tint = if (document.isFavorite) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.outline
-                    },
+                    imageVector = Icons.Default.Star,
+                    contentDescription = stringResource(R.string.action_unfavorite),
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(18.dp),
                 )
+                Spacer(Modifier.width(4.dp))
             }
 
             Box {
@@ -158,6 +159,23 @@ fun DocumentRow(
                     )
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                stringResource(
+                                    if (document.isFavorite) R.string.action_unfavorite
+                                    else R.string.action_favorite,
+                                ),
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                if (document.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
+                                null,
+                            )
+                        },
+                        onClick = { menuOpen = false; onToggleFavorite() },
+                    )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.action_rename)) },
                         leadingIcon = { Icon(Icons.Default.DriveFileRenameOutline, null) },
