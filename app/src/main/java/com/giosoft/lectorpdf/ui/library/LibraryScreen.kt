@@ -1,0 +1,325 @@
+package com.giosoft.lectorpdf.ui.library
+
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DocumentScanner
+import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.giosoft.lectorpdf.R
+import com.giosoft.lectorpdf.data.SafDocuments
+import com.giosoft.lectorpdf.data.db.DocumentEntity
+import com.giosoft.lectorpdf.scan.DocumentScanner
+import com.giosoft.lectorpdf.ui.about.AboutDialog
+import kotlinx.coroutines.launch
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LibraryScreen(
+    onOpenDocument: (String) -> Unit,
+    viewModel: LibraryViewModel = viewModel(factory = LibraryViewModel.Factory),
+) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val snackbarHost = remember { SnackbarHostState() }
+
+    var searching by remember { mutableStateOf(false) }
+    var showAbout by remember { mutableStateOf(false) }
+    var renaming by remember { mutableStateOf<DocumentEntity?>(null) }
+    var renamingAllowed by remember { mutableStateOf(true) }
+    var pendingScanPdf by remember { mutableStateOf<Uri?>(null) }
+
+    // --- Selector del sistema: abre el archivo ORIGINAL, sin copiarlo ---
+    val pickDocument = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        val uri = result.data?.data ?: return@rememberLauncherForActivityResult
+        scope.launch {
+            val persistable = SafDocuments.takePersistablePermission(context, uri)
+            viewModel.registerPickedDocument(uri, persistable)
+            onOpenDocument(uri.toString())
+        }
+    }
+
+    // --- Guardar el PDF escaneado donde el usuario elija ---
+    val saveScan = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        val destination = result.data?.data
+        val source = pendingScanPdf
+        pendingScanPdf = null
+        if (result.resultCode != Activity.RESULT_OK || destination == null || source == null) {
+            return@rememberLauncherForActivityResult
+        }
+        scope.launch {
+            DocumentScanner.saveTo(context, source, destination)
+                .onSuccess {
+                    val persistable = SafDocuments.takePersistablePermission(context, destination)
+                    viewModel.registerPickedDocument(destination, persistable)
+                    snackbarHost.showSnackbar(context.getString(R.string.scan_saved))
+                }
+                .onFailure { snackbarHost.showSnackbar(context.getString(R.string.scan_failed)) }
+        }
+    }
+
+    // --- Escaner de ML Kit ---
+    val scanLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult(),
+    ) { result ->
+        if (!DocumentScanner.isSuccess(result.resultCode)) return@rememberLauncherForActivityResult
+        val pdf = DocumentScanner.pdfFromResult(result.data)
+        if (pdf == null) {
+            scope.launch { snackbarHost.showSnackbar(context.getString(R.string.scan_failed)) }
+            return@rememberLauncherForActivityResult
+        }
+        pendingScanPdf = pdf
+        saveScan.launch(DocumentScanner.createDocumentIntent(DocumentScanner.suggestedName()))
+    }
+
+    val startScan = {
+        val activity = context as? Activity
+        if (activity != null) {
+            DocumentScanner.client(context).getStartScanIntent(activity)
+                .addOnSuccessListener { sender ->
+                    scanLauncher.launch(IntentSenderRequest.Builder(sender).build())
+                }
+                .addOnFailureListener {
+                    scope.launch { snackbarHost.showSnackbar(context.getString(R.string.scan_failed)) }
+                }
+        }
+    }
+
+    // Mensajes con opcion de deshacer
+    LaunchedEffect(Unit) {
+        viewModel.messageFlow.collect { message ->
+            val text = message.arg?.let { context.getString(message.resId, it) }
+                ?: context.getString(message.resId)
+            val result = snackbarHost.showSnackbar(
+                message = text,
+                actionLabel = message.undo?.let { context.getString(R.string.undo) },
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                message.undo?.let(viewModel::undoRemove)
+            }
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHost) },
+        topBar = {
+            TopAppBar(
+                title = {
+                    if (searching) {
+                        OutlinedTextField(
+                            value = state.query,
+                            onValueChange = viewModel::onQueryChange,
+                            placeholder = { Text(stringResource(R.string.library_search_hint)) },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    } else {
+                        Text(stringResource(R.string.library_title))
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        searching = !searching
+                        if (!searching) viewModel.onQueryChange("")
+                    }) {
+                        Icon(Icons.Default.Search, stringResource(R.string.cd_search))
+                    }
+                    IconButton(onClick = { showAbout = true }) {
+                        Icon(Icons.Default.Info, stringResource(R.string.about))
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                ),
+            )
+        },
+        floatingActionButton = {
+            Column(horizontalAlignment = Alignment.End) {
+                SmallFloatingActionButton(onClick = startScan) {
+                    Icon(Icons.Default.DocumentScanner, stringResource(R.string.scan_to_pdf))
+                }
+                Spacer(Modifier.height(12.dp))
+                ExtendedFloatingActionButton(
+                    onClick = { pickDocument.launch(SafDocuments.openDocumentIntent()) },
+                    icon = { Icon(Icons.Default.FolderOpen, null) },
+                    text = { Text(stringResource(R.string.open_pdf)) },
+                )
+            }
+        },
+    ) { padding ->
+        when {
+            state.groups.isEmpty() && !state.hasAnyDocument -> EmptyLibrary(Modifier.padding(padding))
+
+            state.groups.isEmpty() -> NoResults(state.query, Modifier.padding(padding))
+
+            else -> LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(
+                    start = 12.dp,
+                    end = 12.dp,
+                    top = padding.calculateTopPadding() + 8.dp,
+                    bottom = padding.calculateBottomPadding() + 96.dp,
+                ),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                state.groups.forEach { group ->
+                    item(key = "header-${group.title}") {
+                        GroupHeader(group.title)
+                    }
+                    items(group.documents, key = { "${group.title}-${it.uri}" }) { document ->
+                        DocumentRow(
+                            document = document,
+                            onOpen = { onOpenDocument(document.uri) },
+                            onRename = {
+                                scope.launch {
+                                    renamingAllowed = viewModel.canRename(document)
+                                    renaming = document
+                                }
+                            },
+                            onShare = { context.shareDocument(document) },
+                            onToggleFavorite = { viewModel.toggleFavorite(document) },
+                            onRemove = { viewModel.removeFromHistory(document) },
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    renaming?.let { document ->
+        RenameDialog(
+            document = document,
+            canRename = renamingAllowed,
+            onConfirm = { newName ->
+                viewModel.rename(document, newName)
+                renaming = null
+            },
+            onDismiss = { renaming = null },
+        )
+    }
+
+    if (showAbout) {
+        AboutDialog(onDismiss = { showAbout = false })
+    }
+}
+
+@Composable
+private fun GroupHeader(title: GroupTitle) {
+    Text(
+        text = when (title) {
+            is GroupTitle.Resource -> stringResource(title.resId)
+            is GroupTitle.Literal -> title.text
+        },
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(start = 4.dp, top = 12.dp, bottom = 4.dp),
+    )
+}
+
+@Composable
+private fun EmptyLibrary(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxSize().padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Default.MenuBook,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.outline,
+        )
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.library_empty_title),
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.library_empty_body),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Composable
+private fun NoResults(query: String, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxSize().padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = stringResource(R.string.library_no_results, query),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+/** Comparte el documento ORIGINAL por su propia URI: no hace falta FileProvider. */
+private fun android.content.Context.shareDocument(document: DocumentEntity) {
+    val share = Intent(Intent.ACTION_SEND).apply {
+        type = "application/pdf"
+        putExtra(Intent.EXTRA_STREAM, Uri.parse(document.uri))
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    startActivity(Intent.createChooser(share, getString(R.string.action_share)))
+}

@@ -1,25 +1,25 @@
 # Reglas de R8 para el build de release (minifyEnabled true).
+#
+# Room, Compose, androidx.pdf y ML Kit traen sus propias reglas embebidas en
+# los artefactos (consumer rules), asi que aqui solo va lo especifico de la app.
 
-# --- Gson ---
-# Los modelos se serializan por reflexión: sus nombres de campo SON el formato
-# de datos guardado en SharedPreferences. Si R8 los renombra, se pierde el
-# historial de los usuarios que actualicen.
--keepattributes Signature, *Annotation*, EnclosingMethod, InnerClasses
--keep class com.giosoft.lectorpdf.model.** { *; }
--keepclassmembers,allowobfuscation class * {
-    @com.google.gson.annotations.SerializedName <fields>;
-}
--keep class com.google.gson.reflect.TypeToken { *; }
--keep class * extends com.google.gson.reflect.TypeToken
+# --- Entidades de Room ---
+# Los nombres de campo de la entidad son las columnas de la base de datos y el
+# codigo que genera Room las referencia por nombre.
+-keep class com.giosoft.lectorpdf.data.db.** { *; }
 
-# --- Código nativo (JNI) ---
-# MuPDF y PDFium resuelven clases y métodos por nombre desde C.
+# --- Excepciones que la app distingue por tipo ---
+# El visor decide que mostrar segun la excepcion exacta que lanza el cargador:
+# PdfPasswordException pide contrasena, mientras que otra SecurityException
+# indica que el dispositivo no sabe descifrar. Si R8 fusionara estas clases,
+# el visor mostraria el mensaje equivocado.
+-keep class androidx.pdf.PdfPasswordException { *; }
+
+# --- Codigo nativo (JNI) ---
 -keepclasseswithmembernames class * {
     native <methods>;
 }
--keep class com.artifex.mupdf.** { *; }
--keep class com.shockwave.** { *; }
 
-# --- Silenciar avisos de dependencias opcionales no usadas ---
--dontwarn com.artifex.mupdf.**
--dontwarn com.shockwave.**
+# --- Numeros de linea legibles en los informes de fallos de Play ---
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
