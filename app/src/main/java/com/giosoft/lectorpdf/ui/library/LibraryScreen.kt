@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,16 +18,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.DocumentScanner
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.FolderOpen
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.DocumentScanner
+import androidx.compose.material.icons.outlined.LightMode
+import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.MenuBook
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -35,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -55,6 +58,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.giosoft.lectorpdf.R
@@ -183,7 +187,7 @@ fun LibraryScreen(
                     } else {
                         Text(
                             text = stringResource(R.string.app_title_bar),
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -194,19 +198,19 @@ fun LibraryScreen(
                         searching = !searching
                         if (!searching) viewModel.onQueryChange("")
                     }) {
-                        Icon(Icons.Default.Search, stringResource(R.string.cd_search))
+                        Icon(Icons.Outlined.Search, stringResource(R.string.cd_search))
                     }
                     // Tema claro/oscuro independiente del celular.
                     IconButton(onClick = onToggleTheme) {
                         Icon(
-                            imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            imageVector = if (isDarkTheme) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
                             contentDescription = stringResource(
                                 if (isDarkTheme) R.string.theme_to_light else R.string.theme_to_dark,
                             ),
                         )
                     }
                     IconButton(onClick = { showAbout = true }) {
-                        Icon(Icons.Default.Info, stringResource(R.string.about))
+                        Icon(Icons.Outlined.Info, stringResource(R.string.about))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -230,32 +234,57 @@ fun LibraryScreen(
         },
         floatingActionButton = {
             Column(horizontalAlignment = Alignment.End) {
+                val accent = if (isDark) {
+                    MaterialTheme.colorScheme.primaryContainer
+                } else {
+                    MaterialTheme.colorScheme.primary
+                }
+                val onAccent = if (isDark) {
+                    MaterialTheme.colorScheme.onPrimaryContainer
+                } else {
+                    MaterialTheme.colorScheme.onPrimary
+                }
+                val fabShape = RoundedCornerShape(18.dp)
+
+                // Escanear: fondo del color de la superficie con borde del azul
+                // de marca, para que no compita con el boton principal.
                 FloatingActionButton(
                     onClick = startScan,
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    shape = fabShape,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = accent,
+                    elevation = FloatingActionButtonDefaults.elevation(
+                        defaultElevation = 0.dp,
+                        pressedElevation = 0.dp,
+                        focusedElevation = 0.dp,
+                        hoveredElevation = 0.dp,
+                    ),
+                    modifier = Modifier
+                        .size(60.dp)
+                        .border(2.dp, accent, fabShape),
                 ) {
                     Icon(
-                        imageVector = Icons.Default.DocumentScanner,
+                        imageVector = Icons.Outlined.DocumentScanner,
                         contentDescription = stringResource(R.string.scan_to_pdf),
-                        modifier = Modifier.size(28.dp),
+                        modifier = Modifier.size(30.dp),
                     )
                 }
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(14.dp))
                 ExtendedFloatingActionButton(
                     onClick = { pickDocument.launch(SafDocuments.openDocumentIntent()) },
-                    containerColor = if (isDark) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.primary
+                    shape = fabShape,
+                    containerColor = accent,
+                    contentColor = onAccent,
+                    modifier = Modifier.height(60.dp),
+                    icon = {
+                        Icon(Icons.Outlined.FolderOpen, null, Modifier.size(26.dp))
                     },
-                    contentColor = if (isDark) {
-                        MaterialTheme.colorScheme.onPrimaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.onPrimary
+                    text = {
+                        Text(
+                            text = stringResource(R.string.open_pdf),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
                     },
-                    icon = { Icon(Icons.Default.FolderOpen, null) },
-                    text = { Text(stringResource(R.string.open_pdf)) },
                 )
             }
         },
@@ -396,7 +425,7 @@ private fun EmptyLibrary(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center,
     ) {
         Icon(
-            imageVector = Icons.Default.MenuBook,
+            imageVector = Icons.Outlined.MenuBook,
             contentDescription = null,
             modifier = Modifier.size(64.dp),
             tint = MaterialTheme.colorScheme.outline,

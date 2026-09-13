@@ -1,7 +1,7 @@
 package com.giosoft.lectorpdf.ui.library
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,7 +31,7 @@ fun DeleteDialog(
         onDismissRequest = onDismiss,
         icon = {
             Icon(
-                imageVector = Icons.Default.DeleteForever,
+                imageVector = Icons.Outlined.DeleteForever,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.error,
             )

@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -65,7 +65,7 @@ fun PasswordDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        icon = { Icon(Icons.Default.Lock, contentDescription = null) },
+        icon = { Icon(Icons.Outlined.Lock, contentDescription = null) },
         title = { Text(stringResource(R.string.password_title)) },
         text = {
             Column {
@@ -121,5 +121,5 @@ fun PasswordDialog(
     )
 }
 
-private val showIcon: ImageVector get() = Icons.Default.Visibility
-private val hideIcon: ImageVector get() = Icons.Default.VisibilityOff
+private val showIcon: ImageVector get() = Icons.Outlined.Visibility
+private val hideIcon: ImageVector get() = Icons.Outlined.VisibilityOff

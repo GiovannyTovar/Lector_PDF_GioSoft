@@ -1,12 +1,13 @@
 package com.giosoft.lectorpdf.ui.scan
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DocumentScanner
+import androidx.compose.material.icons.outlined.DocumentScanner
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -54,7 +55,7 @@ fun ScanSaveDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        icon = { Icon(Icons.Default.DocumentScanner, contentDescription = null) },
+        icon = { Icon(Icons.Outlined.DocumentScanner, contentDescription = null) },
         title = { Text(stringResource(R.string.scan_name_title)) },
         text = {
             Column {
@@ -77,6 +78,16 @@ fun ScanSaveDialog(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                Spacer(Modifier.height(4.dp))
+                // Va dentro del cuerpo para dejar libres los dos botones de
+                // abajo: guardar y, sobre todo, cancelar.
+                TextButton(
+                    onClick = { onChooseFolder(name) },
+                    enabled = name.isNotBlank(),
+                    contentPadding = PaddingValues(horizontal = 4.dp),
+                ) {
+                    Text(stringResource(R.string.scan_choose_folder))
+                }
             }
         },
         confirmButton = {
@@ -88,11 +99,8 @@ fun ScanSaveDialog(
             }
         },
         dismissButton = {
-            TextButton(
-                onClick = { onChooseFolder(name) },
-                enabled = name.isNotBlank(),
-            ) {
-                Text(stringResource(R.string.scan_choose_folder))
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.action_cancel))
             }
         },
     )

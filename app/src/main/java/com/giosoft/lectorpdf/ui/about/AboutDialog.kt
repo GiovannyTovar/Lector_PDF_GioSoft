@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.outlined.PictureAsPdf
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -23,7 +23,7 @@ import com.giosoft.lectorpdf.R
 fun AboutDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        icon = { Icon(Icons.Default.PictureAsPdf, contentDescription = null) },
+        icon = { Icon(Icons.Outlined.PictureAsPdf, contentDescription = null) },
         title = { Text(stringResource(R.string.about_title)) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {

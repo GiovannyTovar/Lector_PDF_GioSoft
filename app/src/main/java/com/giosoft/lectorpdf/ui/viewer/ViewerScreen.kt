@@ -9,10 +9,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.Print
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material.icons.outlined.Print
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -74,7 +74,7 @@ fun ViewerScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
+                            Icons.AutoMirrored.Outlined.ArrowBack,
                             contentDescription = stringResource(R.string.cd_back),
                         )
                     }
@@ -84,7 +84,7 @@ fun ViewerScreen(
                         IconButton(onClick = {
                             PdfPrinter.print(context, Uri.parse(document.uri), document.name)
                         }) {
-                            Icon(Icons.Default.Print, stringResource(R.string.action_print))
+                            Icon(Icons.Outlined.Print, stringResource(R.string.action_print))
                         }
                         IconButton(onClick = {
                             val share = Intent(Intent.ACTION_SEND).apply {
@@ -96,7 +96,7 @@ fun ViewerScreen(
                                 Intent.createChooser(share, context.getString(R.string.action_share)),
                             )
                         }) {
-                            Icon(Icons.Default.Share, stringResource(R.string.action_share))
+                            Icon(Icons.Outlined.Share, stringResource(R.string.action_share))
                         }
                     }
                 },
@@ -247,7 +247,7 @@ private fun FailureContent(
         verticalArrangement = Arrangement.Center,
     ) {
         Icon(
-            imageVector = Icons.Default.ErrorOutline,
+            imageVector = Icons.Outlined.ErrorOutline,
             contentDescription = null,
             modifier = Modifier.size(48.dp),
             tint = MaterialTheme.colorScheme.error,

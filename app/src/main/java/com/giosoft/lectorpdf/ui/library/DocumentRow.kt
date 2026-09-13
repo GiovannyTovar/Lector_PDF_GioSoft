@@ -1,8 +1,8 @@
 package com.giosoft.lectorpdf.ui.library
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,19 +13,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material.icons.filled.DriveFileRenameOutline
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.PictureAsPdf
-import androidx.compose.material.icons.filled.SaveAlt
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
-import androidx.compose.material.icons.filled.WarningAmber
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.DeleteForever
+import androidx.compose.material.icons.outlined.DriveFileRenameOutline
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.PictureAsPdf
+import androidx.compose.material.icons.outlined.SaveAlt
+import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,10 +39,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.giosoft.lectorpdf.R
 import com.giosoft.lectorpdf.data.db.DocumentEntity
+import com.giosoft.lectorpdf.ui.theme.LocalIsDarkTheme
+import com.giosoft.lectorpdf.ui.theme.PdfRed
+import com.giosoft.lectorpdf.ui.theme.PdfRedContainerDark
+import com.giosoft.lectorpdf.ui.theme.PdfRedContainerLight
 import java.util.Locale
 
 @Composable
@@ -58,45 +63,71 @@ fun DocumentRow(
     modifier: Modifier = Modifier,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
+    val isDark = LocalIsDarkTheme.current
 
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(12.dp),
-        // Borde sutil: en tema claro la tarjeta es blanca sobre un fondo casi
-        // blanco, y sin el no se distinguiria donde acaba cada una.
+        shape = RoundedCornerShape(16.dp),
+        // El fondo de la app es blanco y la tarjeta tambien: el borde es lo
+        // unico que marca donde empieza y acaba cada una.
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Row(
             modifier = Modifier
                 .clickable(onClick = onOpen)
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(start = 12.dp, end = 4.dp, top = 12.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                imageVector = Icons.Default.PictureAsPdf,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(30.dp),
-            )
+            // Icono sobre un cuadro rojo muy tenue: identifica el formato de un
+            // vistazo sin recargar la tarjeta.
+            Box(
+                modifier = Modifier
+                    .size(42.dp)
+                    .background(
+                        color = if (isDark) PdfRedContainerDark else PdfRedContainerLight,
+                        shape = RoundedCornerShape(12.dp),
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.PictureAsPdf,
+                    contentDescription = null,
+                    tint = PdfRed,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
 
-            Spacer(Modifier.width(10.dp))
+            Spacer(Modifier.width(12.dp))
 
             Column(Modifier.weight(1f)) {
-                Text(
-                    text = document.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                    // En MEDIO y no al final: en los nombres de archivo lo que
-                    // distingue a dos parecidos suele estar al final (fechas,
-                    // numeros de factura) y la extension importa.
-                    overflow = TextOverflow.MiddleEllipsis,
-                )
-                Spacer(Modifier.size(2.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (document.isFavorite) {
+                        Icon(
+                            imageVector = Icons.Outlined.Star,
+                            contentDescription = stringResource(R.string.action_unfavorite),
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(15.dp),
+                        )
+                        Spacer(Modifier.width(4.dp))
+                    }
+                    Text(
+                        text = document.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        // En MEDIO y no al final: en los nombres de archivo lo
+                        // que distingue a dos parecidos suele estar al final
+                        // (fechas, numeros de factura) y la extension importa.
+                        overflow = TextOverflow.MiddleEllipsis,
+                    )
+                }
+
+                Spacer(Modifier.size(3.dp))
+
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     // La ubicacion va primero: es lo que distingue dos
-                    // documentos que se llaman igual pero estan en sitios
-                    // distintos.
+                    // documentos que se llaman igual en sitios distintos.
                     document.location?.let { location ->
                         Text(
                             text = location,
@@ -106,11 +137,7 @@ fun DocumentRow(
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f, fill = false),
                         )
-                        Text(
-                            text = " · ",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        Dot()
                     }
                     Text(
                         text = document.sizeBytes.toReadableSize(),
@@ -118,44 +145,32 @@ fun DocumentRow(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     if (document.pageCount > 0) {
+                        Dot()
                         Text(
-                            text = " · ${document.pageCount} pág.",
+                            text = "${document.pageCount} pág.",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    // Aviso para los PDF que llegaron compartidos y cuyo acceso
-                    // puede caducar: el usuario entiende por que a veces
-                    // desaparecen en lugar de pensar que es un fallo.
+                    // Aviso para los PDF cuyo acceso puede caducar.
                     if (!document.persistable) {
                         Spacer(Modifier.width(6.dp))
                         Icon(
-                            imageVector = Icons.Default.WarningAmber,
+                            imageVector = Icons.Outlined.WarningAmber,
                             contentDescription = stringResource(R.string.temporary_access),
                             tint = MaterialTheme.colorScheme.tertiary,
-                            modifier = Modifier.size(14.dp),
+                            modifier = Modifier.size(13.dp),
                         )
                     }
                 }
             }
 
-            // Solo se marca la estrella cuando ya es favorito; anadirlo o
-            // quitarlo vive en el menu, para dejar sitio al nombre.
-            if (document.isFavorite) {
-                Icon(
-                    imageVector = Icons.Default.Star,
-                    contentDescription = stringResource(R.string.action_unfavorite),
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(18.dp),
-                )
-                Spacer(Modifier.width(4.dp))
-            }
-
             Box {
                 IconButton(onClick = { menuOpen = true }) {
                     Icon(
-                        Icons.Default.MoreVert,
+                        imageVector = Icons.Outlined.MoreVert,
                         contentDescription = stringResource(R.string.cd_more_options),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
@@ -170,7 +185,7 @@ fun DocumentRow(
                         },
                         leadingIcon = {
                             Icon(
-                                if (document.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
+                                if (document.isFavorite) Icons.Outlined.Star else Icons.Outlined.StarBorder,
                                 null,
                             )
                         },
@@ -178,28 +193,28 @@ fun DocumentRow(
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.action_rename)) },
-                        leadingIcon = { Icon(Icons.Default.DriveFileRenameOutline, null) },
+                        leadingIcon = { Icon(Icons.Outlined.DriveFileRenameOutline, null) },
                         onClick = { menuOpen = false; onRename() },
                     )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.action_share)) },
-                        leadingIcon = { Icon(Icons.Default.Share, null) },
+                        leadingIcon = { Icon(Icons.Outlined.Share, null) },
                         onClick = { menuOpen = false; onShare() },
                     )
                     if (!document.persistable) {
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.action_save_copy)) },
-                            leadingIcon = { Icon(Icons.Default.SaveAlt, null) },
+                            leadingIcon = { Icon(Icons.Outlined.SaveAlt, null) },
                             onClick = { menuOpen = false; onSaveToMisPdf() },
                         )
                     }
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.action_remove_from_history)) },
-                        leadingIcon = { Icon(Icons.Default.Delete, null) },
+                        leadingIcon = { Icon(Icons.Outlined.Delete, null) },
                         onClick = { menuOpen = false; onRemove() },
                     )
-                    // El borrado real va separado por una linea y en rojo: es
-                    // la unica accion de la app que destruye un archivo.
+                    // El borrado real va separado y en rojo: es la unica accion
+                    // de la app que destruye un archivo.
                     HorizontalDivider()
                     DropdownMenuItem(
                         text = {
@@ -210,7 +225,7 @@ fun DocumentRow(
                         },
                         leadingIcon = {
                             Icon(
-                                Icons.Default.DeleteForever,
+                                Icons.Outlined.DeleteForever,
                                 null,
                                 tint = MaterialTheme.colorScheme.error,
                             )
@@ -221,6 +236,16 @@ fun DocumentRow(
             }
         }
     }
+}
+
+/** Separador " · " de los metadatos, con el mismo estilo en todos. */
+@Composable
+private fun Dot() {
+    Text(
+        text = " · ",
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.outline,
+    )
 }
 
 private fun Long.toReadableSize(): String = when {
