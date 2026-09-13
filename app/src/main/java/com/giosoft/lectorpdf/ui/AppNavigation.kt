@@ -25,6 +25,8 @@ fun AppNavigation(
     /** PDF recibido por intent desde otra app; se abre nada mas arrancar. */
     initialDocumentUri: String? = null,
     onInitialDocumentConsumed: () -> Unit = {},
+    isDarkTheme: Boolean = false,
+    onToggleTheme: (Boolean) -> Unit = {},
     navController: NavHostController = rememberNavController(),
 ) {
     LaunchedEffect(initialDocumentUri) {
@@ -38,6 +40,8 @@ fun AppNavigation(
         composable(Routes.LIBRARY) {
             LibraryScreen(
                 onOpenDocument = { uri -> navController.navigate(Routes.viewer(uri)) },
+                isDarkTheme = isDarkTheme,
+                onToggleTheme = { onToggleTheme(isDarkTheme) },
             )
         }
         composable(

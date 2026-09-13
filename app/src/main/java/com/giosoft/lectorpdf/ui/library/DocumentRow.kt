@@ -67,24 +67,27 @@ fun DocumentRow(
         Row(
             modifier = Modifier
                 .clickable(onClick = onOpen)
-                .padding(horizontal = 12.dp, vertical = 10.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 imageVector = Icons.Default.PictureAsPdf,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(36.dp),
+                modifier = Modifier.size(30.dp),
             )
 
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(10.dp))
 
             Column(Modifier.weight(1f)) {
                 Text(
                     text = document.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    // En MEDIO y no al final: en los nombres de archivo lo que
+                    // distingue a dos parecidos suele estar al final (fechas,
+                    // numeros de factura) y la extension importa.
+                    overflow = TextOverflow.MiddleEllipsis,
                 )
                 Spacer(Modifier.size(2.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -94,7 +97,7 @@ fun DocumentRow(
                     document.location?.let { location ->
                         Text(
                             text = location,
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -102,19 +105,19 @@ fun DocumentRow(
                         )
                         Text(
                             text = " · ",
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                     Text(
                         text = document.sizeBytes.toReadableSize(),
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     if (document.pageCount > 0) {
                         Text(
                             text = " · ${document.pageCount} pág.",
-                            style = MaterialTheme.typography.labelMedium,
+                            style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }

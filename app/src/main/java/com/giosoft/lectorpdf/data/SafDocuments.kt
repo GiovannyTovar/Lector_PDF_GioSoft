@@ -189,7 +189,11 @@ object SafDocuments {
                 c.getString(i)
             }?.trim('/')?.takeIf { it.isNotBlank() }?.let { return@withContext prettifyPath(it) }
 
-            // 2. Los document URI suelen traer "primary:Download/archivo.pdf".
+            // 2. El proveedor de documentos de MediaStore no expone la ruta,
+            //    pero su id ES el _ID de MediaStore, que si la conoce.
+            mediaStoreRelativePath(context, uri)?.let { return@withContext prettifyPath(it) }
+
+            // 3. Los document URI suelen traer "primary:Download/archivo.pdf".
             if (DocumentsContract.isDocumentUri(context, uri)) {
                 runCatching { DocumentsContract.getDocumentId(uri) }.getOrNull()
                     ?.substringAfter(':', "")
@@ -198,9 +202,63 @@ object SafDocuments {
                     ?.let { return@withContext prettifyPath(it) }
             }
 
-            // 3. Ultimo recurso: la app propietaria del proveedor.
+            // 4. Algunos proveedores dejan la ruta en el resumen.
+            queryColumn(context, uri, DocumentsContract.Document.COLUMN_SUMMARY) { c, i ->
+                c.getString(i)
+            }?.takeIf { it.isNotBlank() }?.let { return@withContext prettifyPath(it) }
+
+            // 5. Ultimo recurso: la app propietaria del proveedor.
             authorityLabel(uri.authority)
         }
+
+    private const val MEDIA_DOCUMENTS = "com.android.providers.media.documents"
+
+    /**
+     * Ruta de un documento servido por el proveedor de MediaStore.
+     *
+     * Su id tiene la forma "document:1000108702", donde el numero es el _ID de
+     * MediaStore. Consultarlo devuelve la carpeta real ("Download/",
+     * "Android/media/com.whatsapp/.../WhatsApp Documents/"...).
+     *
+     * Puede devolver null: sin permisos de almacenamiento, MediaStore solo
+     * responde por los archivos que creo la propia app. No es un error, solo
+     * se pasa al siguiente intento.
+     */
+    private fun mediaStoreRelativePath(context: Context, uri: Uri): String? {
+        if (uri.authority != MEDIA_DOCUMENTS) return null
+        val id = runCatching { DocumentsContract.getDocumentId(uri) }.getOrNull()
+            ?.substringAfterLast(':')
+            ?.toLongOrNull()
+            ?: return null
+
+        // Primero, la API pensada para esto: convierte el document URI en su
+        // equivalente de MediaStore arrastrando el permiso que ya tenemos.
+        runCatching { MediaStore.getMediaUri(context, uri) }
+            .getOrNull()
+            ?.let { mediaUri ->
+                queryColumn(context, mediaUri, MediaStore.MediaColumns.RELATIVE_PATH) { c, i ->
+                    c.getString(i)
+                }?.takeIf { it.isNotBlank() }?.let { return it }
+            }
+
+        // Si no, consulta directa por _ID. Sin permisos de almacenamiento
+        // MediaStore solo responde por los archivos de la propia app, asi que
+        // esto puede devolver null sin que sea un error.
+        return try {
+            context.contentResolver.query(
+                MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL),
+                arrayOf(MediaStore.MediaColumns.RELATIVE_PATH),
+                "${MediaStore.MediaColumns._ID} = ?",
+                arrayOf(id.toString()),
+                null,
+            )?.use { cursor ->
+                if (cursor.moveToFirst()) cursor.getString(0) else null
+            }
+        } catch (e: Exception) {
+            Log.d(TAG, "MediaStore no respondio por el id $id: ${e.message}")
+            null
+        }
+    }
 
     /** Traduce las carpetas mas comunes y se queda con el tramo final. */
     private fun prettifyPath(path: String): String {
@@ -215,22 +273,30 @@ object SafDocuments {
         if (translated != null) return translated
 
         // "Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Documents" -> "WhatsApp Documents"
+        // "Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Documents" -> "WhatsApp"
+        if (clean.contains("com.whatsapp", ignoreCase = true)) return "WhatsApp"
+        if (clean.contains("org.telegram", ignoreCase = true)) return "Telegram"
+
         val last = clean.substringAfterLast('/')
-        return when {
-            last.isBlank() -> clean
-            clean.contains("com.whatsapp", ignoreCase = true) -> "WhatsApp · $last"
-            else -> last
-        }
+        return last.ifBlank { clean }
     }
 
+    /**
+     * Nombre de la app de origen. Solo se usa si los intentos anteriores no
+     * dieron con la carpeta real.
+     *
+     * Devuelve null para los proveedores genericos de almacenamiento: una
+     * etiqueta como "Archivos del celular" ocupa sitio sin distinguir nada,
+     * y el tamano y las paginas ya diferencian dos archivos homonimos.
+     */
     private fun authorityLabel(authority: String?): String? = when {
         authority == null -> null
         authority.contains("whatsapp", true) -> "WhatsApp"
         authority.contains("telegram", true) -> "Telegram"
-        authority.contains("apps.docs", true) -> "Google Drive"
+        authority.contains("apps.docs", true) -> "Drive"
         authority.contains("gm.sapi", true) || authority.contains("gmail", true) -> "Gmail"
+        authority.contains("dropbox", true) -> "Dropbox"
         authority.contains("downloads", true) -> "Descargas"
-        authority.contains("externalstorage", true) -> "Almacenamiento"
         else -> null
     }
 

@@ -20,7 +20,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.DocumentScanner
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MenuBook
@@ -51,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -67,6 +70,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun LibraryScreen(
     onOpenDocument: (String) -> Unit,
+    isDarkTheme: Boolean = false,
+    onToggleTheme: () -> Unit = {},
     viewModel: LibraryViewModel = viewModel(factory = LibraryViewModel.Factory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -174,7 +179,12 @@ fun LibraryScreen(
                             modifier = Modifier.fillMaxWidth(),
                         )
                     } else {
-                        Text(stringResource(R.string.library_title))
+                        Text(
+                            text = stringResource(R.string.app_title_bar),
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
                     }
                 },
                 actions = {
@@ -183,6 +193,15 @@ fun LibraryScreen(
                         if (!searching) viewModel.onQueryChange("")
                     }) {
                         Icon(Icons.Default.Search, stringResource(R.string.cd_search))
+                    }
+                    // Tema claro/oscuro independiente del celular.
+                    IconButton(onClick = onToggleTheme) {
+                        Icon(
+                            imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = stringResource(
+                                if (isDarkTheme) R.string.theme_to_light else R.string.theme_to_dark,
+                            ),
+                        )
                     }
                     IconButton(onClick = { showAbout = true }) {
                         Icon(Icons.Default.Info, stringResource(R.string.about))
@@ -222,6 +241,15 @@ fun LibraryScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
+                if (!searching) {
+                    item(key = "titulo-historial") {
+                        Text(
+                            text = stringResource(R.string.history_title),
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp),
+                        )
+                    }
+                }
                 state.groups.forEach { group ->
                     item(key = "header-${group.title}") {
                         GroupHeader(group.title)

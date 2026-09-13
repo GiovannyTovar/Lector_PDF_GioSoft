@@ -13,6 +13,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.giosoft.lectorpdf.data.ThemeMode
 
 private val LightColors = lightColorScheme(
     primary = LightPrimary,
@@ -56,17 +57,25 @@ private val DarkColors = darkColorScheme(
 
 /**
  * A diferencia de la version 4.x, que forzaba el modo claro con
- * MODE_NIGHT_NO, la app respeta el tema del sistema.
+ * MODE_NIGHT_NO, el tema lo decide el usuario desde la propia app: con
+ * [ThemeMode.SYSTEM] sigue al celular, y con LIGHT/DARK manda su eleccion
+ * aunque el celular este en el modo contrario.
  *
  * [dynamicColor] usa la paleta del fondo de pantalla en Android 12+.
  * Se deja desactivado por defecto para conservar la identidad azul de la app.
  */
 @Composable
 fun LectorPdfTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    themeMode: ThemeMode = ThemeMode.SYSTEM,
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
+    val darkTheme = when (themeMode) {
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+    }
+
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current

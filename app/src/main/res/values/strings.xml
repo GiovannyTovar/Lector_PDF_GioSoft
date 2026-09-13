@@ -2,6 +2,10 @@
     <string name="app_name">Lector PDF GioSoft</string>
 
     <!-- Biblioteca -->
+    <string name="app_title_bar">Lector PDF - GioSoft</string>
+    <string name="history_title">Historial</string>
+    <string name="theme_to_dark">Cambiar a tema oscuro</string>
+    <string name="theme_to_light">Cambiar a tema claro</string>
     <string name="library_title">Mis documentos</string>
     <string name="library_empty_title">Todavía no has abierto ningún PDF</string>
     <string name="library_empty_body">Toca el botón de abajo para buscar un documento en tu celular, o escanea unas fotos para crear uno nuevo.</string>

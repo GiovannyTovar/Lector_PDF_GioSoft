@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.pdf.PdfLoader
 import androidx.pdf.SandboxedPdfLoader
 import com.giosoft.lectorpdf.data.DocumentRepository
+import com.giosoft.lectorpdf.data.SettingsRepository
 import com.giosoft.lectorpdf.data.db.AppDatabase
 import kotlinx.coroutines.Dispatchers
 
@@ -23,6 +24,8 @@ class LectorPdfApp : Application() {
  * solo sumaria procesamiento de anotaciones y tiempo de compilacion.
  */
 class AppContainer(app: Application) {
+
+    val settingsRepository: SettingsRepository by lazy { SettingsRepository(app) }
 
     val documentRepository: DocumentRepository by lazy {
         DocumentRepository(app, AppDatabase.get(app).documentDao())

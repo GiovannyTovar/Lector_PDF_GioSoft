@@ -12,7 +12,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
+import androidx.compose.runtime.collectAsState
+import androidx.compose.foundation.isSystemInDarkTheme
 import com.giosoft.lectorpdf.data.SafDocuments
+import com.giosoft.lectorpdf.data.ThemeMode
 import com.giosoft.lectorpdf.ui.AppNavigation
 import com.giosoft.lectorpdf.ui.theme.LectorPdfTheme
 import kotlinx.coroutines.launch
@@ -27,12 +30,31 @@ class MainActivity : ComponentActivity() {
 
         handleIncomingIntent(intent)
 
+        val settings = (application as LectorPdfApp).container.settingsRepository
+
         setContent {
-            LectorPdfTheme {
+            val themeMode by settings.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
+            val systemDark = isSystemInDarkTheme()
+
+            LectorPdfTheme(themeMode = themeMode) {
                 Surface(color = MaterialTheme.colorScheme.background) {
                     AppNavigation(
                         initialDocumentUri = pendingDocument,
                         onInitialDocumentConsumed = { pendingDocument = null },
+                        isDarkTheme = when (themeMode) {
+                            ThemeMode.SYSTEM -> systemDark
+                            ThemeMode.LIGHT -> false
+                            ThemeMode.DARK -> true
+                        },
+                        onToggleTheme = { currentlyDark ->
+                            lifecycleScope.launch {
+                                // Al primer toque se fija una eleccion explicita,
+                                // que ya no depende del tema del celular.
+                                settings.setThemeMode(
+                                    if (currentlyDark) ThemeMode.LIGHT else ThemeMode.DARK,
+                                )
+                            }
+                        },
                     )
                 }
             }
