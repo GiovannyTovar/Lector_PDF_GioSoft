@@ -139,6 +139,41 @@ object SafDocuments {
 
 
     /**
+     * `true` si la app puede borrar este archivo del almacenamiento.
+     *
+     * Vale para lo que la propia app creo (escaneos y copias en "Mis PDF") y
+     * para los documentos cuyo proveedor declara que admiten borrado. Un PDF
+     * abierto desde Drive, por ejemplo, normalmente no lo permite.
+     */
+    suspend fun canDelete(context: Context, uri: Uri): Boolean = withContext(Dispatchers.IO) {
+        if (DocumentsContract.isDocumentUri(context, uri)) {
+            val flags = queryColumn(context, uri, DocumentsContract.Document.COLUMN_FLAGS) { c, i ->
+                c.getInt(i)
+            } ?: return@withContext false
+            return@withContext flags and DocumentsContract.Document.FLAG_SUPPORTS_DELETE != 0
+        }
+        // URI de MediaStore: la app puede borrar lo que ella misma creo.
+        uri.authority == MediaStore.AUTHORITY
+    }
+
+    /**
+     * Borra el archivo del almacenamiento. **Es irreversible.**
+     *
+     * Solo debe llamarse tras una confirmacion explicita del usuario.
+     */
+    suspend fun delete(context: Context, uri: Uri): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val deleted = if (DocumentsContract.isDocumentUri(context, uri)) {
+                DocumentsContract.deleteDocument(context.contentResolver, uri)
+            } else {
+                context.contentResolver.delete(uri, null, null) > 0
+            }
+            if (!deleted) error("El proveedor rechazo borrar el documento")
+            Unit
+        }.onFailure { Log.w(TAG, "No se pudo borrar $uri", it) }
+    }
+
+    /**
      * Etiqueta corta de donde vive el archivo ("Descargas", "WhatsApp",
      * "Drive"...), para poder distinguir dos documentos con el mismo nombre
      * guardados en sitios distintos.

@@ -99,6 +99,27 @@ class DocumentRepository(
         }
     }
 
+    /**
+     * Borra el archivo del celular Y lo quita del historial. **Irreversible.**
+     *
+     * Es la UNICA operacion de la app que destruye un archivo del usuario, y
+     * esta deliberadamente separada de [removeFromHistory] para que no puedan
+     * confundirse. Solo debe invocarse tras confirmacion explicita.
+     *
+     * Si el borrado falla, el historial se deja intacto: no tiene sentido
+     * perder la entrada de un archivo que sigue existiendo.
+     */
+    suspend fun deleteFromDevice(entity: DocumentEntity): Result<Unit> {
+        val uri = Uri.parse(entity.uri)
+        return SafDocuments.delete(context, uri).onSuccess {
+            dao.deleteByUri(entity.uri)
+            if (entity.persistable) SafDocuments.releasePersistablePermission(context, uri)
+        }
+    }
+
+    suspend fun canDelete(entity: DocumentEntity): Boolean =
+        SafDocuments.canDelete(context, Uri.parse(entity.uri))
+
     /** Reinserta una ficha; se usa para el "Deshacer" del historial. */
     suspend fun restore(entity: DocumentEntity) = dao.upsert(entity)
 

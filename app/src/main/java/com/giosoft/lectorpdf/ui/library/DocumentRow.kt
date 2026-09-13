@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PictureAsPdf
@@ -50,6 +52,7 @@ fun DocumentRow(
     onShare: () -> Unit,
     onToggleFavorite: () -> Unit,
     onRemove: () -> Unit,
+    onDeleteFromDevice: () -> Unit,
     onSaveToMisPdf: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -173,6 +176,25 @@ fun DocumentRow(
                         text = { Text(stringResource(R.string.action_remove_from_history)) },
                         leadingIcon = { Icon(Icons.Default.Delete, null) },
                         onClick = { menuOpen = false; onRemove() },
+                    )
+                    // El borrado real va separado por una linea y en rojo: es
+                    // la unica accion de la app que destruye un archivo.
+                    HorizontalDivider()
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = stringResource(R.string.action_delete_device),
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.DeleteForever,
+                                null,
+                                tint = MaterialTheme.colorScheme.error,
+                            )
+                        },
+                        onClick = { menuOpen = false; onDeleteFromDevice() },
                     )
                 }
             }

@@ -78,6 +78,8 @@ fun LibraryScreen(
     var showAbout by remember { mutableStateOf(false) }
     var renaming by remember { mutableStateOf<DocumentEntity?>(null) }
     var renamingAllowed by remember { mutableStateOf(true) }
+    var deleting by remember { mutableStateOf<DocumentEntity?>(null) }
+    var deletingAllowed by remember { mutableStateOf(true) }
     var pendingScanPdf by remember { mutableStateOf<Uri?>(null) }
 
     // --- Selector del sistema: abre el archivo ORIGINAL, sin copiarlo ---
@@ -238,6 +240,12 @@ fun LibraryScreen(
                             onSaveToMisPdf = { viewModel.saveToMisPdf(document) },
                             onToggleFavorite = { viewModel.toggleFavorite(document) },
                             onRemove = { viewModel.removeFromHistory(document) },
+                            onDeleteFromDevice = {
+                                scope.launch {
+                                    deletingAllowed = viewModel.canDelete(document)
+                                    deleting = document
+                                }
+                            },
                         )
                     }
                 }
@@ -254,6 +262,18 @@ fun LibraryScreen(
                 renaming = null
             },
             onDismiss = { renaming = null },
+        )
+    }
+
+    deleting?.let { document ->
+        DeleteDialog(
+            document = document,
+            canDelete = deletingAllowed,
+            onConfirm = {
+                viewModel.deleteFromDevice(document)
+                deleting = null
+            },
+            onDismiss = { deleting = null },
         )
     }
 

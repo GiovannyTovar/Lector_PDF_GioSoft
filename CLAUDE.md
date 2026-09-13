@@ -68,9 +68,14 @@ Antes de copiar, `preserveTemporary()` compara el **SHA-256 del contenido** (`Pu
 
 **`registerOpened()` puede devolver una URI distinta de la que recibió.** Los llamantes (`MainActivity`, `LibraryScreen`) deben navegar a `entity.uri`, nunca a la URI original: si no, el visor abriría la temporal mientras el historial apunta a la copia.
 
-### Quitar del historial no borra nada
+### Dos operaciones distintas, deliberadamente separadas
 
-`DocumentRepository` **no tiene ninguna operación de borrado sobre el almacenamiento del usuario**, a propósito. En la v4.x el diálogo prometía "esto no borra el documento" mientras el código llamaba a `File.delete()`. Si se añade cualquier función de borrado, debe ser explícita y estar claramente separada.
+- **`removeFromHistory()`** quita la fila de la lista y suelta el permiso. **No toca el archivo.** Ofrece deshacer.
+- **`deleteFromDevice()`** borra el archivo de verdad. Es la **única** operación de la app que destruye algo del usuario.
+
+La separación es intencional: en la v4.x el diálogo prometía "esto no borra el documento del almacenamiento" mientras el código llamaba a `File.delete()`. En el menú van separadas por un divisor y la destructiva va en rojo, con confirmación que nombra el archivo.
+
+`deleteFromDevice()` **solo borra el historial si el archivo se borró de verdad**: perder la entrada de un archivo que sigue existiendo sería peor que no hacer nada. `canDelete()` comprueba antes si el proveedor lo permite, para explicarlo en vez de dejar fallar la acción.
 
 ### Renombrar puede cambiar la URI
 

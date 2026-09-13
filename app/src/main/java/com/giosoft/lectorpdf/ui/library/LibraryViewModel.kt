@@ -122,6 +122,15 @@ class LibraryViewModel(
 
     suspend fun canRename(document: DocumentEntity): Boolean = repository.canRename(document)
 
+    suspend fun canDelete(document: DocumentEntity): Boolean = repository.canDelete(document)
+
+    /** Borra el archivo del celular. Sin deshacer: no se puede recuperar. */
+    fun deleteFromDevice(document: DocumentEntity) = viewModelScope.launch {
+        repository.deleteFromDevice(document)
+            .onSuccess { messages.send(UiMessage(R.string.delete_done, arg = document.name)) }
+            .onFailure { messages.send(UiMessage(R.string.delete_failed)) }
+    }
+
     /**
      * Copia a "Documentos/Mis PDF" un documento cuyo acceso es temporal
      * (tipicamente llegado por WhatsApp o correo) para que deje de caducar.
