@@ -6,7 +6,12 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -85,6 +90,7 @@ fun LibraryScreen(
     val snackbarHost = remember { SnackbarHostState() }
     val isDark = LocalIsDarkTheme.current
 
+
     var searching by remember { mutableStateOf(false) }
     var showAbout by remember { mutableStateOf(false) }
     var renaming by remember { mutableStateOf<DocumentEntity?>(null) }
@@ -92,6 +98,26 @@ fun LibraryScreen(
     var deleting by remember { mutableStateOf<DocumentEntity?>(null) }
     var deletingAllowed by remember { mutableStateOf(true) }
     var pendingScanPdf by remember { mutableStateOf<Uri?>(null) }
+
+    val documentActions = DocumentActions(
+        onOpen = { onOpenDocument(it.uri) },
+        onRename = { document ->
+            scope.launch {
+                renamingAllowed = viewModel.canRename(document)
+                renaming = document
+            }
+        },
+        onShare = { context.shareDocument(it) },
+        onToggleFavorite = { viewModel.toggleFavorite(it) },
+        onRemove = { viewModel.removeFromHistory(it) },
+        onDeleteFromDevice = { document ->
+            scope.launch {
+                deletingAllowed = viewModel.canDelete(document)
+                deleting = document
+            }
+        },
+        onSaveToMisPdf = { viewModel.saveToMisPdf(it) },
+    )
 
     // --- Selector del sistema: abre el archivo ORIGINAL, sin copiarlo ---
     val pickDocument = rememberLauncherForActivityResult(
@@ -232,60 +258,54 @@ fun LibraryScreen(
                 ),
             )
         },
-        floatingActionButton = {
-            Column(horizontalAlignment = Alignment.End) {
-                val accent = if (isDark) {
-                    MaterialTheme.colorScheme.primaryContainer
-                } else {
-                    MaterialTheme.colorScheme.primary
-                }
-                val onAccent = if (isDark) {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                } else {
-                    MaterialTheme.colorScheme.onPrimary
-                }
-                val fabShape = RoundedCornerShape(18.dp)
-
-                // Escanear: fondo del color de la superficie con borde del azul
-                // de marca, para que no compita con el boton principal.
-                FloatingActionButton(
-                    onClick = startScan,
-                    shape = fabShape,
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = accent,
-                    elevation = FloatingActionButtonDefaults.elevation(
-                        defaultElevation = 0.dp,
-                        pressedElevation = 0.dp,
-                        focusedElevation = 0.dp,
-                        hoveredElevation = 0.dp,
-                    ),
+        bottomBar = {
+            // Barra fija en lugar de botones flotantes: las dos acciones
+            // principales quedan al mismo nivel, siempre visibles y sin tapar
+            // el ultimo documento de la lista.
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                shadowElevation = 8.dp,
+            ) {
+                Row(
                     modifier = Modifier
-                        .size(60.dp)
-                        .border(2.dp, accent, fabShape),
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Icon(
-                        imageVector = Icons.Outlined.DocumentScanner,
-                        contentDescription = stringResource(R.string.scan_to_pdf),
-                        modifier = Modifier.size(30.dp),
-                    )
-                }
-                Spacer(Modifier.height(14.dp))
-                ExtendedFloatingActionButton(
-                    onClick = { pickDocument.launch(SafDocuments.openDocumentIntent()) },
-                    shape = fabShape,
-                    containerColor = accent,
-                    contentColor = onAccent,
-                    modifier = Modifier.height(60.dp),
-                    icon = {
-                        Icon(Icons.Outlined.FolderOpen, null, Modifier.size(26.dp))
-                    },
-                    text = {
+                    OutlinedButton(
+                        onClick = startScan,
+                        modifier = Modifier.weight(1f).height(52.dp),
+                        shape = RoundedCornerShape(14.dp),
+                        border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary,
+                        ),
+                    ) {
+                        Icon(Icons.Outlined.DocumentScanner, null, Modifier.size(20.dp))
+                        Spacer(Modifier.width(8.dp))
                         Text(
-                            text = stringResource(R.string.open_pdf),
-                            style = MaterialTheme.typography.titleMedium,
+                            text = stringResource(R.string.scan_short),
+                            style = MaterialTheme.typography.labelLarge,
                         )
-                    },
-                )
+                    }
+                    Button(
+                        onClick = { pickDocument.launch(SafDocuments.openDocumentIntent()) },
+                        modifier = Modifier.weight(1f).height(52.dp),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary,
+                        ),
+                    ) {
+                        Icon(Icons.Outlined.FolderOpen, null, Modifier.size(20.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.open_short),
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                    }
+                }
             }
         },
     ) { padding ->
@@ -300,16 +320,16 @@ fun LibraryScreen(
                     start = 12.dp,
                     end = 12.dp,
                     top = padding.calculateTopPadding() + 8.dp,
-                    bottom = padding.calculateBottomPadding() + 96.dp,
+                    bottom = padding.calculateBottomPadding() + 16.dp,
                 ),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 if (!searching) {
                     item(key = "titulo-historial") {
                         Text(
                             text = stringResource(R.string.history_title),
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp),
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 8.dp),
                         )
                     }
                 }
@@ -317,26 +337,10 @@ fun LibraryScreen(
                     item(key = "header-${group.title}") {
                         GroupHeader(group.title)
                     }
-                    items(group.documents, key = { "${group.title}-${it.uri}" }) { document ->
-                        DocumentRow(
-                            document = document,
-                            onOpen = { onOpenDocument(document.uri) },
-                            onRename = {
-                                scope.launch {
-                                    renamingAllowed = viewModel.canRename(document)
-                                    renaming = document
-                                }
-                            },
-                            onShare = { context.shareDocument(document) },
-                            onSaveToMisPdf = { viewModel.saveToMisPdf(document) },
-                            onToggleFavorite = { viewModel.toggleFavorite(document) },
-                            onRemove = { viewModel.removeFromHistory(document) },
-                            onDeleteFromDevice = {
-                                scope.launch {
-                                    deletingAllowed = viewModel.canDelete(document)
-                                    deleting = document
-                                }
-                            },
+                    item(key = "grupo-${group.title}") {
+                        DocumentGroupCard(
+                            documents = group.documents,
+                            actions = documentActions,
                         )
                     }
                 }
@@ -410,10 +414,11 @@ private fun GroupHeader(title: GroupTitle) {
         text = when (title) {
             is GroupTitle.Resource -> stringResource(title.resId)
             is GroupTitle.Literal -> title.text
-        },
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 4.dp, top = 12.dp, bottom = 4.dp),
+        }.uppercase(),
+        style = MaterialTheme.typography.labelMedium,
+        letterSpacing = 0.8.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 8.dp, top = 16.dp, bottom = 6.dp),
     )
 }
 

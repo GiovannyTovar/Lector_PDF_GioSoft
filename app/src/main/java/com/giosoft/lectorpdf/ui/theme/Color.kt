@@ -9,11 +9,11 @@ val BrandNavy = Color(0xFF0E314A)
 val BrandNavyDark = Color(0xFF0A2438)
 val BrandNavyLight = Color(0xFF1D5077)
 
-// Rojo del icono PDF, igual en ambos temas: es el color con el que se
-// reconoce el formato.
+// El icono PDF va en rojo SOLO en el tema claro, que es donde ese rojo se
+// reconoce. En oscuro se usa el azul claro del tema, el mismo de la ruta del
+// documento, porque el rojo saturado sobre fondo negro resulta agresivo.
 val PdfRed = Color(0xFFD93025)
-val PdfRedContainerLight = Color(0x14D93025)
-val PdfRedContainerDark = Color(0x26D93025)
+val PdfRedContainerLight = Color(0x1FD93025)
 
 // Claro
 val LightPrimary = BrandNavy
@@ -24,22 +24,22 @@ val LightSecondary = Color(0xFF50606E)
 val LightOnSecondary = Color(0xFFFFFFFF)
 val LightSecondaryContainer = Color(0xFFD3E5F5)
 val LightOnSecondaryContainer = Color(0xFF0C1D29)
-val LightBackground = Color(0xFFFFFFFF)
+val LightBackground = Color(0xFFF9F9F9)
 val LightOnBackground = Color(0xFF191C1E)
 val LightSurface = Color(0xFFFFFFFF)
 val LightOnSurface = Color(0xFF191C1E)
 val LightSurfaceVariant = Color(0xFFDDE3EA)
 val LightOnSurfaceVariant = Color(0xFF41484D)
 val LightOutline = Color(0xFF71787E)
-val LightOutlineVariant = Color(0xFFE4E9F0)
+val LightOutlineVariant = Color(0xFFEDEDEF)
 // Tonos de "contenedor": los usan menus, dialogos y hojas. Si no se definen,
 // Material 3 cae en su paleta base, que tira a morado y desentona con el azul.
 val LightSurfaceContainerLowest = Color(0xFFFFFFFF)
-val LightSurfaceContainerLow = Color(0xFFF7F9FC)
+val LightSurfaceContainerLow = Color(0xFFF9F9F9)
 val LightSurfaceContainer = Color(0xFFFFFFFF)
 val LightSurfaceContainerHigh = Color(0xFFF4F7FA)
 val LightSurfaceContainerHighest = Color(0xFFEDF1F6)
-val LightSurfaceDim = Color(0xFFDCE2E9)
+val LightSurfaceDim = Color(0xFFEDEDEE)
 val LightSurfaceBright = Color(0xFFFFFFFF)
 val LightInverseSurface = Color(0xFF2E3134)
 val LightInverseOnSurface = Color(0xFFF0F1F4)

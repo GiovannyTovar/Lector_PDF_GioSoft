@@ -13,6 +13,8 @@
     <string name="library_no_results">Ningún documento coincide con «%1$s»</string>
     <string name="open_pdf">Abrir un PDF</string>
     <string name="scan_to_pdf">Escanear a PDF</string>
+    <string name="scan_short">Escanear</string>
+    <string name="open_short">Abrir PDF</string>
     <string name="group_today">Hoy</string>
     <string name="group_yesterday">Ayer</string>
     <string name="favorites">Favoritos</string>
