@@ -49,7 +49,6 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.artifex.mupdf.viewer.BuildConfig;
 import com.artifex.mupdf.viewer.DocumentActivity;
 import com.giosoft.lectorpdf.adapter.PdfAdapter;
 import com.giosoft.lectorpdf.model.PdfGroup;
@@ -486,7 +485,7 @@ public class MainActivity extends AppCompatActivity {
 
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setDataAndType(uri, "application/pdf");
-            intent.setClassName("com.giosoft.lectorpdf", "com.artifex.mupdf.viewer.DocumentActivity");
+            intent.setClassName(getPackageName(), "com.artifex.mupdf.viewer.DocumentActivity");
             intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 
             startActivity(intent);
@@ -505,7 +504,7 @@ public class MainActivity extends AppCompatActivity {
 
         Uri contentUri = FileProvider.getUriForFile(
                 this,
-                BuildConfig.APPLICATION_ID + ".fileprovider", // Importante que coincida con el authorities del manifest
+                getPackageName() + ".fileprovider", // Importante que coincida con el authorities del manifest
                 file
         );
 

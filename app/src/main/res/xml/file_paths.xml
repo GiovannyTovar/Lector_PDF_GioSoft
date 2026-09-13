@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
-<!-- Acceso a archivos en almacenamiento externo privado -->
-<external-files-path name="external_files" path="." />
+    <!-- Solo carpetas privadas de la app. NO se expone el almacenamiento
+         compartido: los archivos del usuario se leen por SAF, no por ruta. -->
 
-<!-- Acceso a archivos en almacenamiento interno -->
-<files-path name="files" path="." />
+    <!-- getExternalFilesDir(): copias heredadas y PDFs generados por el escaner -->
+    <external-files-path name="external_files" path="." />
 
-<!-- Acceso a la carpeta cache -->
-<cache-path name="cache" path="." />
+    <!-- getCacheDir(): copias temporales de PDFs abiertos por intent no persistible -->
+    <cache-path name="cache" path="." />
 
-<!-- Para acceder a archivos en la raíz del almacenamiento externo -->
-<root-path name="root" path="." />
+    <!-- getExternalCacheDir() -->
+    <external-cache-path name="external_cache" path="." />
 </paths>

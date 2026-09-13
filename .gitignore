@@ -7,9 +7,29 @@
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+/.idea/deploymentTargetSelector.xml
+/.idea/deploymentTargetDropDown.xml
+/.idea/runConfigurations.xml
+/.idea/AndroidProjectSystem.xml
+/.idea/gradle.xml
+/.idea/misc.xml
+/.idea/compiler.xml
+/.idea/kotlinc.xml
 .DS_Store
 /build
 /captures
 .externalNativeBuild
 .cxx
 local.properties
+
+# --- Firma de release: NUNCA subir al repositorio ---
+keystore.properties
+*.jks
+*.keystore
+
+# --- Salidas de compilacion ---
+/app/build
+/app/release
+/app/debug
+*.apk
+*.aab

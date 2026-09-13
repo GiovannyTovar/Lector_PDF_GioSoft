@@ -1,21 +1,25 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Reglas de R8 para el build de release (minifyEnabled true).
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# --- Gson ---
+# Los modelos se serializan por reflexión: sus nombres de campo SON el formato
+# de datos guardado en SharedPreferences. Si R8 los renombra, se pierde el
+# historial de los usuarios que actualicen.
+-keepattributes Signature, *Annotation*, EnclosingMethod, InnerClasses
+-keep class com.giosoft.lectorpdf.model.** { *; }
+-keepclassmembers,allowobfuscation class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# --- Código nativo (JNI) ---
+# MuPDF y PDFium resuelven clases y métodos por nombre desde C.
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+-keep class com.artifex.mupdf.** { *; }
+-keep class com.shockwave.** { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# --- Silenciar avisos de dependencias opcionales no usadas ---
+-dontwarn com.artifex.mupdf.**
+-dontwarn com.shockwave.**

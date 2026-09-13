@@ -18,7 +18,6 @@ import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.artifex.mupdf.viewer.BuildConfig;
 import com.giosoft.lectorpdf.R;
 import com.giosoft.lectorpdf.model.PdfGroup;
 import com.giosoft.lectorpdf.model.PdfHistoryManager;
@@ -222,7 +221,7 @@ public class PdfAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             Uri uri = Uri.fromFile(file);
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setDataAndType(uri, "application/pdf");
-            intent.setClassName("com.giosoft.lectorpdf", "com.artifex.mupdf.viewer.DocumentActivity");
+            intent.setClassName(context.getPackageName(), "com.artifex.mupdf.viewer.DocumentActivity");
             intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
             context.startActivity(intent);
 
