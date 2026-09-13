@@ -9,8 +9,6 @@ import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 private const val TAG = "DocumentScanner"
 
@@ -39,11 +37,6 @@ object DocumentScanner {
     fun pdfFromResult(data: android.content.Intent?): Uri? =
         GmsDocumentScanningResult.fromActivityResultIntent(data)?.pdf?.uri
 
-    /** Nombre sugerido: "Escaneo 2026-09-13 14-05.pdf". */
-    fun suggestedName(): String {
-        val stamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm"))
-        return "Escaneo $stamp.pdf"
-    }
 
     /**
      * Copia el PDF temporal al destino que el usuario eligio con el selector.

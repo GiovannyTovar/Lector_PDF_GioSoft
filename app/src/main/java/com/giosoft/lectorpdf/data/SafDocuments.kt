@@ -6,6 +6,7 @@ import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
 import android.provider.DocumentsContract
+import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
@@ -135,6 +136,68 @@ object SafDocuments {
                 result
             }.onFailure { Log.w(TAG, "Fallo al renombrar ${uri.authority}", it) }
         }
+
+
+    /**
+     * Etiqueta corta de donde vive el archivo ("Descargas", "WhatsApp",
+     * "Drive"...), para poder distinguir dos documentos con el mismo nombre
+     * guardados en sitios distintos.
+     *
+     * Es orientativa: cada proveedor expone la informacion de forma distinta y
+     * algunos no la exponen en absoluto, asi que se va degradando desde la ruta
+     * real hasta el nombre de la app de origen.
+     */
+    suspend fun locationLabel(context: Context, uri: Uri): String? =
+        withContext(Dispatchers.IO) {
+            // 1. MediaStore expone la carpeta relativa directamente.
+            queryColumn(context, uri, MediaStore.MediaColumns.RELATIVE_PATH) { c, i ->
+                c.getString(i)
+            }?.trim('/')?.takeIf { it.isNotBlank() }?.let { return@withContext prettifyPath(it) }
+
+            // 2. Los document URI suelen traer "primary:Download/archivo.pdf".
+            if (DocumentsContract.isDocumentUri(context, uri)) {
+                runCatching { DocumentsContract.getDocumentId(uri) }.getOrNull()
+                    ?.substringAfter(':', "")
+                    ?.substringBeforeLast('/', "")
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { return@withContext prettifyPath(it) }
+            }
+
+            // 3. Ultimo recurso: la app propietaria del proveedor.
+            authorityLabel(uri.authority)
+        }
+
+    /** Traduce las carpetas mas comunes y se queda con el tramo final. */
+    private fun prettifyPath(path: String): String {
+        val clean = path.trim('/')
+        val translated = when {
+            clean.equals("Download", true) || clean.equals("Downloads", true) -> "Descargas"
+            clean.equals("Documents", true) -> "Documentos"
+            clean.equals("DCIM", true) -> "Camara"
+            clean.equals("Pictures", true) -> "Imagenes"
+            else -> null
+        }
+        if (translated != null) return translated
+
+        // "Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Documents" -> "WhatsApp Documents"
+        val last = clean.substringAfterLast('/')
+        return when {
+            last.isBlank() -> clean
+            clean.contains("com.whatsapp", ignoreCase = true) -> "WhatsApp · $last"
+            else -> last
+        }
+    }
+
+    private fun authorityLabel(authority: String?): String? = when {
+        authority == null -> null
+        authority.contains("whatsapp", true) -> "WhatsApp"
+        authority.contains("telegram", true) -> "Telegram"
+        authority.contains("apps.docs", true) -> "Google Drive"
+        authority.contains("gm.sapi", true) || authority.contains("gmail", true) -> "Gmail"
+        authority.contains("downloads", true) -> "Descargas"
+        authority.contains("externalstorage", true) -> "Almacenamiento"
+        else -> null
+    }
 
     private inline fun <T> queryColumn(
         context: Context,

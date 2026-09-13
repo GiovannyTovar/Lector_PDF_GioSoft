@@ -36,6 +36,9 @@ interface DocumentDao {
     @Query("UPDATE documents SET pageCount = :pageCount WHERE uri = :uri")
     suspend fun updatePageCount(uri: String, pageCount: Int)
 
+    @Query("UPDATE documents SET location = :location WHERE uri = :uri")
+    suspend fun updateLocation(uri: String, location: String?)
+
     /**
      * Cambiar el nombre de un archivo por SAF puede devolver una URI nueva.
      * Como la URI es la clave primaria, hay que reinsertar la fila con la

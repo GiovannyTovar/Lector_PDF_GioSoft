@@ -44,6 +44,7 @@ class DocumentRepository(
             sizeBytes = SafDocuments.sizeBytes(context, uri),
             isFavorite = existing?.isFavorite ?: false,
             persistable = persistable || (existing?.persistable ?: false),
+            location = SafDocuments.locationLabel(context, uri) ?: existing?.location,
         )
         dao.upsert(entity)
         return entity

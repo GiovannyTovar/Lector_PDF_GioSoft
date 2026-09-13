@@ -25,4 +25,10 @@ data class DocumentEntity(
     val sizeBytes: Long = 0L,
     val isFavorite: Boolean = false,
     val persistable: Boolean = true,
+    /**
+     * Carpeta legible ("Descargas", "WhatsApp"...). Es lo que permite
+     * distinguir dos documentos con el MISMO nombre en ubicaciones distintas,
+     * ya que la clave real es la URI y no el nombre.
+     */
+    val location: String? = null,
 )

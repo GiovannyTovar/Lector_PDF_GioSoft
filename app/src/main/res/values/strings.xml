@@ -23,7 +23,11 @@
     <string name="action_remove_from_history">Quitar del historial</string>
     <string name="action_cancel">Cancelar</string>
     <string name="action_accept">Aceptar</string>
-    <string name="action_save_copy">Guardar una copia</string>
+    <string name="action_save_copy">Guardar en Mis PDF</string>
+    <string name="save_copy_done">Guardado en %1$s. Ya no caducará.</string>
+    <string name="save_copy_failed">No se pudo guardar la copia</string>
+    <string name="temporary_access">Acceso temporal</string>
+    <string name="temporary_access_explain">Este documento te llegó compartido desde otra app y su acceso puede caducar. Guárdalo en Mis PDF para conservarlo.</string>
     <string name="action_retry">Reintentar</string>
 
     <!-- Renombrar -->
@@ -61,6 +65,11 @@
     <string name="scan_failed">No se pudo completar el escaneo</string>
     <string name="scan_cancelled">Escaneo cancelado</string>
     <string name="scan_name_title">Nombre del documento</string>
+    <string name="scan_save_hint">Se guardará en %1$s, donde podrás encontrarlo desde cualquier app.</string>
+    <string name="scan_save_here">Guardar en Mis PDF</string>
+    <string name="scan_choose_folder">Elegir otra carpeta…</string>
+    <string name="scan_saved_at">Guardado en %1$s</string>
+    <string name="action_open_now">Abrir</string>
 
     <!-- Acerca de -->
     <string name="about">Acerca de</string>

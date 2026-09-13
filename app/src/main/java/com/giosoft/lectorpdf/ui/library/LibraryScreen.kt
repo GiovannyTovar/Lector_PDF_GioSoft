@@ -57,7 +57,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.giosoft.lectorpdf.R
 import com.giosoft.lectorpdf.data.SafDocuments
 import com.giosoft.lectorpdf.data.db.DocumentEntity
+import com.giosoft.lectorpdf.data.PublicDocuments
 import com.giosoft.lectorpdf.scan.DocumentScanner
+import com.giosoft.lectorpdf.ui.scan.ScanSaveDialog
 import com.giosoft.lectorpdf.ui.about.AboutDialog
 import kotlinx.coroutines.launch
 
@@ -91,7 +93,7 @@ fun LibraryScreen(
     }
 
     // --- Guardar el PDF escaneado donde el usuario elija ---
-    val saveScan = rememberLauncherForActivityResult(
+    val saveScanToChosenFolder = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult(),
     ) { result ->
         val destination = result.data?.data
@@ -105,7 +107,11 @@ fun LibraryScreen(
                 .onSuccess {
                     val persistable = SafDocuments.takePersistablePermission(context, destination)
                     viewModel.registerPickedDocument(destination, persistable)
-                    snackbarHost.showSnackbar(context.getString(R.string.scan_saved))
+                    val open = snackbarHost.showSnackbar(
+                        message = context.getString(R.string.scan_saved),
+                        actionLabel = context.getString(R.string.action_open_now),
+                    )
+                    if (open == SnackbarResult.ActionPerformed) onOpenDocument(destination.toString())
                 }
                 .onFailure { snackbarHost.showSnackbar(context.getString(R.string.scan_failed)) }
         }
@@ -122,7 +128,6 @@ fun LibraryScreen(
             return@rememberLauncherForActivityResult
         }
         pendingScanPdf = pdf
-        saveScan.launch(DocumentScanner.createDocumentIntent(DocumentScanner.suggestedName()))
     }
 
     val startScan = {
@@ -230,6 +235,7 @@ fun LibraryScreen(
                                 }
                             },
                             onShare = { context.shareDocument(document) },
+                            onSaveToMisPdf = { viewModel.saveToMisPdf(document) },
                             onToggleFavorite = { viewModel.toggleFavorite(document) },
                             onRemove = { viewModel.removeFromHistory(document) },
                         )
@@ -248,6 +254,37 @@ fun LibraryScreen(
                 renaming = null
             },
             onDismiss = { renaming = null },
+        )
+    }
+
+    pendingScanPdf?.let { scanned ->
+        ScanSaveDialog(
+            onSaveToMisPdf = { name ->
+                pendingScanPdf = null
+                scope.launch {
+                    PublicDocuments.save(context, scanned, name)
+                        .onSuccess { saved ->
+                            viewModel.registerScanned(saved)
+                            val open = snackbarHost.showSnackbar(
+                                message = context.getString(
+                                    R.string.scan_saved_at,
+                                    PublicDocuments.displayPath,
+                                ),
+                                actionLabel = context.getString(R.string.action_open_now),
+                            )
+                            if (open == SnackbarResult.ActionPerformed) {
+                                onOpenDocument(saved.toString())
+                            }
+                        }
+                        .onFailure {
+                            snackbarHost.showSnackbar(context.getString(R.string.scan_failed))
+                        }
+                }
+            },
+            onChooseFolder = { name ->
+                saveScanToChosenFolder.launch(DocumentScanner.createDocumentIntent(name))
+            },
+            onDismiss = { pendingScanPdf = null },
         )
     }
 

@@ -11,6 +11,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.giosoft.lectorpdf.LectorPdfApp
 import com.giosoft.lectorpdf.R
 import com.giosoft.lectorpdf.data.DocumentRepository
+import com.giosoft.lectorpdf.data.PublicDocuments
 import com.giosoft.lectorpdf.data.SafDocuments
 import com.giosoft.lectorpdf.data.db.DocumentEntity
 import kotlinx.coroutines.channels.Channel
@@ -54,6 +55,7 @@ data class LibraryUiState(
 
 class LibraryViewModel(
     private val repository: DocumentRepository,
+    private val context: android.content.Context,
 ) : ViewModel() {
 
     private val query = MutableStateFlow("")
@@ -120,6 +122,29 @@ class LibraryViewModel(
 
     suspend fun canRename(document: DocumentEntity): Boolean = repository.canRename(document)
 
+    /**
+     * Copia a "Documentos/Mis PDF" un documento cuyo acceso es temporal
+     * (tipicamente llegado por WhatsApp o correo) para que deje de caducar.
+     *
+     * Es la unica copia que hace la app sobre documentos existentes, y siempre
+     * a peticion explicita del usuario.
+     */
+    fun saveToMisPdf(document: DocumentEntity) = viewModelScope.launch {
+        PublicDocuments.save(context, Uri.parse(document.uri), document.name)
+            .onSuccess { newUri ->
+                repository.registerOpened(newUri, persistable = true)
+                repository.removeFromHistory(document)
+                messages.send(
+                    UiMessage(R.string.save_copy_done, arg = PublicDocuments.displayPath),
+                )
+            }
+            .onFailure { messages.send(UiMessage(R.string.save_copy_failed)) }
+    }
+
+    /** Registra el PDF escaneado ya guardado y devuelve su URI para abrirlo. */
+    suspend fun registerScanned(uri: Uri): DocumentEntity =
+        repository.registerOpened(uri, persistable = true)
+
     private fun groupDocuments(documents: List<DocumentEntity>): List<DocumentGroup> {
         if (documents.isEmpty()) return emptyList()
 
@@ -156,7 +181,7 @@ class LibraryViewModel(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val app = this[APPLICATION_KEY] as LectorPdfApp
-                LibraryViewModel(app.container.documentRepository)
+                LibraryViewModel(app.container.documentRepository, app)
             }
         }
     }

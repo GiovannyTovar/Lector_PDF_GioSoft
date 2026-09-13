@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.SaveAlt
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
@@ -49,6 +50,7 @@ fun DocumentRow(
     onShare: () -> Unit,
     onToggleFavorite: () -> Unit,
     onRemove: () -> Unit,
+    onSaveToMisPdf: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
@@ -83,6 +85,24 @@ fun DocumentRow(
                 )
                 Spacer(Modifier.size(2.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    // La ubicacion va primero: es lo que distingue dos
+                    // documentos que se llaman igual pero estan en sitios
+                    // distintos.
+                    document.location?.let { location ->
+                        Text(
+                            text = location,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false),
+                        )
+                        Text(
+                            text = " · ",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                     Text(
                         text = document.sizeBytes.toReadableSize(),
                         style = MaterialTheme.typography.labelMedium,
@@ -102,8 +122,8 @@ fun DocumentRow(
                         Spacer(Modifier.width(6.dp))
                         Icon(
                             imageVector = Icons.Default.WarningAmber,
-                            contentDescription = stringResource(R.string.file_unavailable),
-                            tint = MaterialTheme.colorScheme.outline,
+                            contentDescription = stringResource(R.string.temporary_access),
+                            tint = MaterialTheme.colorScheme.tertiary,
                             modifier = Modifier.size(14.dp),
                         )
                     }
@@ -142,6 +162,13 @@ fun DocumentRow(
                         leadingIcon = { Icon(Icons.Default.Share, null) },
                         onClick = { menuOpen = false; onShare() },
                     )
+                    if (!document.persistable) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.action_save_copy)) },
+                            leadingIcon = { Icon(Icons.Default.SaveAlt, null) },
+                            onClick = { menuOpen = false; onSaveToMisPdf() },
+                        )
+                    }
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.action_remove_from_history)) },
                         leadingIcon = { Icon(Icons.Default.Delete, null) },
