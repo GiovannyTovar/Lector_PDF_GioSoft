@@ -466,6 +466,19 @@ Aplicado a PDF GioSoft:
   como simple "proveedor de servicios" — no trata esos datos solo por tus
   instrucciones y para tu negocio, sino para su propio producto (mejorar
   ML Kit), así que también cuenta como "compartidos" con un tercero.
+
+  El resto de preguntas de esa misma pantalla, para «Diagnósticos»:
+
+  - **¿Se tratan de forma temporal?** → **No.** `transport-backend-cct` guarda
+    eventos y los manda por lotes más tarde; no es "solo en memoria durante
+    una solicitud en tiempo real".
+  - **¿Es necesaria o el usuario puede elegir?** → **Necesaria.** La app no
+    ofrece ningún interruptor para desactivarla; se activa sola al escanear.
+  - **¿Por qué se recogen / se comparten?** → **Solo «Análisis»** en ambas. Es
+    justo la definición de Google: "monitorizar el estado de la app,
+    diagnosticar errores, mejorar el rendimiento". No es "Funcionalidad de la
+    aplicación" (ninguna función de la app depende de ese dato) ni ninguna de
+    las demás (no hay notificaciones, publicidad, cuentas, ni antifraude).
 - **¿Comparte datos con terceros?** → **Sí**, en el sentido estricto de Google:
   la telemetría de ML Kit va a Google. No hay ningún otro tercero.
 
