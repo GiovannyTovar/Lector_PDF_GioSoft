@@ -459,6 +459,13 @@ Aplicado a PDF GioSoft:
   definición de Google para «Diagnósticos» incluye textualmente
   «diagnósticos técnicos», que es justo esto. «Otros datos de rendimiento» no
   hace falta: es un cajón de sastre para lo que no encaje en las otras dos.
+
+  Para ese dato, Play también pregunta si se **recoge**, se **comparte**, o
+  ambas cosas. Marca **las dos**: los datos salen del celular hacia Google
+  (cuenta como "recogidos" aunque nunca lleguen a ti), y Google no actúa aquí
+  como simple "proveedor de servicios" — no trata esos datos solo por tus
+  instrucciones y para tu negocio, sino para su propio producto (mejorar
+  ML Kit), así que también cuenta como "compartidos" con un tercero.
 - **¿Comparte datos con terceros?** → **Sí**, en el sentido estricto de Google:
   la telemetría de ML Kit va a Google. No hay ningún otro tercero.
 
