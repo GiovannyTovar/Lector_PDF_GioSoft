@@ -75,19 +75,19 @@ class DocumentRepository(
             ?: uri.lastPathSegment
             ?: "documento.pdf"
 
-        val entity = DocumentEntity(
+        // Se parte de la ficha que ya existia y solo se pisan los campos que
+        // el hecho de abrir cambia. Enumerar aqui los que hay que conservar
+        // (favorito, categoria, bloqueo...) hacia que cualquier campo nuevo se
+        // perdiera en silencio al reabrir: asi se perdia la categoria.
+        val base = existing ?: DocumentEntity(uri = key, name = name, lastOpened = 0L)
+        val entity = base.copy(
             uri = key,
             name = name,
             lastOpened = System.currentTimeMillis(),
-            lastPage = existing?.lastPage ?: 0,
-            pageCount = existing?.pageCount ?: 0,
             sizeBytes = SafDocuments.sizeBytes(context, uri),
-            isFavorite = existing?.isFavorite ?: false,
-            persistable = persistable || (existing?.persistable ?: false),
-            location = SafDocuments.locationLabel(context, uri) ?: existing?.location,
-            contentHash = contentHash ?: existing?.contentHash,
-            isLocked = existing?.isLocked ?: false,
-            hasPassword = existing?.hasPassword ?: false,
+            persistable = persistable || existing?.persistable == true,
+            location = SafDocuments.locationLabel(context, uri) ?: base.location,
+            contentHash = contentHash ?: base.contentHash,
         )
         dao.upsert(entity)
         return entity
