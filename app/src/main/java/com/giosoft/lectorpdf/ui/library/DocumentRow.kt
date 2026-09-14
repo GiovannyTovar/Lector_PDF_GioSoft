@@ -219,18 +219,14 @@ private fun DocumentRow(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // Punto del color de su categoria: permite reconocerla de un
                 // vistazo cuando se esta viendo "Todos".
-                // Candado = el archivo lleva contrasena y viaja con el.
-                // Huella = solo se protege dentro de esta app.
-                // Pueden aparecer los dos a la vez.
-                if (document.hasPassword) {
-                    Icon(
-                        imageVector = Icons.Outlined.Lock,
-                        contentDescription = stringResource(R.string.action_password),
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(14.dp),
-                    )
-                    Spacer(Modifier.width(4.dp))
+                // Orden de los indicadores, de lo general a lo particular:
+                // de que tipo es (categoria), como esta protegido (huella y
+                // candado) y si es prioritario (estrella).
+                categoryColor?.let { color ->
+                    Surface(modifier = Modifier.size(9.dp), shape = CircleShape, color = color) {}
+                    Spacer(Modifier.width(6.dp))
                 }
+                // Huella = solo se protege dentro de esta app.
                 if (document.isLocked) {
                     Icon(
                         imageVector = Icons.Outlined.Fingerprint,
@@ -240,9 +236,15 @@ private fun DocumentRow(
                     )
                     Spacer(Modifier.width(4.dp))
                 }
-                categoryColor?.let { color ->
-                    Surface(modifier = Modifier.size(9.dp), shape = CircleShape, color = color) {}
-                    Spacer(Modifier.width(6.dp))
+                // Candado = el archivo lleva contrasena dentro y viaja con el.
+                if (document.hasPassword) {
+                    Icon(
+                        imageVector = Icons.Outlined.Lock,
+                        contentDescription = stringResource(R.string.action_password),
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(14.dp),
+                    )
+                    Spacer(Modifier.width(4.dp))
                 }
                 if (document.isFavorite) {
                     Icon(
