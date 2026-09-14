@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.giosoft.pdf.R
 import com.giosoft.pdf.ui.components.AppDialog
 import com.giosoft.pdf.ui.components.AppTextField
+import com.giosoft.pdf.ui.components.PasswordVisibilityIcon
 
 /**
  * Dialogo de contrasena propio de la app.
@@ -92,20 +91,7 @@ fun PasswordDialog(
                     PasswordVisualTransformation()
                 },
                 keyboardActions = KeyboardActions(onDone = { submit() }),
-                trailingIcon = {
-                    IconButton(onClick = { visible = !visible }) {
-                        Icon(
-                            imageVector = if (visible) {
-                                Icons.Outlined.VisibilityOff
-                            } else {
-                                Icons.Outlined.Visibility
-                            },
-                            contentDescription = stringResource(
-                                if (visible) R.string.password_hide else R.string.password_show,
-                            ),
-                        )
-                    }
-                },
+                trailingIcon = { PasswordVisibilityIcon(visible) { visible = !visible } },
                 modifier = Modifier.focusRequester(focusRequester),
             )
         }

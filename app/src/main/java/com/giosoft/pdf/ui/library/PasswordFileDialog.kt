@@ -19,12 +19,14 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.giosoft.pdf.R
 import com.giosoft.pdf.data.db.DocumentEntity
 import com.giosoft.pdf.ui.components.AppDialog
 import com.giosoft.pdf.ui.components.AppTextField
+import com.giosoft.pdf.ui.components.PasswordVisibilityIcon
 
 private const val MIN_PASSWORD_LENGTH = 4
 
@@ -45,6 +47,7 @@ fun PasswordFileDialog(
     var current by remember { mutableStateOf(TextFieldValue("")) }
     var nueva by remember { mutableStateOf(TextFieldValue("")) }
     var repetida by remember { mutableStateOf(TextFieldValue("")) }
+    var visible by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) { runCatching { focusRequester.requestFocus() } }
 
@@ -89,7 +92,8 @@ fun PasswordFileDialog(
                     value = current,
                     onValueChange = { current = it },
                     label = stringResource(R.string.password_current),
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = transformacion(visible),
+                    trailingIcon = { PasswordVisibilityIcon(visible) { visible = !visible } },
                     modifier = Modifier.focusRequester(focusRequester),
                 )
             } else {
@@ -103,7 +107,8 @@ fun PasswordFileDialog(
                     } else {
                         null
                     },
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = transformacion(visible),
+                    trailingIcon = { PasswordVisibilityIcon(visible) { visible = !visible } },
                     modifier = Modifier.focusRequester(focusRequester),
                 )
                 Spacer(Modifier.height(12.dp))
@@ -117,9 +122,13 @@ fun PasswordFileDialog(
                     } else {
                         null
                     },
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = transformacion(visible),
+                    trailingIcon = { PasswordVisibilityIcon(visible) { visible = !visible } },
                 )
             }
         }
     }
 }
+
+private fun transformacion(visible: Boolean): VisualTransformation =
+    if (visible) VisualTransformation.None else PasswordVisualTransformation()
