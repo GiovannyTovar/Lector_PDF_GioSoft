@@ -1,4 +1,4 @@
-# 📘 Lector PDF GioSoft
+# 📘 PDF GioSoft
 
 Visor de PDF para Android **sin publicidad, sin rastreo y sin permisos de almacenamiento**.
 

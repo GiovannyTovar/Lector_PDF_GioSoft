@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">Lector PDF GioSoft</string>
+    <string name="app_name">PDF GioSoft</string>
 
     <!-- Biblioteca -->
-    <string name="app_title_bar">Lector PDF - GioSoft</string>
+    <string name="app_title_bar">PDF GioSoft</string>
     <string name="history_title">Historial</string>
     <string name="theme_to_dark">Cambiar a tema oscuro</string>
     <string name="theme_to_light">Cambiar a tema claro</string>
@@ -154,7 +154,7 @@ Esta acción no se puede deshacer.</string>
     <string name="settings_thumbnails_desc">Muestra la primera página en lugar del icono.</string>
     <string name="settings_dark_title">Tema oscuro</string>
     <string name="settings_dark_desc">También está en la barra superior.</string>
-    <string name="about_title">Lector PDF GioSoft</string>
+    <string name="about_title">PDF GioSoft</string>
     <string name="about_tagline">Tus documentos, sin publicidad y sin complicaciones.</string>
     <string name="about_version">Versión %1$s</string>
     <string name="about_developed_by">Giovanny Tovar</string>
