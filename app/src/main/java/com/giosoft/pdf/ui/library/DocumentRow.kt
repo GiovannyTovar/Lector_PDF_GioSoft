@@ -219,12 +219,21 @@ private fun DocumentRow(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // Punto del color de su categoria: permite reconocerla de un
                 // vistazo cuando se esta viendo "Todos".
-                // Orden de los indicadores, de lo general a lo particular:
-                // de que tipo es (categoria), como esta protegido (huella y
-                // candado) y si es prioritario (estrella).
+                // Orden de los indicadores: de que tipo es (categoria), si es
+                // prioritario (estrella) y como esta protegido (huella y
+                // candado, juntos porque son la misma clase de informacion).
                 categoryColor?.let { color ->
                     Surface(modifier = Modifier.size(9.dp), shape = CircleShape, color = color) {}
                     Spacer(Modifier.width(6.dp))
+                }
+                if (document.isFavorite) {
+                    Icon(
+                        imageVector = Icons.Outlined.Star,
+                        contentDescription = stringResource(R.string.action_unfavorite),
+                        tint = FavoriteGold,
+                        modifier = Modifier.size(16.dp),
+                    )
+                    Spacer(Modifier.width(4.dp))
                 }
                 // Huella = solo se protege dentro de esta app.
                 if (document.isLocked) {
@@ -243,15 +252,6 @@ private fun DocumentRow(
                         contentDescription = stringResource(R.string.action_password),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(14.dp),
-                    )
-                    Spacer(Modifier.width(4.dp))
-                }
-                if (document.isFavorite) {
-                    Icon(
-                        imageVector = Icons.Outlined.Star,
-                        contentDescription = stringResource(R.string.action_unfavorite),
-                        tint = FavoriteGold,
-                        modifier = Modifier.size(16.dp),
                     )
                     Spacer(Modifier.width(4.dp))
                 }

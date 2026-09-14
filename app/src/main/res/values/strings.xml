@@ -77,6 +77,9 @@ Tus documentos NO se borran: quedarán como «Sin categoría».</string>
     <string name="action_unlock">Quitar la protección</string>
     <string name="lock_added">Documento protegido</string>
     <string name="lock_removed">Protección retirada</string>
+    <string name="lock_confirm_add">Proteger documento</string>
+    <string name="lock_confirm_remove">Quitar la protección</string>
+    <string name="lock_confirm_subtitle">Desbloquea para confirmar el cambio</string>
     <string name="lock_prompt_title">Documento protegido</string>
     <string name="lock_prompt_subtitle">Desbloquea para abrir «%1$s»</string>
     <string name="lock_unavailable">Configura una huella, un PIN o una contraseña en tu celular para usar esta función</string>

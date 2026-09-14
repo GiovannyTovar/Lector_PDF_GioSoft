@@ -170,13 +170,33 @@ fun LibraryScreen(
         onToggleSelection = viewModel::toggleSelection,
         onChangePassword = { changingPassword = it },
         onToggleLocked = { document ->
-            // Sin huella ni PIN configurados la proteccion no serviria de nada.
-            if (activity != null && !document.isLocked && !DeviceLock.isAvailable(activity)) {
-                scope.launch {
+            when {
+                activity == null -> viewModel.toggleLocked(document)
+
+                // Sin huella ni PIN configurados la proteccion no serviria.
+                !document.isLocked && !DeviceLock.isAvailable(activity) -> scope.launch {
                     snackbarHost.showSnackbar(context.getString(R.string.lock_unavailable))
                 }
-            } else {
-                viewModel.toggleLocked(document)
+
+                // Se pide desbloquear TAMBIEN para poner la proteccion, no solo
+                // para quitarla: de lo contrario alguien con el celular abierto
+                // podria protegerte documentos, o retirar tu proteccion, sin
+                // demostrar que eres tu.
+                else -> scope.launch {
+                    val ok = DeviceLock.authenticate(
+                        activity = activity,
+                        title = context.getString(
+                            if (document.isLocked) R.string.lock_confirm_remove
+                            else R.string.lock_confirm_add,
+                        ),
+                        subtitle = context.getString(R.string.lock_confirm_subtitle),
+                    )
+                    if (ok) {
+                        viewModel.toggleLocked(document)
+                    } else {
+                        snackbarHost.showSnackbar(context.getString(R.string.lock_failed))
+                    }
+                }
             }
         },
     )
