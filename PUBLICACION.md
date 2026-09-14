@@ -410,6 +410,9 @@ Además del paquete, Google pide:
 - [x] **Icono** de 512×512 y **gráfico destacado** de 1024×500: ya están hechos,
       en la carpeta [`play/`](play). Se regeneran con
       `py -3 play/generar-graficos.py` si cambia el icono de la app.
+- [x] **Categoría**: Productividad.
+- [x] **Etiquetas** (hasta 5): PDF, escáner de documentos, gestor de
+      documentos, impresión, oficina.
 - [ ] **Descripción corta** (80 caracteres) y **descripción larga**.
 - [ ] **Clasificación de contenido**: un cuestionario. Responde que no hay
       violencia, ni sexo, ni apuestas, ni compras. Sale «Apto para todos».
