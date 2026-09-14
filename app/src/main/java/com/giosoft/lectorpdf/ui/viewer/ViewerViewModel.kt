@@ -21,6 +21,8 @@ import com.giosoft.lectorpdf.data.db.DocumentEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -61,6 +63,11 @@ class ViewerViewModel(
 
     private val _uiState = MutableStateFlow<ViewerUiState>(ViewerUiState.Loading)
     val uiState: StateFlow<ViewerUiState> = _uiState.asStateFlow()
+
+    private val _search = MutableStateFlow(SearchState())
+    val search: StateFlow<SearchState> = _search.asStateFlow()
+
+    private var searchJob: Job? = null
 
     private var openDocument: PdfDocument? = null
     private var entity: DocumentEntity? = null
@@ -126,6 +133,50 @@ class ViewerViewModel(
         }
     }
 
+    // --- Buscar dentro del documento ---
+
+    fun onSearchQueryChange(query: String) {
+        _search.value = _search.value.copy(query = query)
+        // Se cancela la busqueda anterior: al escribir se genera una por cada
+        // pulsacion y solo interesa la ultima.
+        searchJob?.cancel()
+        if (query.isBlank()) {
+            _search.value = SearchState()
+            return
+        }
+        searchJob = viewModelScope.launch {
+            delay(SEARCH_DEBOUNCE_MS)
+            val document = openDocument ?: return@launch
+            _search.value = _search.value.copy(searching = true, completed = false)
+            val matches = runCatching { document.findMatches(query) }.getOrDefault(emptyList())
+            _search.value = SearchState(
+                query = query,
+                matches = matches,
+                currentIndex = 0,
+                searching = false,
+                completed = true,
+            )
+        }
+    }
+
+    fun nextMatch() {
+        val state = _search.value
+        if (!state.hasResults) return
+        _search.value = state.copy(currentIndex = (state.currentIndex + 1) % state.total)
+    }
+
+    fun previousMatch() {
+        val state = _search.value
+        if (!state.hasResults) return
+        val index = if (state.currentIndex == 0) state.total - 1 else state.currentIndex - 1
+        _search.value = state.copy(currentIndex = index)
+    }
+
+    fun closeSearch() {
+        searchJob?.cancel()
+        _search.value = SearchState()
+    }
+
     /** Guarda la pagina para reanudar la lectura donde se quedo. */
     fun onPageChanged(page: Int) {
         val current = entity ?: return
@@ -155,6 +206,9 @@ class ViewerViewModel(
             SdkExtensions.getExtensionVersion(Build.VERSION_CODES.S) >= 13
 
         const val ARG_URI = "documentUri"
+
+        /** Espera antes de buscar, para no lanzar una busqueda por tecla. */
+        private const val SEARCH_DEBOUNCE_MS = 350L
 
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {

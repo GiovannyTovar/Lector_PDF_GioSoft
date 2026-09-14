@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,6 +38,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ripple
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -63,6 +65,8 @@ import com.giosoft.lectorpdf.ui.theme.LocalIsDarkTheme
 import com.giosoft.lectorpdf.ui.theme.FavoriteGold
 import com.giosoft.lectorpdf.ui.theme.LocationBlue
 import com.giosoft.lectorpdf.ui.theme.PdfRed
+import com.giosoft.lectorpdf.ui.theme.SelectedCardDark
+import com.giosoft.lectorpdf.ui.theme.SelectedCardLight
 import java.util.Locale
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.IconButton
@@ -94,10 +98,10 @@ fun DocumentCard(
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = if (isSelected) {
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
-        } else {
-            MaterialTheme.colorScheme.surface
+        color = when {
+            !isSelected -> MaterialTheme.colorScheme.surface
+            LocalIsDarkTheme.current -> SelectedCardDark
+            else -> SelectedCardLight
         },
         shape = RoundedCornerShape(18.dp),
         shadowElevation = 1.dp,
@@ -123,6 +127,7 @@ private fun DocumentRow(
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     val isDark = LocalIsDarkTheme.current
+    val interactionSource = remember { MutableInteractionSource() }
 
     // El rojo identifica el formato PDF en el tema claro. En oscuro se usa el
     // azul claro del tema, el mismo de la ruta.
@@ -138,6 +143,11 @@ private fun DocumentRow(
     Row(
         modifier = Modifier
             .combinedClickable(
+                interactionSource = interactionSource,
+                // Sin efecto de pulsacion mientras se selecciona: al entrar en
+                // ese modo cambia la fila entera y el efecto se quedaba pegado,
+                // pintando un gris oscuro sobre el color de seleccion.
+                indication = if (selectionMode) null else ripple(),
                 // En modo seleccion, tocar marca en vez de abrir; la pulsacion
                 // larga es lo que entra en ese modo.
                 onClick = {

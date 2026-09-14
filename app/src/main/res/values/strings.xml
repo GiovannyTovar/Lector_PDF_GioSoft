@@ -92,6 +92,12 @@ Esta acción no se puede deshacer.</string>
 
     <!-- Visor -->
     <string name="viewer_loading">Abriendo documento…</string>
+    <string name="search_in_document">Buscar en el documento…</string>
+    <string name="search_match_of">%1$d/%2$d</string>
+    <string name="search_no_results">Sin resultados</string>
+    <string name="search_previous">Anterior</string>
+    <string name="search_next">Siguiente</string>
+    <string name="search_close">Cerrar búsqueda</string>
     <string name="viewer_page_of">Página %1$d de %2$d</string>
     <string name="viewer_error_title">No se pudo abrir el documento</string>
     <string name="viewer_error_missing">El archivo ya no está disponible. Puede que se haya movido, borrado o que la app que lo compartió ya no dé acceso.</string>

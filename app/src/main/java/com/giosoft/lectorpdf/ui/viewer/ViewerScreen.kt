@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Print
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,15 +24,23 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -44,6 +54,8 @@ import android.content.Intent
 import android.net.Uri
 import com.giosoft.lectorpdf.R
 import com.giosoft.lectorpdf.print.PdfPrinter
+import androidx.compose.ui.graphics.toArgb
+import com.giosoft.lectorpdf.ui.theme.FavoriteGold
 import com.giosoft.lectorpdf.ui.theme.LocalIsDarkTheme
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -56,12 +68,49 @@ fun ViewerScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val isDark = LocalIsDarkTheme.current
+    val search by viewModel.search.collectAsStateWithLifecycle()
+    var searchOpen by remember { mutableStateOf(false) }
+    val searchFocus = remember { FocusRequester() }
+    // Al abrir la busqueda el campo debe quedar listo para escribir; si no, hay
+    // que tocarlo a mano y parece que no funciona.
+    LaunchedEffect(searchOpen) {
+        if (searchOpen) runCatching { searchFocus.requestFocus() }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
+                    if (searchOpen) {
+                        val onBar = if (isDark) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            MaterialTheme.colorScheme.onPrimary
+                        }
+                        TextField(
+                            value = search.query,
+                            onValueChange = viewModel::onSearchQueryChange,
+                            placeholder = {
+                                Text(
+                                    text = stringResource(R.string.search_in_document),
+                                    color = onBar.copy(alpha = 0.6f),
+                                    maxLines = 1,
+                                )
+                            },
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.bodyLarge,
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                                focusedTextColor = onBar,
+                                unfocusedTextColor = onBar,
+                                cursorColor = onBar,
+                                focusedIndicatorColor = onBar,
+                                unfocusedIndicatorColor = onBar.copy(alpha = 0.7f),
+                            ),
+                            modifier = Modifier.fillMaxWidth().focusRequester(searchFocus),
+                        )
+                    } else {
                         Text(
                             text = (state as? ViewerUiState.Ready)?.entity?.name
                                 ?: stringResource(R.string.app_name),
@@ -80,6 +129,26 @@ fun ViewerScreen(
                     }
                 },
                 actions = {
+                    if (searchOpen) {
+                        SearchNavigation(
+                            state = search,
+                            onPrevious = viewModel::previousMatch,
+                            onNext = viewModel::nextMatch,
+                            onClose = {
+                                searchOpen = false
+                                viewModel.closeSearch()
+                            },
+                        )
+                        return@TopAppBar
+                    }
+                    (state as? ViewerUiState.Ready)?.let {
+                        IconButton(onClick = { searchOpen = true }) {
+                            Icon(
+                                Icons.Outlined.Search,
+                                stringResource(R.string.search_in_document),
+                            )
+                        }
+                    }
                     (state as? ViewerUiState.Ready)?.entity?.let { document ->
                         IconButton(onClick = {
                             PdfPrinter.print(context, Uri.parse(document.uri), document.name)
@@ -140,6 +209,7 @@ fun ViewerScreen(
 
                 is ViewerUiState.Ready -> DocumentContent(
                     state = current,
+                    search = search,
                     onPageChanged = viewModel::onPageChanged,
                 )
 
@@ -157,6 +227,7 @@ fun ViewerScreen(
 @Composable
 private fun DocumentContent(
     state: ViewerUiState.Ready,
+    search: SearchState,
     onPageChanged: (Int) -> Unit,
 ) {
     val pdfState = rememberPdfViewerState()
@@ -173,6 +244,16 @@ private fun DocumentContent(
         snapshotFlow { pdfState.firstVisiblePage }
             .distinctUntilChanged()
             .collect(onPageChanged)
+    }
+
+    // Resaltar las coincidencias y llevar la vista a la activa.
+    val activeColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f).toArgb()
+    val otherColor = FavoriteGold.copy(alpha = 0.35f).toArgb()
+    LaunchedEffect(search.matches, search.currentIndex) {
+        pdfState.setHighlights(search.toHighlights(activeColor, otherColor))
+        search.current?.anchor?.let { punto ->
+            runCatching { pdfState.scrollToPosition(punto) }
+        }
     }
 
     Box(Modifier.fillMaxSize()) {

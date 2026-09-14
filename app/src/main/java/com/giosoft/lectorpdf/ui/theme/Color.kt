@@ -17,6 +17,9 @@ val PdfRed = Color(0xFFD93025)
 val LocationBlue = Color(0xFF1F547E)
 /** Dorado de la estrella de favorito, igual en ambos temas. */
 val FavoriteGold = Color(0xFFFFC107)
+/** Fondo de una tarjeta seleccionada. Solido para que no se mezcle con nada. */
+val SelectedCardLight = Color(0xFFE1E8EF)
+val SelectedCardDark = Color(0xFF1E2A33)
 val PdfRedContainerLight = Color(0x1FD93025)
 
 // Claro
