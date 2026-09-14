@@ -119,6 +119,10 @@ seguir actualizando la app. Sin esto, perder el archivo significa perder la app.
 - [ ] `versionCode` incrementado en `app/build.gradle.kts` (Play rechaza repetidos)
 - [ ] `versionName` actualizado
 - [ ] `.aab` probado en un dispositivo real
+- [ ] **Probadas sobre el paquete de release** (no el de debug) las cuatro
+      funciones que R8 puede romper: abrir un PDF, escanear, imprimir y poner
+      contraseña. R8 solo actúa en release, así que un fallo suyo no aparece
+      con `installDebug`
 - [ ] **Política de privacidad publicada** en una URL pública y sin login
       (está en [`web/privacidad.html`](web/privacidad.html); ver §7)
 - [ ] Formulario de **Seguridad de los datos** completado (ver §8)

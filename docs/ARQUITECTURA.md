@@ -467,5 +467,13 @@ exactamente como está.
   usuario. Es intencional, y la política de privacidad lo declara; si se quiere
   excluir, hay que escribirlo en `backup_rules.xml` y
   `data_extraction_rules.xml`.
+- **R8 rompía el escáner en release, y en debug no se notaba.** ML Kit crea sus
+  componentes por reflexión al arrancar; R8 en modo completo les quitaba el
+  constructor vacío y tocar «Escanear» mataba la app con un `NullPointerException`
+  dentro de ML Kit. La pista previa está en logcat: `ComponentDiscovery: Invalid
+  component registrar`. Las reglas que lo arreglan están en
+  `proguard-rules.pro`. **Moraleja: probar siempre el APK de release firmado en
+  un dispositivo real antes de subir nada**, porque `installDebug` no pasa por
+  R8 y no enseña estos fallos.
 - **La versión anterior (Java + MuPDF, 4.1.0)** está preservada en el tag
   `v4.1.0-java` y la rama `legado-java-v4.1.0`. No borrarlos.

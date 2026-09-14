@@ -35,3 +35,17 @@
 -keep class com.tom_roush.pdfbox.filter.** { *; }
 -keep class com.tom_roush.pdfbox.cos.** { *; }
 -dontwarn com.tom_roush.pdfbox.**
+
+# --- ML Kit (escaner) y componentes de Google Play Services ---
+# MlKitInitProvider instancia sus "registrars" por REFLEXION al arrancar la
+# app. R8 en modo completo les quitaba el constructor vacio, MlKit se quedaba
+# sin registrar sus componentes ("ComponentDiscovery: Invalid component
+# registrar" en logcat) y tocar "Escanear" mataba la app con un
+# NullPointerException dentro de ML Kit. En debug no se ve: ahi no corre R8.
+# Comprobado en release firmado sobre un dispositivo real.
+-keepclassmembers class * implements com.google.firebase.components.ComponentRegistrar {
+    <init>();
+}
+-keep class com.google.mlkit.common.internal.** { *; }
+-keep class com.google.mlkit.vision.**.internal.** { *; }
+-keep class com.google.mlkit.**.*ComponentRegistrar { *; }

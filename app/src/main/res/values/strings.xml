@@ -3,16 +3,12 @@
 
     <!-- Biblioteca -->
     <string name="app_title_bar">PDF GioSoft</string>
-    <string name="history_title">Historial</string>
     <string name="theme_to_dark">Cambiar a tema oscuro</string>
     <string name="theme_to_light">Cambiar a tema claro</string>
-    <string name="library_title">Mis documentos</string>
     <string name="library_empty_title">Todavía no has abierto ningún PDF</string>
     <string name="library_empty_body">Toca el botón de abajo para buscar un documento en tu celular, o escanea unas fotos para crear uno nuevo.</string>
     <string name="library_search_hint">Buscar…</string>
     <string name="library_no_results">Ningún documento coincide con «%1$s»</string>
-    <string name="open_pdf">Abrir un PDF</string>
-    <string name="scan_to_pdf">Escanear a PDF</string>
     <string name="scan_short">Escanear</string>
     <string name="open_short">Abrir PDF</string>
     <string name="group_today">Hoy</string>
@@ -22,14 +18,12 @@
     <string name="selection_all">Seleccionar todo</string>
     <string name="selection_clear">Cancelar selección</string>
     <string name="selection_removed">%1$s documentos quitados de la lista</string>
-    <string name="selection_hint">Mantén pulsado un documento para seleccionar varios</string>
     <string name="filter_all">Todos</string>
     <string name="filter_uncategorized">Sin categoría</string>
     <string name="categories_title">Categorías</string>
     <string name="categories_manage">Gestionar</string>
     <string name="categories_empty">Aún no tienes categorías. Crea una abajo para empezar a organizar tus documentos.</string>
     <string name="category_new">Nueva categoría</string>
-    <string name="category_add">Añadir</string>
     <string name="category_color">Color</string>
     <string name="category_move_up">Subir</string>
     <string name="category_move_down">Bajar</string>
@@ -38,8 +32,6 @@
     <string name="category_edit_title">Editar categoría</string>
     <string name="categories_reorder_hint">Toca una categoría para cambiar su nombre o su color. Usa las flechas para reordenarlas.</string>
     <string name="category_duplicate">Ya existe una categoría con ese nombre</string>
-    <string name="category_position">Posición %1$d</string>
-    <string name="category_rename">Renombrar categoría</string>
     <string name="category_empty">El nombre de la categoría no puede estar vacío</string>
     <string name="category_deleted">Categoría «%1$s» eliminada</string>
     <string name="category_assigned">Documentos organizados</string>
@@ -72,8 +64,6 @@ Tus documentos NO se borran: quedarán como «Sin categoría».</string>
     <string name="password_set_done">Contraseña aplicada al archivo</string>
     <string name="password_removed_done">Contraseña retirada del archivo</string>
     <string name="password_change_failed">No se pudo cambiar la contraseña. Revisa que la actual sea correcta.</string>
-    <string name="password_readonly">Este archivo no se puede modificar desde aquí. Guárdalo en Mis PDF y vuelve a intentarlo.</string>
-    <string name="lock_explain">Solo protege el documento dentro de esta app y en este celular. Si compartes el archivo, quien lo reciba lo abrirá sin desbloqueo.</string>
     <string name="action_unlock">Quitar la protección</string>
     <string name="lock_added">Documento protegido</string>
     <string name="lock_removed">Protección retirada</string>
@@ -109,7 +99,6 @@ Esta acción no se puede deshacer.</string>
     <string name="save_copy_done">Guardado en %1$s. Ya no caducará.</string>
     <string name="save_copy_failed">No se pudo guardar la copia</string>
     <string name="temporary_access">Acceso temporal</string>
-    <string name="temporary_access_explain">Este documento te llegó compartido desde otra app y su acceso puede caducar. Guárdalo en Mis PDF para conservarlo.</string>
     <string name="action_retry">Reintentar</string>
 
     <!-- Renombrar -->
@@ -123,8 +112,6 @@ Esta acción no se puede deshacer.</string>
     <string name="rename_permission_denied">No se renombró: hace falta tu permiso para modificar el archivo.</string>
 
     <!-- Quitar del historial -->
-    <string name="remove_title">Quitar del historial</string>
-    <string name="remove_message">Se quitará «%1$s» de esta lista.\n\nEl archivo NO se borra de tu celular: seguirá donde está.</string>
     <string name="remove_done">Quitado del historial</string>
     <string name="undo">Deshacer</string>
 
@@ -153,7 +140,6 @@ Esta acción no se puede deshacer.</string>
     <!-- Escaner -->
     <string name="scan_saved">Documento escaneado guardado</string>
     <string name="scan_failed">No se pudo completar el escaneo</string>
-    <string name="scan_cancelled">Escaneo cancelado</string>
     <string name="scan_name_title">Nombre del documento</string>
     <string name="scan_save_hint">Se guardará en %1$s, donde podrás encontrarlo desde cualquier app.</string>
     <string name="scan_save_here">Guardar en Mis PDF</string>
@@ -200,5 +186,4 @@ Esta acción no se puede deshacer.</string>
     <string name="cd_more_options">Más opciones</string>
     <string name="cd_back">Volver</string>
     <string name="cd_search">Buscar</string>
-    <string name="file_unavailable">Archivo no disponible</string>
 </resources>

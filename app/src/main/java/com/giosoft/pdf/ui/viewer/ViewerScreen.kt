@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -70,6 +71,7 @@ fun ViewerScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val resources = LocalResources.current
     val isDark = LocalIsDarkTheme.current
     val search by viewModel.search.collectAsStateWithLifecycle()
     var searchOpen by remember { mutableStateOf(false) }
@@ -165,7 +167,7 @@ fun ViewerScreen(
                                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                             }
                             context.startActivity(
-                                Intent.createChooser(share, context.getString(R.string.action_share)),
+                                Intent.createChooser(share, resources.getString(R.string.action_share)),
                             )
                         }) {
                             Icon(Icons.Outlined.Share, stringResource(R.string.action_share))

@@ -4,16 +4,12 @@
 
     <!-- Biblioteca -->
     <string name="app_title_bar">PDF GioSoft</string>
-    <string name="history_title">Historique</string>
     <string name="theme_to_dark">Passer au thème sombre</string>
     <string name="theme_to_light">Passer au thème clair</string>
-    <string name="library_title">Mes documents</string>
     <string name="library_empty_title">Vous n’avez encore ouvert aucun PDF</string>
     <string name="library_empty_body">Touchez le bouton ci-dessous pour chercher un document sur votre téléphone, ou numérisez quelques photos pour en créer un.</string>
     <string name="library_search_hint">Rechercher…</string>
     <string name="library_no_results">Aucun document ne correspond à « %1$s »</string>
-    <string name="open_pdf">Ouvrir un PDF</string>
-    <string name="scan_to_pdf">Numériser en PDF</string>
     <string name="scan_short">Numériser</string>
     <string name="open_short">Ouvrir un PDF</string>
     <string name="group_today">Aujourd’hui</string>
@@ -23,14 +19,12 @@
     <string name="selection_all">Tout sélectionner</string>
     <string name="selection_clear">Annuler la sélection</string>
     <string name="selection_removed">%1$s documents retirés de la liste</string>
-    <string name="selection_hint">Appuyez longuement sur un document pour en sélectionner plusieurs</string>
     <string name="filter_all">Tous</string>
     <string name="filter_uncategorized">Sans catégorie</string>
     <string name="categories_title">Catégories</string>
     <string name="categories_manage">Gérer</string>
     <string name="categories_empty">Vous n’avez pas encore de catégories. Créez-en une ci-dessous pour commencer à organiser vos documents.</string>
     <string name="category_new">Nouvelle catégorie</string>
-    <string name="category_add">Ajouter</string>
     <string name="category_color">Couleur</string>
     <string name="category_move_up">Monter</string>
     <string name="category_move_down">Descendre</string>
@@ -39,8 +33,6 @@
     <string name="category_edit_title">Modifier la catégorie</string>
     <string name="categories_reorder_hint">Touchez une catégorie pour changer son nom ou sa couleur. Utilisez les flèches pour les réordonner.</string>
     <string name="category_duplicate">Une catégorie porte déjà ce nom</string>
-    <string name="category_position">Position %1$d</string>
-    <string name="category_rename">Renommer la catégorie</string>
     <string name="category_empty">Le nom de la catégorie ne peut pas être vide</string>
     <string name="category_deleted">Catégorie « %1$s » supprimée</string>
     <string name="category_assigned">Documents organisés</string>
@@ -73,8 +65,6 @@ Vos documents NE sont PAS supprimés : ils passeront en « Sans catégorie ».</
     <string name="password_set_done">Mot de passe appliqué au fichier</string>
     <string name="password_removed_done">Mot de passe retiré du fichier</string>
     <string name="password_change_failed">Le mot de passe n’a pas pu être modifié. Vérifiez que l’actuel est correct.</string>
-    <string name="password_readonly">Ce fichier ne peut pas être modifié d’ici. Enregistrez-le dans Mes PDF et réessayez.</string>
-    <string name="lock_explain">Protège le document uniquement dans cette application et sur ce téléphone. Si vous partagez le fichier, la personne qui le reçoit l’ouvrira sans déverrouillage.</string>
     <string name="action_unlock">Retirer la protection</string>
     <string name="lock_added">Document protégé</string>
     <string name="lock_removed">Protection retirée</string>
@@ -110,7 +100,6 @@ Cette action est irréversible.</string>
     <string name="save_copy_done">Enregistré dans %1$s. L’accès n’expirera plus.</string>
     <string name="save_copy_failed">La copie n’a pas pu être enregistrée</string>
     <string name="temporary_access">Accès temporaire</string>
-    <string name="temporary_access_explain">Ce document vous a été partagé depuis une autre application et son accès peut expirer. Enregistrez-le dans Mes PDF pour le conserver.</string>
     <string name="action_retry">Réessayer</string>
 
     <!-- Renombrar -->
@@ -124,8 +113,6 @@ Cette action est irréversible.</string>
     <string name="rename_permission_denied">Non renommé : votre autorisation est nécessaire pour modifier le fichier.</string>
 
     <!-- Quitar del historial -->
-    <string name="remove_title">Retirer de l’historique</string>
-    <string name="remove_message">« %1$s » sera retiré de cette liste.\n\nLe fichier N’EST PAS supprimé de votre téléphone : il reste où il est.</string>
     <string name="remove_done">Retiré de l’historique</string>
     <string name="undo">Annuler</string>
 
@@ -154,7 +141,6 @@ Cette action est irréversible.</string>
     <!-- Escaner -->
     <string name="scan_saved">Document numérisé enregistré</string>
     <string name="scan_failed">La numérisation n’a pas pu être terminée</string>
-    <string name="scan_cancelled">Numérisation annulée</string>
     <string name="scan_name_title">Nom du document</string>
     <string name="scan_save_hint">Il sera enregistré dans %1$s, où vous pourrez le retrouver depuis n’importe quelle application.</string>
     <string name="scan_save_here">Enregistrer dans Mes PDF</string>
@@ -201,5 +187,4 @@ Cette action est irréversible.</string>
     <string name="cd_more_options">Plus d’options</string>
     <string name="cd_back">Retour</string>
     <string name="cd_search">Rechercher</string>
-    <string name="file_unavailable">Fichier non disponible</string>
 </resources>

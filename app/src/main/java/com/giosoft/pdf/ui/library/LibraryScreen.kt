@@ -71,6 +71,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -103,6 +104,7 @@ fun LibraryScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val resources = LocalResources.current
     val scope = rememberCoroutineScope()
     val snackbarHost = remember { SnackbarHostState() }
     val isDark = LocalIsDarkTheme.current
@@ -140,16 +142,16 @@ fun LibraryScreen(
             scope.launch {
                 val ok = DeviceLock.authenticate(
                     activity = activity,
-                    title = context.getString(
+                    title = resources.getString(
                         if (document.isLocked) R.string.lock_confirm_remove
                         else R.string.lock_confirm_add,
                     ),
-                    subtitle = context.getString(R.string.lock_confirm_subtitle),
+                    subtitle = resources.getString(R.string.lock_confirm_subtitle),
                 )
                 if (ok) {
                     viewModel.toggleLocked(document)
                 } else {
-                    snackbarHost.showSnackbar(context.getString(R.string.lock_failed))
+                    snackbarHost.showSnackbar(resources.getString(R.string.lock_failed))
                 }
             }
         }
@@ -165,8 +167,8 @@ fun LibraryScreen(
                 scope.launch {
                     val ok = DeviceLock.authenticate(
                         activity = activity,
-                        title = context.getString(R.string.lock_prompt_title),
-                        subtitle = context.getString(
+                        title = resources.getString(R.string.lock_prompt_title),
+                        subtitle = resources.getString(
                             R.string.lock_prompt_subtitle,
                             document.name,
                         ),
@@ -174,7 +176,7 @@ fun LibraryScreen(
                     if (ok) {
                         onOpenDocument(document.uri)
                     } else {
-                        snackbarHost.showSnackbar(context.getString(R.string.lock_failed))
+                        snackbarHost.showSnackbar(resources.getString(R.string.lock_failed))
                     }
                 }
             }
@@ -203,7 +205,7 @@ fun LibraryScreen(
                 // Sin huella ni PIN configurados la proteccion no serviria.
                 activity != null && !document.isLocked && !DeviceLock.isAvailable(activity) ->
                     scope.launch {
-                        snackbarHost.showSnackbar(context.getString(R.string.lock_unavailable))
+                        snackbarHost.showSnackbar(resources.getString(R.string.lock_unavailable))
                     }
 
                 !document.isLocked -> lockExplaining = document
@@ -254,12 +256,12 @@ fun LibraryScreen(
                     val persistable = SafDocuments.takePersistablePermission(context, destination)
                     val saved = viewModel.registerPickedDocument(destination, persistable)
                     val open = snackbarHost.showSnackbar(
-                        message = context.getString(R.string.scan_saved),
-                        actionLabel = context.getString(R.string.action_open_now),
+                        message = resources.getString(R.string.scan_saved),
+                        actionLabel = resources.getString(R.string.action_open_now),
                     )
                     if (open == SnackbarResult.ActionPerformed) onOpenDocument(saved.uri)
                 }
-                .onFailure { snackbarHost.showSnackbar(context.getString(R.string.scan_failed)) }
+                .onFailure { snackbarHost.showSnackbar(resources.getString(R.string.scan_failed)) }
         }
     }
 
@@ -270,7 +272,7 @@ fun LibraryScreen(
         if (!DocumentScanner.isSuccess(result.resultCode)) return@rememberLauncherForActivityResult
         val pdf = DocumentScanner.pdfFromResult(result.data)
         if (pdf == null) {
-            scope.launch { snackbarHost.showSnackbar(context.getString(R.string.scan_failed)) }
+            scope.launch { snackbarHost.showSnackbar(resources.getString(R.string.scan_failed)) }
             return@rememberLauncherForActivityResult
         }
         pendingScanPdf = pdf
@@ -284,7 +286,7 @@ fun LibraryScreen(
                     scanLauncher.launch(IntentSenderRequest.Builder(sender).build())
                 }
                 .addOnFailureListener {
-                    scope.launch { snackbarHost.showSnackbar(context.getString(R.string.scan_failed)) }
+                    scope.launch { snackbarHost.showSnackbar(resources.getString(R.string.scan_failed)) }
                 }
         }
     }
@@ -292,11 +294,11 @@ fun LibraryScreen(
     // Mensajes con opcion de deshacer
     LaunchedEffect(Unit) {
         viewModel.messageFlow.collect { message ->
-            val text = message.arg?.let { context.getString(message.resId, it) }
-                ?: context.getString(message.resId)
+            val text = message.arg?.let { resources.getString(message.resId, it) }
+                ?: resources.getString(message.resId)
             val result = snackbarHost.showSnackbar(
                 message = text,
-                actionLabel = message.undo?.let { context.getString(R.string.undo) },
+                actionLabel = message.undo?.let { resources.getString(R.string.undo) },
             )
             if (result == SnackbarResult.ActionPerformed) {
                 message.undo?.let(viewModel::undoRemove)
@@ -608,18 +610,18 @@ fun LibraryScreen(
                         .onSuccess { saved ->
                             viewModel.registerScanned(saved)
                             val open = snackbarHost.showSnackbar(
-                                message = context.getString(
+                                message = resources.getString(
                                     R.string.scan_saved_at,
                                     PublicDocuments.displayPath,
                                 ),
-                                actionLabel = context.getString(R.string.action_open_now),
+                                actionLabel = resources.getString(R.string.action_open_now),
                             )
                             if (open == SnackbarResult.ActionPerformed) {
                                 onOpenDocument(saved.toString())
                             }
                         }
                         .onFailure {
-                            snackbarHost.showSnackbar(context.getString(R.string.scan_failed))
+                            snackbarHost.showSnackbar(resources.getString(R.string.scan_failed))
                         }
                 }
             },
