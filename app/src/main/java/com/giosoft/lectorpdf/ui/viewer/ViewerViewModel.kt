@@ -99,6 +99,8 @@ class ViewerViewModel(
                 persistable = stored?.persistable ?: false,
             )
             repository.setPageCount(documentUri, document.pageCount)
+            // Si se abrio sin contrasena, ya no esta cifrado.
+            if (password == null) repository.setHasPassword(documentUri, false)
             entity = registered
 
             _uiState.value = ViewerUiState.Ready(
@@ -108,6 +110,8 @@ class ViewerViewModel(
             )
         } catch (e: PdfPasswordException) {
             // Cifrado: hace falta contrasena, o la introducida es incorrecta.
+            // Se anota para poder mostrar el candado en la lista.
+            repository.setHasPassword(documentUri, true)
             _uiState.value = ViewerUiState.PasswordRequired(
                 documentName = stored?.name ?: documentUri.lastPathSegment.orEmpty(),
                 previousAttemptFailed = isRetry,

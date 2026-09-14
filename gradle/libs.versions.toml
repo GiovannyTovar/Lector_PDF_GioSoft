@@ -18,6 +18,8 @@ material = "1.12.0"
 androidxPdf = "1.0.0-beta01"
 # Escaner de documentos de ML Kit: entrega el PDF ya armado.
 mlkitDocScanner = "16.0.0"
+# Escribe PDF cifrados; androidx.pdf sabe leerlos pero no crearlos.
+pdfbox = "2.0.27.0"
 
 junit = "4.13.2"
 androidxJunit = "1.2.1"
@@ -49,8 +51,10 @@ coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutin
 
 pdf-compose = { group = "androidx.pdf", name = "pdf-compose", version.ref = "androidxPdf" }
 pdf-document-service = { group = "androidx.pdf", name = "pdf-document-service", version.ref = "androidxPdf" }
+pdf-ocr = { group = "androidx.pdf", name = "pdf-ocr-play-services", version.ref = "androidxPdf" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 mlkit-document-scanner = { group = "com.google.android.gms", name = "play-services-mlkit-document-scanner", version.ref = "mlkitDocScanner" }
+pdfbox = { group = "com.tom-roush", name = "pdfbox-android", version.ref = "pdfbox" }
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJunit" }

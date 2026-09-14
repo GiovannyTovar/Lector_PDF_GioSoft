@@ -117,6 +117,7 @@ fun LibraryScreen(
     var manageCategories by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
     var movingDocuments by remember { mutableStateOf<List<DocumentEntity>>(emptyList()) }
+    var changingPassword by remember { mutableStateOf<DocumentEntity?>(null) }
     var renaming by remember { mutableStateOf<DocumentEntity?>(null) }
     var renamingAllowed by remember { mutableStateOf(true) }
     var deleting by remember { mutableStateOf<DocumentEntity?>(null) }
@@ -167,6 +168,7 @@ fun LibraryScreen(
         onSaveToMisPdf = { viewModel.saveToMisPdf(it) },
         onMoveToCategory = { movingDocuments = listOf(it) },
         onToggleSelection = viewModel::toggleSelection,
+        onChangePassword = { changingPassword = it },
         onToggleLocked = { document ->
             // Sin huella ni PIN configurados la proteccion no serviria de nada.
             if (activity != null && !document.isLocked && !DeviceLock.isAvailable(activity)) {
@@ -583,6 +585,17 @@ fun LibraryScreen(
             favoritesPosition = state.favoritesPosition,
             onDelete = viewModel::deleteCategory,
             onDismiss = { manageCategories = false },
+        )
+    }
+
+    changingPassword?.let { document ->
+        PasswordFileDialog(
+            document = document,
+            onApply = { actual, nueva ->
+                viewModel.changeFilePassword(document, actual, nueva)
+                changingPassword = null
+            },
+            onDismiss = { changingPassword = null },
         )
     }
 

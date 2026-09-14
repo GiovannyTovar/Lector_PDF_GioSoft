@@ -29,6 +29,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.pdf.ExperimentalPdfApi
 import androidx.pdf.compose.PdfViewer
+import androidx.pdf.ocr.playservices.MlKitOcrProvider
 import androidx.pdf.compose.rememberPdfViewerState
 import android.content.Intent
 import android.net.Uri
@@ -263,10 +265,17 @@ private fun DocumentContent(
         // solo permitia pasar paginas en horizontal.
         // El contenido se renderiza tal cual viene en el PDF: no se altera
         // ningun color ni disposicion.
+        // El reconocimiento de texto convierte un escaneo (que para el
+        // celular es solo una imagen) en algo donde se puede buscar y copiar.
+        // Solo entra en accion en paginas sin texto propio.
+        val ocr = remember { MlKitOcrProvider() }
+        DisposableEffect(ocr) { onDispose { ocr.close() } }
+
         PdfViewer(
             state.document,
             pdfState,
             Modifier.fillMaxSize(),
+            ocrProvider = ocr,
         )
 
         if (state.entity.pageCount > 0) {

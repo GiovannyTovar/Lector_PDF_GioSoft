@@ -24,7 +24,9 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.DriveFileRenameOutline
 import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.Fingerprint
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Fingerprint
 import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.PictureAsPdf
@@ -85,6 +87,7 @@ data class DocumentActions(
     val onMoveToCategory: (DocumentEntity) -> Unit,
     val onToggleSelection: (DocumentEntity) -> Unit,
     val onToggleLocked: (DocumentEntity) -> Unit,
+    val onChangePassword: (DocumentEntity) -> Unit,
 )
 
 /** Cada documento en su propia tarjeta blanca, con sombra muy suave. */
@@ -170,7 +173,9 @@ private fun DocumentRow(
             mutableStateOf<android.graphics.Bitmap?>(null)
         }
         LaunchedEffect(document.uri, showThumbnail) {
-            thumbnail = if (showThumbnail && !document.isLocked) {
+            // Ni los bloqueados ni los cifrados generan miniatura: mostraria
+            // justo el contenido que se quiso proteger.
+            thumbnail = if (showThumbnail && !document.isLocked && !document.hasPassword) {
                 Thumbnails.firstPage(context, Uri.parse(document.uri))
             } else {
                 null
@@ -214,14 +219,26 @@ private fun DocumentRow(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // Punto del color de su categoria: permite reconocerla de un
                 // vistazo cuando se esta viendo "Todos".
-                if (document.isLocked) {
+                // Candado = el archivo lleva contrasena y viaja con el.
+                // Huella = solo se protege dentro de esta app.
+                // Pueden aparecer los dos a la vez.
+                if (document.hasPassword) {
                     Icon(
                         imageVector = Icons.Outlined.Lock,
-                        contentDescription = stringResource(R.string.action_lock),
+                        contentDescription = stringResource(R.string.action_password),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(14.dp),
                     )
-                    Spacer(Modifier.width(5.dp))
+                    Spacer(Modifier.width(4.dp))
+                }
+                if (document.isLocked) {
+                    Icon(
+                        imageVector = Icons.Outlined.Fingerprint,
+                        contentDescription = stringResource(R.string.action_lock),
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(15.dp),
+                    )
+                    Spacer(Modifier.width(4.dp))
                 }
                 categoryColor?.let { color ->
                     Surface(modifier = Modifier.size(9.dp), shape = CircleShape, color = color) {}
@@ -335,13 +352,25 @@ private fun DocumentRow(
                             ),
                         )
                     },
+                    leadingIcon = { Icon(Icons.Outlined.Fingerprint, null) },
+                    onClick = { menuOpen = false; actions.onToggleLocked(document) },
+                )
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            stringResource(
+                                if (document.hasPassword) R.string.action_remove_password
+                                else R.string.action_password,
+                            ),
+                        )
+                    },
                     leadingIcon = {
                         Icon(
-                            if (document.isLocked) Icons.Outlined.LockOpen else Icons.Outlined.Lock,
+                            if (document.hasPassword) Icons.Outlined.LockOpen else Icons.Outlined.Lock,
                             null,
                         )
                     },
-                    onClick = { menuOpen = false; actions.onToggleLocked(document) },
+                    onClick = { menuOpen = false; actions.onChangePassword(document) },
                 )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.move_to_category)) },

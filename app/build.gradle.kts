@@ -112,7 +112,9 @@ dependencies {
     // Visor de PDF oficial de Google y escaner de documentos de ML Kit.
     implementation(libs.pdf.compose)
     implementation(libs.pdf.document.service)
+    implementation(libs.pdf.ocr)
     implementation(libs.mlkit.document.scanner)
+    implementation(libs.pdfbox)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

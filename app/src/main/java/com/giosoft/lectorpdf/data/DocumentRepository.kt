@@ -87,6 +87,7 @@ class DocumentRepository(
             location = SafDocuments.locationLabel(context, uri) ?: existing?.location,
             contentHash = contentHash ?: existing?.contentHash,
             isLocked = existing?.isLocked ?: false,
+            hasPassword = existing?.hasPassword ?: false,
         )
         dao.upsert(entity)
         return entity
@@ -123,6 +124,9 @@ class DocumentRepository(
 
     /** Reinserta una ficha; se usa para el "Deshacer" del historial. */
     suspend fun restore(entity: DocumentEntity) = dao.upsert(entity)
+
+    suspend fun setHasPassword(uri: Uri, hasPassword: Boolean) =
+        dao.updateHasPassword(uri.toString(), hasPassword)
 
     suspend fun setLocked(entity: DocumentEntity, locked: Boolean) =
         dao.updateLocked(entity.uri, locked)

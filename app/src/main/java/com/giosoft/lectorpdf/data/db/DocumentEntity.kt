@@ -47,4 +47,9 @@ data class DocumentEntity(
      * la lista mostraria justo el contenido que se quiso proteger.
      */
     val isLocked: Boolean = false,
+    /**
+     * El archivo PDF lleva contrasena dentro. A diferencia de [isLocked], esto
+     * viaja con el archivo: se la pediran a quien lo reciba, en cualquier app.
+     */
+    val hasPassword: Boolean = false,
 )

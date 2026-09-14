@@ -12,6 +12,7 @@ import com.giosoft.lectorpdf.LectorPdfApp
 import com.giosoft.lectorpdf.R
 import com.giosoft.lectorpdf.data.CategoryRepository
 import com.giosoft.lectorpdf.data.DocumentRepository
+import com.giosoft.lectorpdf.data.PdfEncryption
 import com.giosoft.lectorpdf.data.PublicDocuments
 import com.giosoft.lectorpdf.data.SettingsRepository
 import com.giosoft.lectorpdf.data.SafDocuments
@@ -236,6 +237,36 @@ class LibraryViewModel(
      */
     suspend fun registerPickedDocument(uri: Uri, persistable: Boolean): DocumentEntity =
         repository.registerOpened(uri, persistable)
+
+    /**
+     * Pone o quita la contrasena DENTRO del archivo.
+     *
+     * Se escribe sobre el propio documento del usuario, asi que si el proveedor
+     * no permite escritura se avisa en vez de fallar en silencio.
+     */
+    fun changeFilePassword(
+        document: DocumentEntity,
+        currentPassword: String?,
+        newPassword: String?,
+    ) = viewModelScope.launch {
+        val uri = Uri.parse(document.uri)
+        val resultado = if (newPassword != null) {
+            PdfEncryption.protect(context, uri, uri, newPassword, currentPassword)
+        } else {
+            PdfEncryption.removeProtection(context, uri, uri, currentPassword.orEmpty())
+        }
+        resultado
+            .onSuccess {
+                repository.setHasPassword(uri, newPassword != null)
+                messages.send(
+                    UiMessage(
+                        if (newPassword != null) R.string.password_set_done
+                        else R.string.password_removed_done,
+                    ),
+                )
+            }
+            .onFailure { messages.send(UiMessage(R.string.password_change_failed)) }
+    }
 
     fun toggleLocked(document: DocumentEntity) = viewModelScope.launch {
         repository.setLocked(document, !document.isLocked)
