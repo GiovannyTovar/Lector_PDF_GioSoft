@@ -275,6 +275,48 @@ Si prefieres que se vea `legal.cremanti.com` en vez de `pdfgiosoft.pages.dev`:
    cuenta de Cloudflare, él solo crea lo que hace falta; no tienes que tocar DNS.
 3. En un par de minutos funcionan **las dos** direcciones.
 
+### El enlace «Sitio web» que sale en la app
+
+Dentro de «Acerca de» hay una fila que abre tu sitio web. La dirección que viaja
+dentro de la app es:
+
+```
+https://pdfgiosoft.pages.dev/web
+```
+
+**Esa no es tu web: es un reenvío.** Funciona como cuando te mudas de casa y
+dejas orden en el correo de reenviar las cartas a la dirección nueva: quien
+escribe sigue usando la dirección vieja, y las cartas llegan igual.
+
+La regla está en el archivo [`web/_redirects`](web/_redirects):
+
+```
+/web    /index.html    302
+```
+
+Hoy lleva a la página de ayuda. Cuando tengas el sitio de GioSoft, cambias esa
+línea por la dirección nueva, vuelves a subir la carpeta a Cloudflare, y listo:
+
+```
+/web    https://giosoft.com    302
+```
+
+**La app no se toca y no hay que publicar nada en Play.** Si en su lugar se
+hubiera puesto la dirección final dentro de la app, cada mudanza obligaría a
+subir una versión nueva y a esperar a que cada usuario la instalara.
+
+Dos avisos:
+
+- **Antes de publicar en Play**, comprueba que el proyecto de Cloudflare Pages se
+  llama exactamente `pdfgiosoft` (eso es lo que produce `pdfgiosoft.pages.dev`).
+  Si Cloudflare te da otro nombre porque ese esté ocupado, cambia la línea
+  `about_website_url` en `app/src/main/res/values/strings.xml` **antes** de subir
+  la app. Después de publicada, esa dirección ya no se puede cambiar sin una
+  versión nueva.
+- Que sea **302** y no 301 es importante: los navegadores recuerdan las 301
+  durante meses, así que una 301 mal puesta seguiría llevando a la dirección
+  vieja aunque la cambiaras.
+
 ### Cuando tengas el dominio de GioSoft
 
 No hay que republicar la app, y esto es importante que quede claro: **la dirección

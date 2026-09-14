@@ -555,5 +555,10 @@ versión.
 - **Nunca des por buena una versión que solo probaste con `installDebug`.** R8
   rompió el escáner en release y en debug no se veía: la historia completa, con
   el diagnóstico y cómo probar el release sin llave de firma, está en la §11 bis.
+- **La URL del sitio web que abre «Acerca de» no es la del sitio.**
+  `about_website_url` apunta a una dirección propia que redirige
+  (`web/_redirects`), porque lo que se empaqueta en un APK ya no se puede
+  cambiar sin publicar otra versión. Para mudar el sitio se edita la
+  redirección, nunca la cadena.
 - **La versión anterior (Java + MuPDF, 4.1.0)** está preservada en el tag
   `v4.1.0-java` y la rama `legado-java-v4.1.0`. No borrarlos.

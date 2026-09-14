@@ -1,0 +1,18 @@
+# Redirecciones de Cloudflare Pages.
+#
+# /web es la direccion que va DENTRO de la app (string about_website_url) y no
+# puede cambiar nunca sin publicar una version nueva en Play. Por eso no apunta
+# al sitio final: apunta aqui, y aqui se decide a donde va.
+#
+# Para mudar el sitio web, se cambia la linea de abajo y se vuelve a subir la
+# carpeta a Cloudflare. La app no se toca.
+#
+#   /web  https://giosoft.com  302      <- cuando exista el sitio de GioSoft
+#
+# El 302 es "redireccion temporal", y es importante que sea 302 y no 301: el
+# navegador se queda con las 301 en memoria durante meses, asi que una 301 mal
+# puesta seguiria enviando a la direccion vieja aunque aqui se cambiara.
+#
+# Mientras no haya sitio propio, el enlace lleva a la pagina de ayuda, que ya
+# es util para quien lo toque.
+/web    /index.html    302

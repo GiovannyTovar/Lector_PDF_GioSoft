@@ -1,7 +1,10 @@
 package com.giosoft.pdf.ui.about
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.DeleteOutline
@@ -35,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -119,6 +124,10 @@ private fun AboutContent() {
                 label = stringResource(R.string.about_developer_label),
                 value = stringResource(R.string.about_developed_by),
             )
+            Spacer(Modifier.size(8.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            Spacer(Modifier.size(8.dp))
+            WebsiteLine()
         }
     }
 
@@ -289,6 +298,56 @@ private fun AppLogo() {
             painter = painterResource(R.mipmap.ic_launcher_foreground),
             contentDescription = null,
             modifier = Modifier.requiredSize(100.dp),
+        )
+    }
+}
+
+/**
+ * Enlace al sitio web, en la misma lista que la version y el autor.
+ *
+ * La direccion que viaja dentro de la app (`about_website_url`) **no es la del
+ * sitio final**: es una direccion propia y permanente que redirige a donde haga
+ * falta en cada momento. Cambiar el destino es editar la regla de redireccion
+ * en el hosting; la app se queda como esta. Si en vez de eso se pusiera aqui la
+ * direccion definitiva, mudar el sitio obligaria a publicar una version nueva
+ * en Play y a que cada usuario la instalara.
+ */
+@Composable
+private fun WebsiteLine() {
+    val context = LocalContext.current
+    val url = stringResource(R.string.about_website_url)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .clickable {
+                // Se abre en el navegador: la app no carga paginas web.
+                runCatching {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                }
+            }
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(R.string.about_website_label),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = stringResource(R.string.about_website_value),
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Spacer(Modifier.width(6.dp))
+        Icon(
+            imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(16.dp),
         )
     }
 }

@@ -164,6 +164,8 @@ Cette action est irréversible.</string>
     <string name="about_why_text">Cette application a été créée pour offrir une alternative sans publicité à la lecture de documents PDF. Elle s’adresse tout particulièrement aux amis, à la famille et aux proches, afin de leur faciliter la gestion de leurs documents de façon rapide, privée et sans interruptions.</string>
     <string name="about_what_title">Ce qu’elle fait</string>
     <string name="about_what_text">Elle ouvre vos fichiers d’origine sans les dupliquer et les classe par catégories et favoris. Vous pouvez rechercher dans un document, le protéger par empreinte ou par mot de passe, numériser avec l’appareil photo, imprimer, partager et lire en mode sombre, entre autres fonctions.</string>
+    <string name="about_website_label">Site web</string>
+    <string name="about_website_value">giosoft.com</string>
     <string name="about_thanks">Merci de l’utiliser.</string>
     <string name="about_close">Fermer</string>
 

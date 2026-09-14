@@ -164,6 +164,8 @@ This action can’t be undone.</string>
     <string name="about_why_text">This application was created to offer an ad-free alternative for reading PDF documents. It is aimed especially at friends, family and acquaintances, so that handling their documents is quick, private and free of interruptions.</string>
     <string name="about_what_title">What it does</string>
     <string name="about_what_text">It opens your original files without duplicating them and organizes them by category and favorites. You can search inside a document, protect it with your fingerprint or a password, scan with the camera, print, share and read in dark mode, among other features.</string>
+    <string name="about_website_label">Website</string>
+    <string name="about_website_value">giosoft.com</string>
     <string name="about_thanks">Thanks for using it.</string>
     <string name="about_close">Close</string>
 
