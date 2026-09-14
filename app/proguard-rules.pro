@@ -23,3 +23,15 @@
 # --- Numeros de linea legibles en los informes de fallos de Play ---
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
+
+# --- PDFBox (cifrado de PDF con contrasena) ---
+# Referencia un codec JPEG2000 opcional que no se incluye: solo hace falta para
+# imagenes JPX dentro de un PDF, y cifrar no las toca.
+-dontwarn com.gemalto.jp2.**
+
+# El cifrado resuelve algoritmos y filtros por nombre, asi que esas clases no
+# se pueden renombrar ni eliminar.
+-keep class com.tom_roush.pdfbox.pdmodel.encryption.** { *; }
+-keep class com.tom_roush.pdfbox.filter.** { *; }
+-keep class com.tom_roush.pdfbox.cos.** { *; }
+-dontwarn com.tom_roush.pdfbox.**
