@@ -359,3 +359,100 @@ a:hover {
         transition: none !important;
     }
 }
+
+/* Ayuda ----------------------------------------------------------------- */
+
+.seccion {
+    margin-bottom: 42px;
+}
+
+.seccion h2 {
+    font-family: var(--fuente-titulo);
+    font-weight: 600;
+    font-size: 1.5rem;
+    line-height: 1.2;
+    letter-spacing: -0.012em;
+    text-wrap: balance;
+    margin: 0 0 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--borde);
+}
+
+.seccion h3 {
+    font-family: var(--fuente-texto);
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 24px 0 8px;
+}
+
+.seccion p {
+    margin: 0 0 12px;
+}
+
+.seccion ul,
+.seccion ol {
+    margin: 0 0 12px;
+    padding-left: 1.2em;
+    display: grid;
+    gap: 7px;
+}
+
+.seccion > :last-child {
+    margin-bottom: 0;
+}
+
+/* La comparativa de las dos protecciones: es la confusion mas habitual, y
+   verlas enfrentadas explica mas que dos parrafos seguidos. */
+.tabla {
+    overflow-x: auto;
+    margin: 0 0 14px;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.94rem;
+}
+
+th,
+td {
+    text-align: left;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--borde);
+    vertical-align: top;
+}
+
+thead th {
+    font-size: 0.74rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--tenue);
+    border-bottom-width: 2px;
+}
+
+tbody th {
+    font-weight: 700;
+    color: var(--tinta);
+    white-space: nowrap;
+}
+
+td {
+    color: var(--suave);
+}
+
+/* Preguntas frecuentes: pregunta y respuesta, sin acordeones que escondan
+   justo lo que la persona vino a leer. */
+.faq {
+    display: grid;
+    gap: 22px;
+}
+
+.faq h3 {
+    margin: 0 0 6px;
+    font-size: 1rem;
+}
+
+.faq p {
+    margin: 0;
+    color: var(--suave);
+}

@@ -1,130 +1,183 @@
 # Publicar en Google Play
 
-Guía para generar la llave de firma y subir la app. Lo único que debes hacer tú
-es **generar el `.jks` y rellenar `keystore.properties`**; el resto del proyecto
-ya está configurado.
+Guía para firmar la app y subirla. Lo único que tienes que hacer tú es
+**generar el `.jks` y rellenar `keystore.properties`**; el resto del proyecto ya
+está configurado.
+
+Estado a 14 de septiembre de 2026: la llave todavía **no está generada**
+(`keystore.properties` no existe, y por eso `bundleRelease` produce un paquete
+sin firmar sin que el build falle).
 
 ---
 
-## 1. Generar el almacén de llaves (una sola vez en la vida de la app)
+## 1. Generar el almacén de llaves — una sola vez en la vida de la app
 
 > ⚠️ **Si pierdes este archivo o su contraseña, no podrás volver a actualizar la
-> app publicada, nunca.** Haz copia de seguridad en al menos dos sitios
-> (disco externo + gestor de contraseñas / nube privada).
+> app publicada. Nunca.** No hay forma de recuperarlo por tu cuenta: la única
+> red de seguridad es activar *Play App Signing* en el paso 5. Haz copia en al
+> menos dos sitios (disco externo y gestor de contraseñas o nube privada).
 
-Crea una carpeta FUERA del repositorio, por ejemplo `C:\Users\GIOVANNY\llaves`:
+Crea una carpeta **fuera del repositorio**:
 
 ```powershell
 mkdir C:\Users\GIOVANNY\llaves
 cd C:\Users\GIOVANNY\llaves
 
 keytool -genkeypair -v `
-  -keystore lectorpdf-release.jks `
+  -keystore pdfgiosoft-release.jks `
   -storetype PKCS12 `
   -keyalg RSA -keysize 4096 `
   -validity 10000 `
-  -alias lectorpdf
+  -alias pdfgiosoft
 ```
 
-`keytool` viene con el JDK. Si no lo encuentra, está en el JDK de Android Studio:
-`C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe`
+`keytool` viene con el JDK. Si el sistema no lo encuentra, está en el JDK de
+Android Studio:
 
-Te preguntará una contraseña y tus datos (nombre, organización, ciudad, país).
-Puedes poner tu nombre y `CO` como país; no se muestran a los usuarios.
+```powershell
+& "C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe" -genkeypair -v `
+  -keystore pdfgiosoft-release.jks -storetype PKCS12 -keyalg RSA -keysize 4096 `
+  -validity 10000 -alias pdfgiosoft
+```
+
+Te pedirá una contraseña (apúntala en el gestor de contraseñas **antes** de
+escribirla) y unos datos: nombre y apellido, unidad, organización, ciudad,
+departamento y código de país (`CO`). No se muestran a los usuarios, pero
+quedan dentro del certificado para siempre.
+
+`-validity 10000` son unos 27 años. Play exige que el certificado siga válido
+hasta el 22 de octubre de 2033 como mínimo; con 10000 días vas sobrado.
 
 ## 2. Rellenar keystore.properties
 
 ```powershell
-cd C:\Users\GIOVANNY\AndroidStudioProjects\LectorPDFGioSoft
+cd C:\Users\GIOVANNY\AndroidStudioProjects\PDFGioSoft
 copy keystore.properties.template keystore.properties
 ```
 
-Edita `keystore.properties` con tus valores:
+Edita `keystore.properties`:
 
 ```properties
-storeFile=C:/Users/GIOVANNY/llaves/lectorpdf-release.jks
+storeFile=C:/Users/GIOVANNY/llaves/pdfgiosoft-release.jks
 storePassword=LA_QUE_PUSISTE
-keyAlias=lectorpdf
+keyAlias=pdfgiosoft
 keyPassword=LA_QUE_PUSISTE
 ```
 
-> Usa barras normales `/`, no `\`.
-> Este archivo y los `.jks` están en `.gitignore`: no se suben al repositorio.
+> Barras normales `/`, no `\`.
+> Si en `keytool` aceptaste la misma contraseña para la llave que para el
+> almacén, `keyPassword` y `storePassword` son iguales.
+> Este archivo y los `.jks` están en `.gitignore`: nunca se suben al repositorio.
 
 ## 3. Generar el paquete firmado
 
-Google Play exige **Android App Bundle (`.aab`)**, no APK:
+Google Play exige **Android App Bundle (`.aab`)**:
 
 ```powershell
 .\gradlew.bat bundleRelease
 ```
 
-Resultado en: `app/build/outputs/bundle/release/app-release.aab`
+Queda en `app/build/outputs/bundle/release/app-release.aab`.
 
-Para comprobar que quedó firmado:
-
-```powershell
-.\gradlew.bat bundleRelease --info | Select-String "signing"
-```
-
-Si quieres además un APK instalable a mano para probar:
+Comprobar que de verdad está firmado (si falta la llave, el archivo existe
+igualmente pero **sin firma**, y Play lo rechaza):
 
 ```powershell
-.\gradlew.bat assembleRelease
+& "$env:LOCALAPPDATA\Android\Sdk\build-tools\36.0.0\apksigner.bat" verify --verbose --print-certs `
+  (Get-ChildItem app\build\outputs\apk\release\*.apk).FullName
 ```
 
-## 4. Checklist antes de subir
+`apksigner` trabaja sobre APK, así que para esa comprobación genera también
+`.\gradlew.bat assembleRelease`. Debe aparecer tu certificado y
+`Verified using v2 scheme: true`.
 
-- [ ] `versionCode` incrementado en `app/build.gradle` (Play rechaza repetidos)
+## 4. Probar el `.aab` antes de subirlo
+
+Un `.aab` no se instala directamente. Dos caminos:
+
+- **Recomendado:** súbelo a un canal de **prueba interna** en Play Console e
+  instálalo desde el enlace que te da. Es la misma tubería que usará la gente.
+- **A mano:** con [`bundletool`](https://github.com/google/bundletool/releases):
+
+```powershell
+java -jar bundletool.jar build-apks --bundle=app\build\outputs\bundle\release\app-release.aab `
+  --output=pdfgiosoft.apks --connected-device `
+  --ks=C:\Users\GIOVANNY\llaves\pdfgiosoft-release.jks --ks-key-alias=pdfgiosoft
+java -jar bundletool.jar install-apks --apks=pdfgiosoft.apks
+```
+
+## 5. Play App Signing: actívalo
+
+Al crear la app en Play Console, acepta **Play App Signing**. Tu `.jks` pasa a
+ser la *llave de carga*: tú firmas el `.aab` con ella y Google lo vuelve a
+firmar con la llave de distribución, que custodia él. La ventaja es concreta:
+si algún día pierdes tu `.jks`, puedes pedir el cambio de llave de carga y
+seguir actualizando la app. Sin esto, perder el archivo significa perder la app.
+
+## 6. Antes de subir
+
+- [ ] `versionCode` incrementado en `app/build.gradle.kts` (Play rechaza repetidos)
 - [ ] `versionName` actualizado
-- [ ] Probado el `.aab` en un dispositivo real (con `bundletool` o vía prueba interna de Play)
-- [ ] Política de privacidad publicada en una URL accesible
-- [ ] Formulario de **Seguridad de los datos** completado en Play Console
-- [ ] Capturas de pantalla (mínimo 2, teléfono), icono 512×512, gráfico destacado 1024×500
+- [ ] `.aab` probado en un dispositivo real
+- [ ] **Política de privacidad publicada** en una URL pública y sin login
+      (está en [`web/privacidad.html`](web/privacidad.html); ver §7)
+- [ ] Formulario de **Seguridad de los datos** completado (ver §8)
+- [ ] Capturas (mínimo 2 de teléfono), icono 512×512, gráfico destacado 1024×500
 - [ ] Descripción corta y larga
-- [ ] Clasificación de contenido
-- [ ] Revisar el bloque de donaciones del diálogo "Acerca de" (ver aviso abajo)
+- [ ] Cuestionario de clasificación de contenido
+- [ ] País de residencia y datos fiscales del desarrollador
 
-## 5. Avisos a revisar antes de publicar
+## 7. La página legal
 
-**Donaciones.** El diálogo "Acerca de" muestra un número de cuenta Nequi. La
-política de pagos de Google Play restringe pedir donaciones fuera de su sistema
-de facturación; la exención suele aplicar a organizaciones sin ánimo de lucro
-registradas, no a personas. **Consulta la política vigente antes de subir**; lo
-más seguro es quitarlo o sustituirlo por un enlace externo fuera de la app.
+En [`web/`](web) están listas para publicar: `index.html`, `ayuda.html`,
+`privacidad.html`, `terminos.html` y `estilos.css`. Se suben a Cloudflare Pages
+(o a cualquier hosting estático) arrastrando la carpeta.
 
-**Firma de apps de Play.** Se recomienda activar *Play App Signing*: subes tu
-`.aab` firmado con tu llave de carga y Google guarda la llave de firma real.
-Si algún día pierdes tu `.jks`, Google puede ayudarte a recuperar el acceso.
+A Play se le da la URL directa de `privacidad.html`. **Esa URL vive en Play
+Console, no dentro del APK**: cambiar de dominio más adelante no obliga a
+publicar una versión nueva de la app.
 
-**Permisos.** La app no declara ningún permiso peligroso: los archivos se leen
-mediante el selector del sistema (SAF). Esto evita el formulario de
-justificación de `MANAGE_EXTERNAL_STORAGE` y acelera la revisión.
+## 8. Seguridad de los datos: lo que hay que declarar
 
----
+La app no recoge datos personales, pero el formulario pregunta por todo lo que
+la app *puede* hacer, incluidas las librerías que arrastra:
 
-## Notas técnicas del proyecto
+- **Ubicación, contactos, mensajes, fotos:** nada.
+- **Archivos y documentos:** el usuario elige cada archivo con el selector del
+  sistema. No se recogen ni se envían; solo se copian dentro del propio
+  dispositivo en los dos casos descritos en la política.
+- **Datos de diagnóstico:** el escáner de ML Kit arrastra
+  `com.google.android.datatransport:transport-backend-cct`, que **añade
+  `android.permission.INTERNET` y `ACCESS_NETWORK_STATE` al manifiesto final**
+  aunque el proyecto no los declare. Es telemetría de Google sobre su propio
+  componente. Compruébalo tú mismo antes de responder el formulario:
 
-- `compileSdk` **37** (lo exigen las AndroidX recientes; AGP lo descarga solo)
-- `targetSdk` **36** · `minSdk` **31** (Android 12)
-- AGP **9.4.0**, Gradle **9.7.1**, Java **17**, Kotlin integrado en AGP
-- Kotlin + Jetpack Compose; el motor de PDF es `androidx.pdf` (Apache 2.0)
-- Release con **R8** (`minifyEnabled`) y `shrinkResources` activos
-- **APK de release: ~4,2 MB** (la v4.1.0 con MuPDF pesaba 27 MB)
-- Todas las librerías nativas están alineadas a **16 KB**, requisito de Play
-  para apps que apuntan a Android 15+. Comprobado leyendo las cabeceras ELF
-  del APK generado.
-- El build de debug usa `applicationIdSuffix .debug`, así puedes tener
-  instaladas la versión de Play y la de desarrollo a la vez.
-- Si en el futuro Play exige un `targetSdk` mayor, verifica el nivel vigente
-  en Play Console: cambia cada año (suele ser en agosto).
+```powershell
+.\gradlew.bat :app:processReleaseManifestForPackage
+Select-String "uses-permission" app\build\intermediates\merged_manifest\release\*\AndroidManifest.xml
+Select-String -Context 2 "INTERNET" app\build\outputs\logs\manifest-merger-release-report.txt
+```
 
-## Sin permisos peligrosos
+- **Permiso propio:** `USE_BIOMETRIC`, que Android clasifica como *normal*. La
+  app nunca accede a datos biométricos; solo recibe del sistema un sí o un no.
 
-La app no declara **ningún** permiso en el manifiesto. Los archivos se abren
-con el selector del sistema (SAF), que concede acceso archivo por archivo, y el
-escáner corre dentro de los servicios de Google Play, así que ni siquiera hace
-falta declarar el permiso de cámara.
+## 9. Notas técnicas
 
-Esto simplifica mucho el formulario de **Seguridad de los datos**: la app no
-recoge ni comparte nada, y todo el procesamiento es local.
+- `compileSdk` **37** · `targetSdk` **36** · `minSdk` **31** (Android 12)
+- AGP **9.4.0**, Gradle **9.7.1**, Java **17**. Kotlin va integrado en AGP:
+  aplicar `org.jetbrains.kotlin.android` da error
+- Release con **R8** (`isMinifyEnabled`) y `shrinkResources`
+- El motor de PDF es `androidx.pdf`, Apache 2.0 y **sin librerías nativas
+  propias** (ver [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) §2)
+- El paquete incluye dos `.so` que vienen de AndroidX
+  (`libandroidx.graphics.path.so` y `libdatastore_shared_counter.so`).
+  **Ambas están alineadas a 16 KB**, el requisito de Play; verificado leyendo
+  las cabeceras de programa del ELF (`p_align = 0x4000` en los segmentos LOAD)
+- El build de debug usa `applicationIdSuffix .debug`: puedes tener instaladas a
+  la vez la de Play y la de desarrollo. Ese sufijo no llega a Play
+- El diálogo «Acerca de» ya **no** incluye el número de cuenta para donaciones
+  que tenía la v4.x. No lo vuelvas a añadir sin revisar la política de pagos de
+  Play: pedir donaciones fuera de su facturación está restringido, y la exención
+  suele ser para organizaciones sin ánimo de lucro registradas, no para personas
+- Si Play sube el `targetSdk` mínimo (suele anunciarlo cada agosto), comprueba
+  el nivel vigente en Play Console antes de publicar

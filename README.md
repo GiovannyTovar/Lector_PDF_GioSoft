@@ -57,6 +57,17 @@ No hacen falta llaves de firma para compilar. Para generar el paquete de Play, v
 
 ---
 
+## 📚 Documentación
+
+| Documento | Para quién |
+|---|---|
+| [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) | Quien vaya a tocar el código: qué se usa, por qué se descartaron MuPDF y PDFium, y cómo funciona cada pieza |
+| [`web/ayuda.html`](web/ayuda.html) | Quien usa la app: guía de uso y preguntas frecuentes |
+| [`web/privacidad.html`](web/privacidad.html) · [`web/terminos.html`](web/terminos.html) | Páginas públicas que exige Google Play |
+| [`PUBLICACION.md`](PUBLICACION.md) | Firmar y subir a Play |
+
+---
+
 ## 📜 Historial de versiones
 
 La versión 5.0 es una reescritura completa (Java → Kotlin, MuPDF → androidx.pdf) que resolvió el problema de las copias y redujo el tamaño de la app de **27 MB a ~4 MB**.
