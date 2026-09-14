@@ -302,8 +302,11 @@ cambia.
 Además del paquete, Google pide:
 
 - [ ] **Capturas de pantalla**: mínimo 2 de teléfono. Se sacan con el celular
-      (botón de encendido + volumen abajo) abriendo la app.
-- [ ] **Icono** de 512×512 píxeles y **gráfico destacado** de 1024×500.
+      (botón de encendido + volumen abajo) abriendo la app. Consejos en
+      [`play/README.md`](play/README.md).
+- [x] **Icono** de 512×512 y **gráfico destacado** de 1024×500: ya están hechos,
+      en la carpeta [`play/`](play). Se regeneran con
+      `py -3 play/generar-graficos.py` si cambia el icono de la app.
 - [ ] **Descripción corta** (80 caracteres) y **descripción larga**.
 - [ ] **Clasificación de contenido**: un cuestionario. Responde que no hay
       violencia, ni sexo, ni apuestas, ni compras. Sale «Apto para todos».

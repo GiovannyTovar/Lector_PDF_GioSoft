@@ -288,7 +288,7 @@ private fun AppLogo() {
         Image(
             painter = painterResource(R.mipmap.ic_launcher_foreground),
             contentDescription = null,
-            modifier = Modifier.requiredSize(116.dp),
+            modifier = Modifier.requiredSize(100.dp),
         )
     }
 }
