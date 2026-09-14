@@ -422,19 +422,37 @@ Además del paquete, Google pide:
 ### El formulario de «Seguridad de los datos»
 
 Es una declaración jurada sobre qué datos recoge tu app. Miente aquí (aunque sea
-sin querer) y te pueden retirar la app. Para PDF GioSoft:
+sin querer) y te pueden retirar la app.
 
-- **¿Recoge datos de usuario?** → **No.** No hay cuentas, ni analítica, ni
-  publicidad, ni rastreo.
-- **¿Comparte datos con terceros?** → **No.**
-- **¿Los archivos del usuario salen del dispositivo?** → **No.** El usuario elige
-  cada archivo con el selector del sistema; las únicas copias que hace la app se
-  quedan en el propio celular, en Documentos/Mis PDF.
-- **Detalle que no es obvio y conviene declarar:** el escáner es un componente de
-  Google (ML Kit) y ese componente trae consigo una librería de telemetría propia
-  que **añade permiso de Internet a tu app** aunque tu código no lo pida, y puede
-  enviarle a Google datos técnicos sobre su propio funcionamiento (no tus
-  documentos). Está declarado en la política de privacidad publicada, sección 8.
+La definición exacta de Google (verificada en su [página de ayuda]
+(https://support.google.com/googleplay/android-developer/answer/10787469)):
+
+> «Recoger» significa transmitir datos a otro lugar que está fuera del
+> dispositivo del usuario. No es necesario declarar los datos a los que acceda
+> tu app si solo se tratan de forma **local** y no se envían fuera del
+> dispositivo. Esto incluye los datos que **cualquier SDK o librería** que uses
+> transmita fuera del dispositivo, aunque no viajen a tu propio servidor.
+
+Aplicado a PDF GioSoft:
+
+- **¿La app recoge o comparte datos de usuario?** → **Sí.** (Ver el motivo
+  abajo: no es por tus documentos, es por una librería de Google.)
+- **Fotos y vídeos** (por el escáner) → **No se marca.** El escaneo lo hace ML
+  Kit dentro del celular; la app solo recibe el PDF ya armado. Ninguna foto sale
+  del dispositivo.
+- **Archivos y documentos** (por leer PDF) → **No se marca.** El usuario elige
+  el PDF con el selector del sistema y se procesa enteramente en local (incluso
+  en un proceso aislado, ver `docs/ARQUITECTURA.md`). No se sube a ningún
+  servidor.
+- **App info y rendimiento → Diagnósticos** → **Sí se marca.** El escáner
+  arrastra `com.google.android.datatransport:transport-backend-cct`, la
+  librería de telemetría de Google que ya vimos que añade el permiso de
+  Internet al manifiesto final. Por la definición de arriba, lo que esa
+  librería envíe cuenta como "recogido" aunque no sea tu servidor el que lo
+  reciba y no sean tus documentos lo que viaja. Está declarado en la política
+  de privacidad publicada, sección 8.
+- **¿Comparte datos con terceros?** → **Sí**, en el sentido estricto de Google:
+  la telemetría de ML Kit va a Google. No hay ningún otro tercero.
 
 Puedes comprobarlo tú mismo:
 
