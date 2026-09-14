@@ -32,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.DocumentScanner
 import androidx.compose.material.icons.outlined.LightMode
+import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.MoreVert
@@ -40,6 +41,7 @@ import androidx.compose.material.icons.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -100,6 +102,8 @@ fun LibraryScreen(
     var searching by remember { mutableStateOf(false) }
     var aboutSection by remember { mutableStateOf<AboutSection?>(null) }
     var overflowOpen by remember { mutableStateOf(false) }
+    var manageCategories by remember { mutableStateOf(false) }
+    var movingDocuments by remember { mutableStateOf<List<DocumentEntity>>(emptyList()) }
     var renaming by remember { mutableStateOf<DocumentEntity?>(null) }
     var renamingAllowed by remember { mutableStateOf(true) }
     var deleting by remember { mutableStateOf<DocumentEntity?>(null) }
@@ -124,6 +128,7 @@ fun LibraryScreen(
             }
         },
         onSaveToMisPdf = { viewModel.saveToMisPdf(it) },
+        onMoveToCategory = { movingDocuments = listOf(it) },
     )
 
     // --- Selector del sistema: abre el archivo ORIGINAL, sin copiarlo ---
@@ -254,6 +259,15 @@ fun LibraryScreen(
                             onDismissRequest = { overflowOpen = false },
                         ) {
                             DropdownMenuItem(
+                                text = { Text(stringResource(R.string.categories_title)) },
+                                leadingIcon = { Icon(Icons.Outlined.Folder, null) },
+                                onClick = {
+                                    overflowOpen = false
+                                    manageCategories = true
+                                },
+                            )
+                            HorizontalDivider()
+                            DropdownMenuItem(
                                 text = { Text(stringResource(R.string.about)) },
                                 leadingIcon = { Icon(Icons.Outlined.Info, null) },
                                 onClick = {
@@ -342,6 +356,15 @@ fun LibraryScreen(
             }
         },
     ) { padding ->
+        Column(Modifier.padding(top = padding.calculateTopPadding())) {
+            CategoryBar(
+                categories = state.categories,
+                selected = state.filter,
+                hasUncategorized = state.hasUncategorized,
+                onSelect = viewModel::onFilterChange,
+                onManage = { manageCategories = true },
+                modifier = Modifier.padding(vertical = 4.dp),
+            )
         when {
             state.groups.isEmpty() && !state.hasAnyDocument -> EmptyLibrary(Modifier.padding(padding))
 
@@ -352,7 +375,7 @@ fun LibraryScreen(
                 contentPadding = PaddingValues(
                     start = 12.dp,
                     end = 12.dp,
-                    top = padding.calculateTopPadding() + 8.dp,
+                    top = 8.dp,
                     bottom = padding.calculateBottomPadding() + 16.dp,
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -366,6 +389,7 @@ fun LibraryScreen(
                     }
                 }
             }
+        }
         }
     }
 
@@ -421,6 +445,33 @@ fun LibraryScreen(
                 saveScanToChosenFolder.launch(DocumentScanner.createDocumentIntent(name))
             },
             onDismiss = { pendingScanPdf = null },
+        )
+    }
+
+    if (manageCategories) {
+        ManageCategoriesDialog(
+            categories = state.categories,
+            onCreate = viewModel::createCategory,
+            onRename = viewModel::renameCategory,
+            onDelete = viewModel::deleteCategory,
+            onDismiss = { manageCategories = false },
+        )
+    }
+
+    if (movingDocuments.isNotEmpty()) {
+        MoveToCategoryDialog(
+            categories = state.categories,
+            currentCategoryId = movingDocuments.firstOrNull()?.categoryId,
+            documentCount = movingDocuments.size,
+            onConfirm = { categoryId ->
+                viewModel.assignCategory(movingDocuments, categoryId)
+                movingDocuments = emptyList()
+            },
+            onCreateCategory = {
+                movingDocuments = emptyList()
+                manageCategories = true
+            },
+            onDismiss = { movingDocuments = emptyList() },
         )
     }
 

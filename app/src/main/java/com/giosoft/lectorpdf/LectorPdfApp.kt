@@ -3,10 +3,13 @@ package com.giosoft.lectorpdf
 import android.app.Application
 import androidx.pdf.PdfLoader
 import androidx.pdf.SandboxedPdfLoader
+import com.giosoft.lectorpdf.data.CategoryRepository
 import com.giosoft.lectorpdf.data.DocumentRepository
 import com.giosoft.lectorpdf.data.SettingsRepository
 import com.giosoft.lectorpdf.data.db.AppDatabase
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class LectorPdfApp : Application() {
 
@@ -16,6 +19,10 @@ class LectorPdfApp : Application() {
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(this)
+        // Crear las categorias sugeridas la primera vez, fuera del hilo principal.
+        CoroutineScope(Dispatchers.IO).launch {
+            container.categoryRepository.seedDefaultsIfNeeded(container.settingsRepository)
+        }
     }
 }
 
@@ -27,8 +34,14 @@ class AppContainer(app: Application) {
 
     val settingsRepository: SettingsRepository by lazy { SettingsRepository(app) }
 
+    private val database by lazy { AppDatabase.get(app) }
+
     val documentRepository: DocumentRepository by lazy {
-        DocumentRepository(app, AppDatabase.get(app).documentDao())
+        DocumentRepository(app, database.documentDao())
+    }
+
+    val categoryRepository: CategoryRepository by lazy {
+        CategoryRepository(database.categoryDao(), database.documentDao())
     }
 
     /**

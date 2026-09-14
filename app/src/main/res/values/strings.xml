@@ -18,6 +18,24 @@
     <string name="group_today">Hoy</string>
     <string name="group_yesterday">Ayer</string>
     <string name="favorites">Favoritos</string>
+    <string name="filter_all">Todos</string>
+    <string name="filter_uncategorized">Sin categoría</string>
+    <string name="categories_title">Categorías</string>
+    <string name="categories_manage">Gestionar</string>
+    <string name="categories_empty">Aún no tienes categorías. Crea una abajo para empezar a organizar tus documentos.</string>
+    <string name="category_new">Nueva categoría</string>
+    <string name="category_add">Añadir</string>
+    <string name="category_rename">Renombrar categoría</string>
+    <string name="category_empty">El nombre de la categoría no puede estar vacío</string>
+    <string name="category_deleted">Categoría «%1$s» eliminada</string>
+    <string name="category_assigned">Documentos organizados</string>
+    <string name="category_delete_title">¿Eliminar categoría?</string>
+    <string name="category_delete_message">Se eliminará la categoría «%1$s».
+
+Tus documentos NO se borran: quedarán como «Sin categoría».</string>
+    <string name="action_delete_category">Eliminar categoría</string>
+    <string name="move_to_category">Mover a categoría</string>
+    <string name="move_to_category_many">Mover %1$d documentos</string>
 
     <!-- Acciones sobre un documento -->
     <string name="action_open">Abrir</string>

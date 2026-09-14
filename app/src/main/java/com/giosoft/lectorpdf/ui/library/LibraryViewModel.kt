@@ -10,9 +10,11 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.giosoft.lectorpdf.LectorPdfApp
 import com.giosoft.lectorpdf.R
+import com.giosoft.lectorpdf.data.CategoryRepository
 import com.giosoft.lectorpdf.data.DocumentRepository
 import com.giosoft.lectorpdf.data.PublicDocuments
 import com.giosoft.lectorpdf.data.SafDocuments
+import com.giosoft.lectorpdf.data.db.CategoryEntity
 import com.giosoft.lectorpdf.data.db.DocumentEntity
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,30 +53,59 @@ data class LibraryUiState(
     val query: String = "",
     val isEmpty: Boolean = false,
     val hasAnyDocument: Boolean = false,
+    val categories: List<CategoryEntity> = emptyList(),
+    val filter: LibraryFilter = LibraryFilter.All,
+    val hasUncategorized: Boolean = false,
 )
 
 class LibraryViewModel(
     private val repository: DocumentRepository,
+    private val categories: CategoryRepository,
     private val context: android.content.Context,
 ) : ViewModel() {
 
     private val query = MutableStateFlow("")
+    private val filter = MutableStateFlow<LibraryFilter>(LibraryFilter.All)
 
     private val messages = Channel<UiMessage>(Channel.BUFFERED)
     val messageFlow = messages.receiveAsFlow()
 
     val uiState: StateFlow<LibraryUiState> =
-        combine(repository.observeAll(), query) { documents, currentQuery ->
-            val filtered = if (currentQuery.isBlank()) {
-                documents
-            } else {
-                documents.filter { it.name.contains(currentQuery.trim(), ignoreCase = true) }
+        combine(
+            repository.observeAll(),
+            query,
+            filter,
+            categories.observeAll(),
+        ) { documents, currentQuery, currentFilter, allCategories ->
+            // Si la categoria seleccionada se borro, se vuelve a "Todos" en vez
+            // de dejar la lista vacia sin explicacion.
+            val activeFilter = when {
+                currentFilter is LibraryFilter.Category &&
+                    allCategories.none { it.id == currentFilter.id } -> LibraryFilter.All
+                else -> currentFilter
             }
+
+            val byFilter = when (activeFilter) {
+                is LibraryFilter.All -> documents
+                is LibraryFilter.Favorites -> documents.filter { it.isFavorite }
+                is LibraryFilter.Uncategorized -> documents.filter { it.categoryId == null }
+                is LibraryFilter.Category -> documents.filter { it.categoryId == activeFilter.id }
+            }
+
+            val filtered = if (currentQuery.isBlank()) {
+                byFilter
+            } else {
+                byFilter.filter { it.name.contains(currentQuery.trim(), ignoreCase = true) }
+            }
+
             LibraryUiState(
                 groups = groupDocuments(filtered),
                 query = currentQuery,
                 isEmpty = filtered.isEmpty(),
                 hasAnyDocument = documents.isNotEmpty(),
+                categories = allCategories,
+                filter = activeFilter,
+                hasUncategorized = documents.any { it.categoryId == null },
             )
         }.stateIn(
             scope = viewModelScope,
@@ -85,6 +116,31 @@ class LibraryViewModel(
     fun onQueryChange(value: String) {
         query.value = value
     }
+
+    fun onFilterChange(value: LibraryFilter) {
+        filter.value = value
+    }
+
+    // --- Categorias ---
+
+    fun createCategory(name: String) = viewModelScope.launch {
+        categories.create(name).onFailure { messages.send(UiMessage(R.string.category_empty)) }
+    }
+
+    fun renameCategory(category: CategoryEntity, newName: String) = viewModelScope.launch {
+        categories.rename(category, newName)
+    }
+
+    fun deleteCategory(category: CategoryEntity) = viewModelScope.launch {
+        categories.delete(category)
+        messages.send(UiMessage(R.string.category_deleted, arg = category.name))
+    }
+
+    fun assignCategory(documents: Collection<DocumentEntity>, categoryId: Long?) =
+        viewModelScope.launch {
+            categories.assignAll(documents, categoryId)
+            messages.send(UiMessage(R.string.category_assigned))
+        }
 
     /**
      * Registra un documento elegido en el selector del sistema.
@@ -190,7 +246,11 @@ class LibraryViewModel(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val app = this[APPLICATION_KEY] as LectorPdfApp
-                LibraryViewModel(app.container.documentRepository, app)
+                LibraryViewModel(
+                    app.container.documentRepository,
+                    app.container.categoryRepository,
+                    app,
+                )
             }
         }
     }

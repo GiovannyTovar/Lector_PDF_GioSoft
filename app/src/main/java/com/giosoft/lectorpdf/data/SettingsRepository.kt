@@ -2,9 +2,11 @@ package com.giosoft.lectorpdf.data
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 private val Context.dataStore by preferencesDataStore(name = "ajustes")
@@ -22,6 +24,8 @@ enum class ThemeMode {
 class SettingsRepository(private val context: Context) {
 
     private val themeKey = stringPreferencesKey("theme_mode")
+    private val thumbnailsKey = booleanPreferencesKey("show_thumbnails")
+    private val categoriesSeededKey = booleanPreferencesKey("categories_seeded")
 
     val themeMode: Flow<ThemeMode> = context.dataStore.data.map { preferences ->
         preferences[themeKey]
@@ -31,5 +35,26 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setThemeMode(mode: ThemeMode) {
         context.dataStore.edit { it[themeKey] = mode.name }
+    }
+
+    /**
+     * Miniatura de la primera pagina en cada tarjeta.
+     *
+     * Desactivado por defecto: generar la miniatura obliga a abrir cada PDF, y
+     * con un historial largo eso encarece el arranque. El usuario lo activa si
+     * lo prefiere.
+     */
+    val showThumbnails: Flow<Boolean> =
+        context.dataStore.data.map { it[thumbnailsKey] ?: false }
+
+    suspend fun setShowThumbnails(enabled: Boolean) {
+        context.dataStore.edit { it[thumbnailsKey] = enabled }
+    }
+
+    suspend fun areCategoriesSeeded(): Boolean =
+        context.dataStore.data.first()[categoriesSeededKey] ?: false
+
+    suspend fun markCategoriesSeeded() {
+        context.dataStore.edit { it[categoriesSeededKey] = true }
     }
 }

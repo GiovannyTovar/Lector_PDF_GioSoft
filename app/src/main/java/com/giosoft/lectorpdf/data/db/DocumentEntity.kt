@@ -16,7 +16,10 @@ import androidx.room.PrimaryKey
  * que caduca; esos se guardan con `persistable = false` y la interfaz avisa de
  * que puede dejar de estar disponible.
  */
-@Entity(tableName = "documents", indices = [Index("contentHash")])
+@Entity(
+    tableName = "documents",
+    indices = [Index("contentHash"), Index("categoryId")],
+)
 data class DocumentEntity(
     @PrimaryKey val uri: String,
     val name: String,
@@ -37,4 +40,6 @@ data class DocumentEntity(
      * del nombre y de la URI, para no volver a copiar uno que ya conservamos.
      */
     val contentHash: String? = null,
+    /** Categoria a la que el usuario lo asigno. null = sin categoria. */
+    val categoryId: Long? = null,
 )

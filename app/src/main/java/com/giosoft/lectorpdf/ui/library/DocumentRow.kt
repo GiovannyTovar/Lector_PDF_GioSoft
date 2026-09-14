@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.DriveFileRenameOutline
+import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.PictureAsPdf
 import androidx.compose.material.icons.outlined.SaveAlt
@@ -61,6 +62,7 @@ data class DocumentActions(
     val onRemove: (DocumentEntity) -> Unit,
     val onDeleteFromDevice: (DocumentEntity) -> Unit,
     val onSaveToMisPdf: (DocumentEntity) -> Unit,
+    val onMoveToCategory: (DocumentEntity) -> Unit,
 )
 
 /** Cada documento en su propia tarjeta blanca, con sombra muy suave. */
@@ -212,6 +214,11 @@ private fun DocumentRow(
                         )
                     },
                     onClick = { menuOpen = false; actions.onToggleFavorite(document) },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.move_to_category)) },
+                    leadingIcon = { Icon(Icons.Outlined.Folder, null) },
+                    onClick = { menuOpen = false; actions.onMoveToCategory(document) },
                 )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.action_rename)) },

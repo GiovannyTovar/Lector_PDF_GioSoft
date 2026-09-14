@@ -7,10 +7,16 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [DocumentEntity::class], version = 3, exportSchema = false)
+@Database(
+    entities = [DocumentEntity::class, CategoryEntity::class],
+    version = 4,
+    exportSchema = false,
+)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun documentDao(): DocumentDao
+
+    abstract fun categoryDao(): CategoryDao
 
     companion object {
         @Volatile
@@ -31,12 +37,30 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** Anade las categorias. Los documentos existentes quedan sin categoria. */
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS categories (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "name TEXT NOT NULL, " +
+                        "colorArgb INTEGER NOT NULL, " +
+                        "position INTEGER NOT NULL)",
+                )
+                db.execSQL("ALTER TABLE documents ADD COLUMN categoryId INTEGER")
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_documents_categoryId " +
+                        "ON documents(categoryId)",
+                )
+            }
+        }
+
         fun get(context: Context): AppDatabase = instance ?: synchronized(this) {
             instance ?: Room.databaseBuilder(
                 context.applicationContext,
                 AppDatabase::class.java,
                 "lectorpdf.db",
-            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build().also { instance = it }
+            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build().also { instance = it }
         }
     }
 }
