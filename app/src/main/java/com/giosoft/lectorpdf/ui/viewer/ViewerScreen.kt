@@ -55,7 +55,8 @@ import android.net.Uri
 import com.giosoft.lectorpdf.R
 import com.giosoft.lectorpdf.print.PdfPrinter
 import androidx.compose.ui.graphics.toArgb
-import com.giosoft.lectorpdf.ui.theme.FavoriteGold
+import com.giosoft.lectorpdf.ui.theme.SearchHighlightActive
+import com.giosoft.lectorpdf.ui.theme.SearchHighlightOther
 import com.giosoft.lectorpdf.ui.theme.LocalIsDarkTheme
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -247,8 +248,8 @@ private fun DocumentContent(
     }
 
     // Resaltar las coincidencias y llevar la vista a la activa.
-    val activeColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f).toArgb()
-    val otherColor = FavoriteGold.copy(alpha = 0.35f).toArgb()
+    val activeColor = SearchHighlightActive.toArgb()
+    val otherColor = SearchHighlightOther.toArgb()
     LaunchedEffect(search.matches, search.currentIndex) {
         pdfState.setHighlights(search.toHighlights(activeColor, otherColor))
         search.current?.anchor?.let { punto ->

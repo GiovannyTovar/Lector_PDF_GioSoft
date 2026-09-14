@@ -20,6 +20,17 @@ val FavoriteGold = Color(0xFFFFC107)
 /** Fondo de una tarjeta seleccionada. Solido para que no se mezcle con nada. */
 val SelectedCardLight = Color(0xFFE1E8EF)
 val SelectedCardDark = Color(0xFF1E2A33)
+
+/**
+ * Resaltado de las coincidencias de busqueda.
+ *
+ * OPACOS y CLAROS a proposito: el visor multiplica el color sobre la pagina en
+ * vez de mezclarlo, asi que un color con transparencia se premultiplica y sale
+ * casi negro, tapando el texto. Con un tono claro, el fondo queda del color del
+ * marcador y las letras siguen leyendose.
+ */
+val SearchHighlightActive = Color(0xFFFFAB40)
+val SearchHighlightOther = Color(0xFFFFF59D)
 val PdfRedContainerLight = Color(0x1FD93025)
 
 // Claro
