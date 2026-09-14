@@ -454,6 +454,13 @@ Aplicado a PDF GioSoft:
 - **¿Comparte datos con terceros?** → **Sí**, en el sentido estricto de Google:
   la telemetría de ML Kit va a Google. No hay ningún otro tercero.
 
+**¿Los datos se cifran en tránsito?** → **Sí.** No hace falta suponerlo: ni la
+app ni ninguna librería (comprobado en el manifiesto de release fusionado)
+declaran `usesCleartextTraffic` ni un `networkSecurityConfig` propio. Con
+`targetSdk 36`, Android **bloquea por defecto cualquier tráfico HTTP sin
+cifrar** (desde API 28); cualquier conexión de la app o de sus librerías tiene
+que ser HTTPS/TLS o el sistema la rechaza antes de que salga del celular.
+
 Puedes comprobarlo tú mismo:
 
 ```powershell
