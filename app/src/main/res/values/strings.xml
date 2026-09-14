@@ -164,7 +164,7 @@ Esta acción no se puede deshacer.</string>
     <string name="about_what_title">Qué hace</string>
     <string name="about_what_text">Abre tus archivos originales sin duplicarlos y los organiza por categorías y favoritos. Permite buscar dentro de un documento, protegerlo con tu huella o con contraseña, escanear con la cámara, imprimir, compartir y leer en modo oscuro, entre otras funciones.</string>
     <string name="about_website_label">Sitio web</string>
-    <string name="about_website_value">giosoft.com</string>
+    <string name="about_website_value">giosoft.com.co</string>
     <string name="about_website_url" translatable="false">https://pdfgiosoft.pages.dev/web</string>
     <string name="about_thanks">Gracias por usarla.</string>
     <string name="about_close">Cerrar</string>
