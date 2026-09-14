@@ -1,0 +1,361 @@
+/* PDF GioSoft — páginas públicas de privacidad y términos.
+   Paleta tomada de la propia app: el azul marino de la barra superior y el
+   rojo del icono PDF, que aquí aparece solo en detalles pequeños. */
+
+:root {
+    color-scheme: light;
+
+    --papel: #f4f6f8;
+    --superficie: #ffffff;
+    --tinta: #12283c;
+    --suave: #56697b;
+    --tenue: #8095a6;
+    --borde: #dde4ea;
+    --realce: #eef2f6;
+    --acento: #b8342a;
+
+    --fuente-titulo: "Newsreader", Georgia, "Times New Roman", serif;
+    --fuente-texto: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        color-scheme: dark;
+
+        --papel: #0c161f;
+        --superficie: #122130;
+        --tinta: #e7edf3;
+        --suave: #a3b4c3;
+        --tenue: #7b8fa1;
+        --borde: #22333f;
+        --realce: #18293a;
+        --acento: #e8796d;
+    }
+}
+
+:root[data-theme="dark"] {
+    color-scheme: dark;
+
+    --papel: #0c161f;
+    --superficie: #122130;
+    --tinta: #e7edf3;
+    --suave: #a3b4c3;
+    --tenue: #7b8fa1;
+    --borde: #22333f;
+    --realce: #18293a;
+    --acento: #e8796d;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--papel);
+    color: var(--tinta);
+    font-family: var(--fuente-texto);
+    font-size: 1rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Barra superior ------------------------------------------------------- */
+
+.barra {
+    background: #12283c;
+    color: #eef2f6;
+    padding: 14px 20px;
+}
+
+.barra-interior {
+    max-width: 46rem;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 22px;
+}
+
+.marca {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    margin-right: auto;
+    color: #eef2f6;
+    text-decoration: none;
+}
+
+.marca-icono {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 5px;
+    background: #b8342a;
+    color: #fff;
+    font-size: 0.56rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.barra nav {
+    display: flex;
+    gap: 20px;
+    font-size: 0.92rem;
+}
+
+.barra nav a {
+    color: #b9c8d6;
+    text-decoration: none;
+    padding-bottom: 2px;
+    border-bottom: 2px solid transparent;
+}
+
+.barra nav a:hover,
+.barra nav a:focus-visible {
+    color: #fff;
+    border-bottom-color: #b8342a;
+}
+
+.barra nav a[aria-current="page"] {
+    color: #fff;
+    border-bottom-color: #b8342a;
+}
+
+/* Cuerpo del documento -------------------------------------------------- */
+
+.hoja {
+    max-width: 46rem;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 44px 64px;
+}
+
+h1 {
+    font-family: var(--fuente-titulo);
+    font-weight: 600;
+    font-size: clamp(2rem, 5.2vw, 2.7rem);
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    margin: 0 0 14px;
+}
+
+.ficha {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    font-size: 0.82rem;
+    color: var(--tenue);
+    font-variant-numeric: tabular-nums;
+    padding-bottom: 26px;
+    border-bottom: 1px solid var(--borde);
+    margin-bottom: 30px;
+}
+
+.ficha span:not(:last-child)::after {
+    content: " ·";
+    color: var(--borde);
+}
+
+.entrada {
+    font-size: 1.08rem;
+    color: var(--suave);
+    margin: 0 0 34px;
+}
+
+/* Bloque de resumen: fondo propio, sin galón de color ni tarjeta flotante */
+.resumen {
+    background: var(--realce);
+    border: 1px solid var(--borde);
+    border-radius: 6px;
+    padding: 22px 24px;
+    margin-bottom: 46px;
+}
+
+.resumen h2 {
+    font-family: var(--fuente-texto);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--tenue);
+    margin: 0 0 12px;
+}
+
+.resumen ul {
+    margin: 0;
+    padding-left: 1.1em;
+    display: grid;
+    gap: 7px;
+}
+
+.resumen li::marker {
+    color: var(--acento);
+}
+
+/* Secciones numeradas: en un documento legal el número es la referencia con
+   la que se cita una cláusula, no un adorno. */
+.clausula {
+    display: grid;
+    grid-template-columns: 2.6rem 1fr;
+    margin-bottom: 38px;
+}
+
+.clausula > .numero {
+    font-family: var(--fuente-titulo);
+    font-size: 1.05rem;
+    color: var(--tenue);
+    padding-top: 0.18em;
+    font-variant-numeric: tabular-nums;
+}
+
+.clausula h2 {
+    font-family: var(--fuente-titulo);
+    font-weight: 600;
+    font-size: 1.42rem;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0 0 10px;
+}
+
+.clausula > div > :last-child {
+    margin-bottom: 0;
+}
+
+.clausula p {
+    margin: 0 0 12px;
+}
+
+.clausula ul {
+    margin: 0 0 12px;
+    padding-left: 1.15em;
+    display: grid;
+    gap: 6px;
+}
+
+/* Lista de datos guardados: término y explicación. */
+dl {
+    margin: 0 0 12px;
+    display: grid;
+    gap: 12px;
+}
+
+dt {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+dd {
+    margin: 2px 0 0;
+    color: var(--suave);
+    font-size: 0.97rem;
+}
+
+.nota {
+    font-size: 0.92rem;
+    color: var(--suave);
+    background: var(--realce);
+    border: 1px solid var(--borde);
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin: 0 0 12px;
+}
+
+.nota strong {
+    color: var(--acento);
+}
+
+a {
+    color: inherit;
+    text-decoration-color: var(--acento);
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1.5px;
+}
+
+a:hover {
+    color: var(--acento);
+}
+
+:focus-visible {
+    outline: 2px solid var(--acento);
+    outline-offset: 3px;
+    border-radius: 2px;
+}
+
+.pie {
+    border-top: 1px solid var(--borde);
+    padding-top: 22px;
+    color: var(--tenue);
+    font-size: 0.88rem;
+    display: grid;
+    gap: 6px;
+}
+
+/* Portada --------------------------------------------------------------- */
+
+.portada-lema {
+    font-family: var(--fuente-titulo);
+    font-size: clamp(1.3rem, 3.4vw, 1.75rem);
+    line-height: 1.35;
+    color: var(--suave);
+    margin: 0 0 40px;
+    text-wrap: balance;
+}
+
+.documentos {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 46px;
+}
+
+.documento {
+    display: block;
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: 8px;
+    padding: 22px 24px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.documento:hover {
+    border-color: var(--acento);
+    color: inherit;
+}
+
+.documento h2 {
+    font-family: var(--fuente-titulo);
+    font-weight: 600;
+    font-size: 1.3rem;
+    margin: 0 0 6px;
+}
+
+.documento p {
+    margin: 0;
+    color: var(--suave);
+    font-size: 0.95rem;
+}
+
+@media (max-width: 540px) {
+    .clausula {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+
+    .clausula > .numero {
+        padding-top: 0;
+        font-size: 0.95rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
