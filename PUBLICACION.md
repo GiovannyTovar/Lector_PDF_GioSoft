@@ -414,7 +414,7 @@ Además del paquete, Google pide:
 - [ ] **Clasificación de contenido**: un cuestionario. Responde que no hay
       violencia, ni sexo, ni apuestas, ni compras. Sale «Apto para todos».
 - [ ] **Política de privacidad**: la URL del paso 7.
-- [ ] **Seguridad de los datos**: ver abajo, tiene truco.
+- [x] **Seguridad de los datos**: ver abajo, tiene truco. (Hecho, ver detalle.)
 - [ ] **Datos fiscales y país** del desarrollador.
 - [ ] `versionCode` subido en `app/build.gradle.kts` si ya subiste una versión
       antes (Play rechaza dos paquetes con el mismo número).
@@ -509,7 +509,8 @@ SDK de publicidad; el permiso `AD_ID` no aparece en ningún sitio:
 
 ```powershell
 .\gradlew.bat :app:processReleaseManifestForPackage
-Select-String "AD_ID" appuild\intermediates\merged_manifestelease\*\AndroidManifest.xml
+Select-String "AD_ID" appuild\intermediates\merged_manifest
+elease\*\AndroidManifest.xml
 ```
 
 Si algún día añades un SDK que sí lo traiga, este comando vuelve a decírtelo.
