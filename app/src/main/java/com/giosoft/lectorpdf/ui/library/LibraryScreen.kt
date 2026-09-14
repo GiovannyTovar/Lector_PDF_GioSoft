@@ -135,6 +135,7 @@ fun LibraryScreen(
         },
         onSaveToMisPdf = { viewModel.saveToMisPdf(it) },
         onMoveToCategory = { movingDocuments = listOf(it) },
+        onToggleSelection = viewModel::toggleSelection,
     )
 
     // --- Selector del sistema: abre el archivo ORIGINAL, sin copiarlo ---
@@ -218,6 +219,23 @@ fun LibraryScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHost) },
         topBar = {
+            val selectionMode = state.selected.isNotEmpty()
+            if (selectionMode) {
+                SelectionTopBar(
+                    count = state.selected.size,
+                    onClear = viewModel::clearSelection,
+                    onSelectAll = viewModel::selectAllVisible,
+                    onMoveToCategory = { movingDocuments = viewModel.selectedDocuments() },
+                    onFavorite = { viewModel.favoriteSelected(true) },
+                    onShare = {
+                        context.shareDocuments(viewModel.selectedDocuments())
+                        viewModel.clearSelection()
+                    },
+                    onRemove = viewModel::removeSelected,
+                    isDark = isDark,
+                )
+                return@Scaffold
+            }
             TopAppBar(
                 title = {
                     if (searching) {
@@ -448,6 +466,8 @@ fun LibraryScreen(
                                 .firstOrNull { it.id == document.categoryId }
                                 ?.let { Color(it.colorArgb) },
                             showThumbnail = state.showThumbnails,
+                            selectionMode = state.selected.isNotEmpty(),
+                            isSelected = document.uri in state.selected,
                         )
                     }
                 }
@@ -614,6 +634,22 @@ private fun NoResults(query: String, modifier: Modifier = Modifier) {
             textAlign = TextAlign.Center,
         )
     }
+}
+
+/** Comparte varios documentos a la vez. */
+private fun android.content.Context.shareDocuments(documents: List<DocumentEntity>) {
+    if (documents.isEmpty()) return
+    if (documents.size == 1) {
+        shareDocument(documents.first())
+        return
+    }
+    val uris = ArrayList(documents.map { Uri.parse(it.uri) })
+    val share = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+        type = "application/pdf"
+        putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    startActivity(Intent.createChooser(share, getString(R.string.action_share)))
 }
 
 /** Comparte el documento ORIGINAL por su propia URI: no hace falta FileProvider. */

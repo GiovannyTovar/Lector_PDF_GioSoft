@@ -2,7 +2,10 @@ package com.giosoft.lectorpdf.ui.library
 
 import android.net.Uri
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -30,6 +33,7 @@ import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -60,6 +64,7 @@ import com.giosoft.lectorpdf.ui.theme.FavoriteGold
 import com.giosoft.lectorpdf.ui.theme.LocationBlue
 import com.giosoft.lectorpdf.ui.theme.PdfRed
 import java.util.Locale
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.IconButton
 
 /** Acciones disponibles sobre un documento, agrupadas para no repetirlas. */
@@ -72,33 +77,49 @@ data class DocumentActions(
     val onDeleteFromDevice: (DocumentEntity) -> Unit,
     val onSaveToMisPdf: (DocumentEntity) -> Unit,
     val onMoveToCategory: (DocumentEntity) -> Unit,
+    val onToggleSelection: (DocumentEntity) -> Unit,
 )
 
 /** Cada documento en su propia tarjeta blanca, con sombra muy suave. */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DocumentCard(
     document: DocumentEntity,
     actions: DocumentActions,
     categoryColor: Color? = null,
     showThumbnail: Boolean = false,
+    selectionMode: Boolean = false,
+    isSelected: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
+        color = if (isSelected) {
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
+        } else {
+            MaterialTheme.colorScheme.surface
+        },
         shape = RoundedCornerShape(18.dp),
         shadowElevation = 1.dp,
+        border = if (isSelected) {
+            BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
+        } else {
+            null
+        },
     ) {
-        DocumentRow(document, actions, categoryColor, showThumbnail)
+        DocumentRow(document, actions, categoryColor, showThumbnail, selectionMode, isSelected)
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DocumentRow(
     document: DocumentEntity,
     actions: DocumentActions,
     categoryColor: Color?,
     showThumbnail: Boolean,
+    selectionMode: Boolean,
+    isSelected: Boolean,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     val isDark = LocalIsDarkTheme.current
@@ -116,7 +137,18 @@ private fun DocumentRow(
 
     Row(
         modifier = Modifier
-            .clickable { actions.onOpen(document) }
+            .combinedClickable(
+                // En modo seleccion, tocar marca en vez de abrir; la pulsacion
+                // larga es lo que entra en ese modo.
+                onClick = {
+                    if (selectionMode) {
+                        actions.onToggleSelection(document)
+                    } else {
+                        actions.onOpen(document)
+                    }
+                },
+                onLongClick = { actions.onToggleSelection(document) },
+            )
             .padding(start = 12.dp, end = 0.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -235,6 +267,14 @@ private fun DocumentRow(
                     )
                 }
             }
+        }
+
+        if (selectionMode) {
+            Checkbox(
+                checked = isSelected,
+                onCheckedChange = { actions.onToggleSelection(document) },
+            )
+            return@Row
         }
 
         Box {

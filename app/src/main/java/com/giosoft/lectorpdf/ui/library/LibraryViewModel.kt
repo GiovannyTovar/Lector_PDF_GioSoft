@@ -57,6 +57,7 @@ data class LibraryUiState(
     val categories: List<CategoryEntity> = emptyList(),
     val favoritesPosition: Int = 0,
     val showThumbnails: Boolean = false,
+    val selected: Set<String> = emptySet(),
     val filter: LibraryFilter = LibraryFilter.All,
     val hasUncategorized: Boolean = false,
 )
@@ -70,6 +71,7 @@ class LibraryViewModel(
 
     private val query = MutableStateFlow("")
     private val filter = MutableStateFlow<LibraryFilter>(LibraryFilter.All)
+    private val selection = MutableStateFlow<Set<String>>(emptySet())
 
     private val messages = Channel<UiMessage>(Channel.BUFFERED)
     val messageFlow = messages.receiveAsFlow()
@@ -82,6 +84,7 @@ class LibraryViewModel(
             categories.observeAll(),
             settings.favoritesPosition,
             settings.showThumbnails,
+            selection,
         ) { values ->
             @Suppress("UNCHECKED_CAST")
             val documents = values[0] as List<DocumentEntity>
@@ -91,6 +94,8 @@ class LibraryViewModel(
             val allCategories = values[3] as List<CategoryEntity>
             val favPosition = values[4] as Int
             val thumbnails = values[5] as Boolean
+            @Suppress("UNCHECKED_CAST")
+            val currentSelection = values[6] as Set<String>
             // Si la categoria seleccionada se borro, se vuelve a "Todos" en vez
             // de dejar la lista vacia sin explicacion.
             val activeFilter = when {
@@ -120,6 +125,9 @@ class LibraryViewModel(
                 categories = allCategories,
                 favoritesPosition = favPosition,
                 showThumbnails = thumbnails,
+                // Solo se conservan los seleccionados que siguen visibles tras
+                // filtrar o buscar, para no operar sobre lo que no se ve.
+                selected = currentSelection.intersect(filtered.map { it.uri }.toSet()),
                 filter = activeFilter,
                 hasUncategorized = documents.any { it.categoryId == null },
             )
@@ -151,6 +159,44 @@ class LibraryViewModel(
     }
 
     /** Mueve la ficha de Favoritos entre las categorias de la fila de filtros. */
+    // --- Seleccion multiple ---
+
+    fun toggleSelection(document: DocumentEntity) {
+        val uri = document.uri
+        selection.value = if (uri in selection.value) {
+            selection.value - uri
+        } else {
+            selection.value + uri
+        }
+    }
+
+    fun clearSelection() {
+        selection.value = emptySet()
+    }
+
+    fun selectAllVisible() {
+        selection.value = uiState.value.groups.flatMap { group -> group.documents }
+            .map { it.uri }
+            .toSet()
+    }
+
+    /** Documentos seleccionados, en el orden en que se ven. */
+    fun selectedDocuments(): List<DocumentEntity> =
+        uiState.value.groups.flatMap { it.documents }
+            .filter { it.uri in uiState.value.selected }
+
+    fun removeSelected() = viewModelScope.launch {
+        val documents = selectedDocuments()
+        clearSelection()
+        documents.forEach { repository.removeFromHistory(it) }
+        messages.send(UiMessage(R.string.selection_removed, arg = documents.size.toString()))
+    }
+
+    fun favoriteSelected(favorite: Boolean) = viewModelScope.launch {
+        selectedDocuments().forEach { repository.setFavorite(it, favorite) }
+        clearSelection()
+    }
+
     fun setShowThumbnails(enabled: Boolean) = viewModelScope.launch {
         settings.setShowThumbnails(enabled)
     }

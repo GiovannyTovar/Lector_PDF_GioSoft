@@ -18,6 +18,11 @@
     <string name="group_today">Hoy</string>
     <string name="group_yesterday">Ayer</string>
     <string name="favorites">Favoritos</string>
+    <string name="selection_count">%1$d elegidos</string>
+    <string name="selection_all">Seleccionar todo</string>
+    <string name="selection_clear">Cancelar selección</string>
+    <string name="selection_removed">%1$s documentos quitados de la lista</string>
+    <string name="selection_hint">Mantén pulsado un documento para seleccionar varios</string>
     <string name="filter_all">Todos</string>
     <string name="filter_uncategorized">Sin categoría</string>
     <string name="categories_title">Categorías</string>
