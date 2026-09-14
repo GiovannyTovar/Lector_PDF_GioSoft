@@ -52,6 +52,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -299,6 +300,15 @@ fun LibraryScreen(
             val result = snackbarHost.showSnackbar(
                 message = text,
                 actionLabel = message.undo?.let { resources.getString(R.string.undo) },
+                // Sin esto, Compose deja el snackbar EN PANTALLA PARA SIEMPRE en
+                // cuanto lleva boton de accion (su valor por defecto es
+                // Indefinite si actionLabel != null). "Deshacer" necesita
+                // tiempo para leerse y tocarse, pero no que se quede fijo.
+                duration = if (message.undo != null) {
+                    SnackbarDuration.Long
+                } else {
+                    SnackbarDuration.Short
+                },
             )
             if (result == SnackbarResult.ActionPerformed) {
                 message.undo?.let(viewModel::undoRemove)
