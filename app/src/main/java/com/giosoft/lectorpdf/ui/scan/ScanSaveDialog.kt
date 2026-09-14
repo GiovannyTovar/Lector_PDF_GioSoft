@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DocumentScanner
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -30,6 +31,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.giosoft.lectorpdf.R
 import com.giosoft.lectorpdf.data.PublicDocuments
+import com.giosoft.lectorpdf.ui.theme.LocalIsDarkTheme
 
 /**
  * Que hacer con el PDF recien escaneado.
@@ -46,7 +48,7 @@ fun ScanSaveDialog(
 ) {
     val suggested = remember { PublicDocuments.defaultScanName() }
     var value by remember {
-        mutableStateOf(TextFieldValue(suggested, selection = TextRange(suggested.length)))
+        mutableStateOf(TextFieldValue(suggested, selection = TextRange(0, suggested.length)))
     }
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
@@ -99,7 +101,16 @@ fun ScanSaveDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = if (LocalIsDarkTheme.current) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.error
+                    },
+                ),
+            ) {
                 Text(stringResource(R.string.action_cancel))
             }
         },

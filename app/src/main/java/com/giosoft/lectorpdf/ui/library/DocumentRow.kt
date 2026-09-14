@@ -27,7 +27,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,9 +46,11 @@ import androidx.compose.ui.unit.dp
 import com.giosoft.lectorpdf.R
 import com.giosoft.lectorpdf.data.db.DocumentEntity
 import com.giosoft.lectorpdf.ui.theme.LocalIsDarkTheme
+import com.giosoft.lectorpdf.ui.theme.FavoriteGold
+import com.giosoft.lectorpdf.ui.theme.LocationBlue
 import com.giosoft.lectorpdf.ui.theme.PdfRed
-import com.giosoft.lectorpdf.ui.theme.PdfRedContainerLight
 import java.util.Locale
+import androidx.compose.material3.IconButton
 
 /** Acciones disponibles sobre un documento, agrupadas para no repetirlas. */
 data class DocumentActions(
@@ -88,10 +91,12 @@ private fun DocumentRow(
     // El rojo identifica el formato PDF en el tema claro. En oscuro se usa el
     // azul claro del tema, el mismo de la ruta.
     val iconColor = if (isDark) MaterialTheme.colorScheme.primary else PdfRed
+    // En claro el icono va suelto y mas grande: el circulo de fondo lo hacia
+    // parecer pequeno. En oscuro se conserva el circulo, que ahi si da cuerpo.
     val iconBackground = if (isDark) {
         MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
     } else {
-        PdfRedContainerLight
+        Color.Transparent
     }
 
     Row(
@@ -110,7 +115,7 @@ private fun DocumentRow(
                 imageVector = Icons.Outlined.PictureAsPdf,
                 contentDescription = null,
                 tint = iconColor,
-                modifier = Modifier.size(21.dp),
+                modifier = Modifier.size(if (isDark) 21.dp else 30.dp),
             )
         }
 
@@ -122,14 +127,14 @@ private fun DocumentRow(
                     Icon(
                         imageVector = Icons.Outlined.Star,
                         contentDescription = stringResource(R.string.action_unfavorite),
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(15.dp),
+                        tint = FavoriteGold,
+                        modifier = Modifier.size(16.dp),
                     )
                     Spacer(Modifier.width(4.dp))
                 }
                 Text(
                     text = document.name,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     // En MEDIO y no al final: en los nombres de archivo lo que
@@ -149,7 +154,7 @@ private fun DocumentRow(
                         text = location,
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = if (isDark) MaterialTheme.colorScheme.primary else LocationBlue,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = false),
@@ -201,8 +206,9 @@ private fun DocumentRow(
                     },
                     leadingIcon = {
                         Icon(
-                            if (document.isFavorite) Icons.Outlined.Star else Icons.Outlined.StarBorder,
-                            null,
+                            imageVector = if (document.isFavorite) Icons.Outlined.Star else Icons.Outlined.StarBorder,
+                            contentDescription = null,
+                            tint = if (document.isFavorite) FavoriteGold else LocalContentColor.current,
                         )
                     },
                     onClick = { menuOpen = false; actions.onToggleFavorite(document) },

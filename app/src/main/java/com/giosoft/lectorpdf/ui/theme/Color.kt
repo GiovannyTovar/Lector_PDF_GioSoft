@@ -13,6 +13,10 @@ val BrandNavyLight = Color(0xFF1D5077)
 // reconoce. En oscuro se usa el azul claro del tema, el mismo de la ruta del
 // documento, porque el rojo saturado sobre fondo negro resulta agresivo.
 val PdfRed = Color(0xFFD93025)
+/** Azul de la ubicacion del archivo en el tema claro. */
+val LocationBlue = Color(0xFF2196F3)
+/** Dorado de la estrella de favorito, igual en ambos temas. */
+val FavoriteGold = Color(0xFFFFC107)
 val PdfRedContainerLight = Color(0x1FD93025)
 
 // Claro

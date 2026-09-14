@@ -33,11 +33,33 @@ object PublicDocuments {
     private val relativePath: String
         get() = "${Environment.DIRECTORY_DOCUMENTS}/$FOLDER_NAME"
 
-    /** Nombre por defecto de un escaneo: "Documento 2026-09-13 14-30". */
+    /**
+     * Nombre por defecto de un escaneo: "Doc 13-09-2026 - 20.32".
+     *
+     * No lleva "/" ni ":" a proposito: el sistema de archivos de Android no los
+     * admite en un nombre; la barra crearia carpetas y los dos puntos hacen
+     * fallar la escritura. Se usan "-" y "." para conservar la misma forma.
+     */
     fun defaultScanName(): String {
-        val stamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm"))
-        return "Documento $stamp"
+        val stamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy - HH.mm"))
+        return "Doc $stamp"
     }
+
+    /** Caracteres que un nombre de archivo no puede llevar en Android. */
+    private val INVALID_NAME_CHARS = charArrayOf(
+        '/', '\u005C', ':', '*', '?', '"', '<', '>', '|',
+    )
+
+    /**
+     * Sustituye los caracteres que un nombre de archivo no puede llevar.
+     * Sin esto, escribir "13/09" partiria el nombre en carpetas y el guardado
+     * fallaria sin explicacion para el usuario.
+     */
+    fun sanitizeFileName(name: String): String =
+        name.map { ch -> if (ch in INVALID_NAME_CHARS || ch.code < 0x20) '-' else ch }
+            .joinToString("")
+            .trim()
+            .ifBlank { defaultScanName() }
 
     /**
      * Copia [source] a "Documentos/Mis PDF" con el nombre indicado.
@@ -55,7 +77,7 @@ object PublicDocuments {
                 val collection = MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
 
                 val pending = ContentValues().apply {
-                    put(MediaStore.MediaColumns.DISPLAY_NAME, ensurePdfExtension(name))
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, ensurePdfExtension(sanitizeFileName(name)))
                     put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf")
                     put(MediaStore.MediaColumns.RELATIVE_PATH, relativePath)
                     // Mientras esta "pendiente", otras apps no lo ven a medio escribir.

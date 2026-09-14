@@ -8,8 +8,10 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +34,8 @@ import androidx.compose.material.icons.outlined.DocumentScanner
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -73,8 +77,10 @@ import com.giosoft.lectorpdf.data.PublicDocuments
 import com.giosoft.lectorpdf.scan.DocumentScanner
 import com.giosoft.lectorpdf.ui.scan.ScanSaveDialog
 import com.giosoft.lectorpdf.ui.about.AboutDialog
+import com.giosoft.lectorpdf.ui.about.AboutSection
 import com.giosoft.lectorpdf.ui.theme.LocalIsDarkTheme
 import kotlinx.coroutines.launch
+import androidx.compose.material3.ButtonDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,7 +98,8 @@ fun LibraryScreen(
 
 
     var searching by remember { mutableStateOf(false) }
-    var showAbout by remember { mutableStateOf(false) }
+    var aboutSection by remember { mutableStateOf<AboutSection?>(null) }
+    var overflowOpen by remember { mutableStateOf(false) }
     var renaming by remember { mutableStateOf<DocumentEntity?>(null) }
     var renamingAllowed by remember { mutableStateOf(true) }
     var deleting by remember { mutableStateOf<DocumentEntity?>(null) }
@@ -235,8 +242,34 @@ fun LibraryScreen(
                             ),
                         )
                     }
-                    IconButton(onClick = { showAbout = true }) {
-                        Icon(Icons.Outlined.Info, stringResource(R.string.about))
+                    Box {
+                        IconButton(onClick = { overflowOpen = true }) {
+                            Icon(
+                                Icons.Outlined.MoreVert,
+                                stringResource(R.string.cd_more_options),
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = overflowOpen,
+                            onDismissRequest = { overflowOpen = false },
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.about)) },
+                                leadingIcon = { Icon(Icons.Outlined.Info, null) },
+                                onClick = {
+                                    overflowOpen = false
+                                    aboutSection = AboutSection.ABOUT
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.about_privacy_title)) },
+                                leadingIcon = { Icon(Icons.Outlined.Shield, null) },
+                                onClick = {
+                                    overflowOpen = false
+                                    aboutSection = AboutSection.PRIVACY
+                                },
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -324,15 +357,6 @@ fun LibraryScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                if (!searching) {
-                    item(key = "titulo-historial") {
-                        Text(
-                            text = stringResource(R.string.history_title),
-                            style = MaterialTheme.typography.headlineSmall,
-                            modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 8.dp),
-                        )
-                    }
-                }
                 state.groups.forEach { group ->
                     item(key = "header-${group.title}") {
                         GroupHeader(group.title)
@@ -400,8 +424,8 @@ fun LibraryScreen(
         )
     }
 
-    if (showAbout) {
-        AboutDialog(onDismiss = { showAbout = false })
+    aboutSection?.let { section ->
+        AboutDialog(section = section, onDismiss = { aboutSection = null })
     }
 }
 
