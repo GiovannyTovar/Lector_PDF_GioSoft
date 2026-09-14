@@ -156,14 +156,14 @@ Cette action est irréversible.</string>
     <string name="settings_dark_title">Thème sombre</string>
     <string name="settings_dark_desc">Il est aussi dans la barre du haut.</string>
     <string name="about_title">PDF GioSoft</string>
-    <string name="about_tagline">Vos documents, sans publicité et sans complications.</string>
+    <string name="about_tagline">Vos PDF, sans pub et sans prise de tête.</string>
     <string name="about_version">Version %1$s</string>
     <string name="about_developed_by">Giovanny Tovar</string>
-    <string name="about_developer_label">Développement</string>
+    <string name="about_developer_label">Créée par</string>
     <string name="about_why_title">Pourquoi elle existe</string>
-    <string name="about_why_text">Presque tous les lecteurs de PDF remplissent l’écran de publicités ou demandent des autorisations dont ils n’ont pas besoin. Cette application est née pour offrir une solution simple aux amis, à la famille et aux proches : ouvrir un document, le lire, et passer à autre chose.</string>
+    <string name="about_why_text">Les lecteurs de PDF que j’essayais étaient pleins de pubs, ou demandaient des autorisations qui n’avaient rien à y faire. Je voulais quelque chose de simple pour ma famille et mes amis : vous ouvrez le document, vous le lisez, et vous passez à autre chose.</string>
     <string name="about_what_title">Ce qu’elle fait</string>
-    <string name="about_what_text">Elle ouvre vos fichiers d’origine sans les dupliquer, les classe par catégories, numérise des documents avec l’appareil photo, imprime et partage. Rien de plus, rien de moins.</string>
+    <string name="about_what_text">Elle ouvre vos fichiers tels quels, sans en faire des copies dans votre dos. Vous les classez par catégories, vous numérisez des papiers avec l’appareil photo, vous imprimez et vous partagez. C’est tout.</string>
     <string name="about_thanks">Merci de l’utiliser.</string>
     <string name="about_close">Fermer</string>
 

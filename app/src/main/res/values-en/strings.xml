@@ -156,14 +156,14 @@ This action can’t be undone.</string>
     <string name="settings_dark_title">Dark theme</string>
     <string name="settings_dark_desc">It’s also in the top bar.</string>
     <string name="about_title">PDF GioSoft</string>
-    <string name="about_tagline">Your documents, with no ads and no fuss.</string>
+    <string name="about_tagline">Your PDFs, with no ads and no fuss.</string>
     <string name="about_version">Version %1$s</string>
     <string name="about_developed_by">Giovanny Tovar</string>
-    <string name="about_developer_label">Development</string>
+    <string name="about_developer_label">Made by</string>
     <string name="about_why_title">Why it exists</string>
-    <string name="about_why_text">Almost every PDF reader fills the screen with ads or asks for permissions it doesn’t need. This app was born to offer a simple alternative to friends, family and neighbors: open a document, read it, and get on with your day.</string>
+    <string name="about_why_text">The PDF readers I tried were full of ads, or asked for permissions they had no business asking for. I wanted something simple for my family and my friends: you open the document, you read it, you get on with your day.</string>
     <string name="about_what_title">What it does</string>
-    <string name="about_what_text">It opens your original files without duplicating them, organizes them by category, scans documents with the camera, prints and shares. Nothing more, nothing less.</string>
+    <string name="about_what_text">It opens your files just as they are, without making copies behind your back. You sort them into categories, scan paper with the camera, print and share. That’s it.</string>
     <string name="about_thanks">Thanks for using it.</string>
     <string name="about_close">Close</string>
 

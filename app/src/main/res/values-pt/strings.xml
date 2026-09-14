@@ -156,14 +156,14 @@ Esta ação não pode ser desfeita.</string>
     <string name="settings_dark_title">Tema escuro</string>
     <string name="settings_dark_desc">Também está na barra superior.</string>
     <string name="about_title">PDF GioSoft</string>
-    <string name="about_tagline">Seus documentos, sem anúncios e sem complicação.</string>
+    <string name="about_tagline">Seus PDF, sem anúncios e sem complicação.</string>
     <string name="about_version">Versão %1$s</string>
     <string name="about_developed_by">Giovanny Tovar</string>
-    <string name="about_developer_label">Desenvolvimento</string>
+    <string name="about_developer_label">Feita por</string>
     <string name="about_why_title">Por que ela existe</string>
-    <string name="about_why_text">Quase todos os leitores de PDF enchem a tela de anúncios ou pedem permissões de que não precisam. Este aplicativo nasceu para oferecer uma alternativa simples a amigos, familiares e conhecidos: abrir um documento, ler e seguir com a sua vida.</string>
+    <string name="about_why_text">Os leitores de PDF que eu testava viviam cheios de anúncios, ou pediam permissões que não tinham nada a ver. Eu queria algo simples para a minha família e os meus amigos: você abre o documento, lê e segue com a sua vida.</string>
     <string name="about_what_title">O que ela faz</string>
-    <string name="about_what_text">Abre seus arquivos originais sem duplicá-los, organiza por categorias, digitaliza documentos com a câmera, imprime e compartilha. Nada mais, nada menos.</string>
+    <string name="about_what_text">Abre seus arquivos do jeito que estão, sem tirar cópias pelas suas costas. Você organiza por categorias, digitaliza papéis com a câmera, imprime e compartilha. Só isso.</string>
     <string name="about_thanks">Obrigado por usar.</string>
     <string name="about_close">Fechar</string>
 

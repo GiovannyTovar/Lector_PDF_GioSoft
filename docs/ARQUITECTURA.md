@@ -450,6 +450,91 @@ exactamente como está.
 
 ---
 
+## 11 bis. R8: por qué hay que probar SIEMPRE el paquete de release
+
+`installDebug` **no** pasa por R8. El paquete que va a Play, sí. Son dos binarios
+distintos, y hay fallos que solo existen en el segundo.
+
+### Qué hace R8
+
+Al compilar en release, R8 recorta el código: elimina clases y métodos que cree
+que nadie usa, y acorta los nombres que quedan. Así el APK pasa de ~90 MB (debug,
+sin recortar) a ~11 MB.
+
+El problema es cómo decide qué «nadie usa»: siguiendo las llamadas del código. Lo
+que se invoca **por reflexión** —es decir, buscando una clase por su nombre en
+tiempo de ejecución— R8 no lo ve, y se lo lleva por delante.
+
+### Lo que pasó en este proyecto (septiembre de 2026)
+
+Síntoma: en el APK de release firmado, tocar «Escanear» cerraba la app al
+instante. En debug, perfecto.
+
+La traza no decía nada útil, porque los nombres ya estaban ofuscados:
+
+```
+FATAL EXCEPTION: main
+java.lang.NullPointerException
+    at java.util.Objects.requireNonNull(Objects.java:222)
+    at a15.<init>(SourceFile:54)
+    at hn4.f(SourceFile:75)
+```
+
+La pista estaba unos segundos antes, al arrancar la app:
+
+```
+W ComponentDiscovery: Invalid component registrar.
+W ComponentDiscovery: Could not instantiate com.google.mlkit.common.internal.CommonComponentRegistrar
+    Caused by: java.lang.NoSuchMethodException: ...CommonComponentRegistrar.<init> []
+    at com.google.mlkit.common.internal.MlKitInitProvider.onCreate
+```
+
+Traducido: ML Kit arranca con un `ContentProvider` que busca sus «registrars» por
+nombre y los instancia con `Class.newInstance()`. R8 había eliminado el
+constructor vacío de esas clases, porque en el código nadie lo llama de forma
+visible. ML Kit se quedaba sin registrar sus componentes, y al pedir el escáner
+algo llegaba `null`.
+
+El arreglo son cuatro reglas en `app/proguard-rules.pro`, que conservan el
+constructor de cualquier `ComponentRegistrar` y las clases internas de ML Kit.
+
+### Cómo probar el release sin tener la llave de firma
+
+Un APK de release sin firmar no se instala. Para probarlo sin esperar a tener el
+`.jks` definitivo, se firma con la llave de depuración, que existe en cualquier
+máquina con Android Studio:
+
+```bash
+./gradlew assembleRelease
+
+BT="$LOCALAPPDATA/Android/Sdk/build-tools/36.0.0"
+"$BT/zipalign.exe" -f -p 4 app/build/outputs/apk/release/app-release-unsigned.apk /tmp/release.apk
+"$BT/apksigner.bat" sign --ks "$USERPROFILE/.android/debug.keystore"   --ks-pass pass:android --ks-key-alias androiddebugkey --key-pass pass:android /tmp/release.apk
+adb install -r /tmp/release.apk
+```
+
+Ese APK se instala como `com.giosoft.pdf` (sin el sufijo `.debug`), así que
+**desinstálalo antes de instalar la versión real de Play**: al estar firmado con
+otra llave, Android rechazaría la actualización.
+
+### Qué probar en release, siempre
+
+Lo que R8 puede romper es justo lo que depende de librerías externas o reflexión:
+
+| Función | Qué se ejercita |
+|---|---|
+| Abrir un PDF | `androidx.pdf`, proceso aislado, Room |
+| Escanear | ML Kit (el que falló) |
+| Imprimir | servicio de impresión del sistema |
+| Poner contraseña y reabrir | PDFBox (resuelve filtros y algoritmos por nombre) |
+| Renombrar | SAF y MediaStore |
+| Eliminar del celular | SAF |
+
+Las seis se comprobaron sobre el release firmado antes de dar por buena esta
+versión.
+
+---
+
 ## 12. Trampas conocidas
 
 - **AGP 9 lleva Kotlin integrado.** Aplicar `org.jetbrains.kotlin.android` da
@@ -467,13 +552,8 @@ exactamente como está.
   usuario. Es intencional, y la política de privacidad lo declara; si se quiere
   excluir, hay que escribirlo en `backup_rules.xml` y
   `data_extraction_rules.xml`.
-- **R8 rompía el escáner en release, y en debug no se notaba.** ML Kit crea sus
-  componentes por reflexión al arrancar; R8 en modo completo les quitaba el
-  constructor vacío y tocar «Escanear» mataba la app con un `NullPointerException`
-  dentro de ML Kit. La pista previa está en logcat: `ComponentDiscovery: Invalid
-  component registrar`. Las reglas que lo arreglan están en
-  `proguard-rules.pro`. **Moraleja: probar siempre el APK de release firmado en
-  un dispositivo real antes de subir nada**, porque `installDebug` no pasa por
-  R8 y no enseña estos fallos.
+- **Nunca des por buena una versión que solo probaste con `installDebug`.** R8
+  rompió el escáner en release y en debug no se veía: la historia completa, con
+  el diagnóstico y cómo probar el release sin llave de firma, está en la §11 bis.
 - **La versión anterior (Java + MuPDF, 4.1.0)** está preservada en el tag
   `v4.1.0-java` y la rama `legado-java-v4.1.0`. No borrarlos.

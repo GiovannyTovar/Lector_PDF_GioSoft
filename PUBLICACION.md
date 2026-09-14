@@ -1,187 +1,375 @@
-# Publicar en Google Play
+# Cómo publicar PDF GioSoft en Google Play
 
-Guía para firmar la app y subirla. Lo único que tienes que hacer tú es
-**generar el `.jks` y rellenar `keystore.properties`**; el resto del proyecto ya
-está configurado.
+Guía paso a paso, explicando cada cosa. No hace falta saber nada previo: si sigues
+el orden, funciona.
 
-Estado a 14 de septiembre de 2026: la llave todavía **no está generada**
-(`keystore.properties` no existe, y por eso `bundleRelease` produce un paquete
-sin firmar sin que el build falle).
+**Estado a 14 de septiembre de 2026:** la llave de firma todavía no existe. Ese es
+el paso 2.
 
 ---
 
-## 1. Generar el almacén de llaves — una sola vez en la vida de la app
+## 1. Primero, lo que hay que entender (5 minutos de lectura)
 
-> ⚠️ **Si pierdes este archivo o su contraseña, no podrás volver a actualizar la
-> app publicada. Nunca.** No hay forma de recuperarlo por tu cuenta: la única
-> red de seguridad es activar *Play App Signing* en el paso 5. Haz copia en al
-> menos dos sitios (disco externo y gestor de contraseñas o nube privada).
+### ¿Qué es «firmar» una app?
 
-Crea una carpeta **fuera del repositorio**:
+Cuando subes una app a Google Play, Google necesita una forma de saber que las
+actualizaciones futuras las manda **la misma persona** que subió la primera
+versión. Si no, cualquiera podría publicar una actualización falsa de tu app.
+
+Para eso está la **firma digital**. Funciona como la firma de tu cédula: es tuya,
+nadie más la tiene, y sirve para demostrar que algo lo hiciste tú.
+
+Esa firma vive dentro de un archivo. Ese archivo es la **llave**.
+
+### ¿Qué es el archivo `.jks`?
+
+Es la llave. Un archivo pequeño que tu computador genera una sola vez y que
+queda protegido con una contraseña que tú eliges.
+
+```
+pdfgiosoft-release.jks   ←  este archivo firma todas tus actualizaciones
+```
+
+> ⚠️ **Lo más importante de toda esta guía:**
+> si pierdes ese archivo **o su contraseña**, no puedes volver a actualizar la app
+> en Play. Nunca. Ni escribiendo a Google. Tendrías que publicar una app nueva,
+> desde cero, y quienes tuvieran la vieja no recibirían nunca más una
+> actualización.
+>
+> Por eso el paso 2 insiste tanto en guardar copia.
+
+### ¿Qué es un gestor de contraseñas y por qué te lo pido?
+
+Un **gestor de contraseñas** es una aplicación que guarda contraseñas por ti,
+cifradas, y te las muestra cuando las necesitas. Tú solo recuerdas una contraseña
+(la del gestor) y él recuerda todas las demás.
+
+Seguramente ya usas uno sin saberlo: **el de Google**, ese que te pregunta
+«¿guardar contraseña?» en Chrome; lo ves en
+[passwords.google.com](https://passwords.google.com). Otros conocidos:
+**Bitwarden** (gratis), **1Password**, **KeePass**.
+
+Te lo pido porque la contraseña de la llave **no se puede recuperar**. No hay un
+«olvidé mi contraseña» como en Facebook: no existe nadie al otro lado que pueda
+resetearla. Si la apuntas en un papel y lo pierdes, o confías en acordarte dentro
+de dos años, te quedas sin poder actualizar tu app.
+
+Lo mismo con el archivo `.jks`: guarda una copia en dos sitios distintos (por
+ejemplo, una USB y tu Google Drive privado). No dentro de la carpeta del proyecto,
+porque esa se sube a GitHub y la llave sería pública.
+
+### ¿Qué es un `.aab`?
+
+Es el paquete que se sube a Play. Antes se subían `.apk`; hoy Google pide `.aab`
+(*Android App Bundle*). La diferencia práctica: el `.aab` lleva la app para todos
+los celulares posibles, y Play arma para cada usuario solo el pedacito que su
+celular necesita, así descarga menos.
+
+Tu proyecto ya está configurado para generarlo. Es un comando.
+
+---
+
+## 2. Crear la llave (una sola vez en la vida de la app)
+
+Abre **PowerShell** (busca «PowerShell» en el menú de inicio de Windows) y pega
+esto:
 
 ```powershell
 mkdir C:\Users\GIOVANNY\llaves
 cd C:\Users\GIOVANNY\llaves
 
-keytool -genkeypair -v `
-  -keystore pdfgiosoft-release.jks `
-  -storetype PKCS12 `
-  -keyalg RSA -keysize 4096 `
-  -validity 10000 `
-  -alias pdfgiosoft
+keytool -genkeypair -v -keystore pdfgiosoft-release.jks -storetype PKCS12 -keyalg RSA -keysize 4096 -validity 10000 -alias pdfgiosoft
 ```
 
-`keytool` viene con el JDK. Si el sistema no lo encuentra, está en el JDK de
-Android Studio:
+Traducido: «crea una carpeta llamada `llaves` fuera del proyecto, métete en ella y
+genera una llave llamada `pdfgiosoft-release.jks`».
+
+**Si dice que `keytool` no existe**, es porque esa herramienta viene con Java y
+Windows no sabe dónde está. Usa esta versión, que apunta al Java de Android
+Studio:
 
 ```powershell
-& "C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe" -genkeypair -v `
-  -keystore pdfgiosoft-release.jks -storetype PKCS12 -keyalg RSA -keysize 4096 `
-  -validity 10000 -alias pdfgiosoft
+& "C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe" -genkeypair -v -keystore pdfgiosoft-release.jks -storetype PKCS12 -keyalg RSA -keysize 4096 -validity 10000 -alias pdfgiosoft
 ```
 
-Te pedirá una contraseña (apúntala en el gestor de contraseñas **antes** de
-escribirla) y unos datos: nombre y apellido, unidad, organización, ciudad,
-departamento y código de país (`CO`). No se muestran a los usuarios, pero
-quedan dentro del certificado para siempre.
+### Qué te va a preguntar
 
-`-validity 10000` son unos 27 años. Play exige que el certificado siga válido
-hasta el 22 de octubre de 2033 como mínimo; con 10000 días vas sobrado.
+**Primero, una contraseña.** Invéntate una larga. **Antes de escribirla, guárdala
+en tu gestor de contraseñas** con un nombre claro, tipo «Llave de firma PDF
+GioSoft». No la escribas primero y la guardes después: al escribirla no se ve en
+pantalla y es fácil equivocarse.
 
-## 2. Rellenar keystore.properties
+**Después, unos datos tuyos**, uno por línea. Puedes responder así:
+
+| Pregunta en inglés | Qué poner |
+|---|---|
+| What is your first and last name? | Giovanny Tovar |
+| What is the name of your organizational unit? | GioSoft |
+| What is the name of your organization? | GioSoft |
+| What is the name of your City or Locality? | Bogota |
+| What is the name of your State or Province? | Cundinamarca |
+| What is the two-letter country code? | CO |
+
+Al final te pregunta `Is CN=Giovanny Tovar, OU=GioSoft... correct?` → escribe
+**`yes`** y Enter.
+
+Esos datos quedan dentro del certificado para siempre, pero **no se muestran a los
+usuarios** en Play. Evita tildes y la ñ.
+
+Cuando termine, comprueba que el archivo está ahí:
+
+```powershell
+dir C:\Users\GIOVANNY\llaves
+```
+
+**Ahora, antes de seguir: copia ese `.jks` a otro sitio.** Una USB, un disco
+externo, tu Drive personal. Es el momento, no «luego».
+
+---
+
+## 3. Decirle al proyecto dónde está la llave
+
+El proyecto no sabe dónde guardaste la llave ni cuál es su contraseña. Se lo dices
+en un archivo llamado `keystore.properties`. Ese archivo **no se sube a GitHub**
+(está en la lista de exclusiones), así que tu contraseña no se hace pública.
 
 ```powershell
 cd C:\Users\GIOVANNY\AndroidStudioProjects\PDFGioSoft
 copy keystore.properties.template keystore.properties
+notepad keystore.properties
 ```
 
-Edita `keystore.properties`:
+Se abre el Bloc de notas. Déjalo así, con tu contraseña de verdad:
 
 ```properties
 storeFile=C:/Users/GIOVANNY/llaves/pdfgiosoft-release.jks
-storePassword=LA_QUE_PUSISTE
+storePassword=AQUI_TU_CONTRASEÑA
 keyAlias=pdfgiosoft
-keyPassword=LA_QUE_PUSISTE
+keyPassword=AQUI_TU_CONTRASEÑA
 ```
 
-> Barras normales `/`, no `\`.
-> Si en `keytool` aceptaste la misma contraseña para la llave que para el
-> almacén, `keyPassword` y `storePassword` son iguales.
-> Este archivo y los `.jks` están en `.gitignore`: nunca se suben al repositorio.
+Dos detalles que dan guerra:
 
-## 3. Generar el paquete firmado
+- Las barras van **así `/`**, no así `\`. Aunque Windows use las otras.
+- `storePassword` y `keyPassword` son la misma contraseña si, cuando `keytool` te
+  preguntó por la contraseña de la llave, solo pulsaste Enter para reutilizar la
+  del almacén (que es lo normal).
 
-Google Play exige **Android App Bundle (`.aab`)**:
+Guarda y cierra.
+
+---
+
+## 4. Generar el paquete para Play
 
 ```powershell
+cd C:\Users\GIOVANNY\AndroidStudioProjects\PDFGioSoft
 .\gradlew.bat bundleRelease
 ```
 
-Queda en `app/build/outputs/bundle/release/app-release.aab`.
+Tarda unos minutos. Cuando termine con `BUILD SUCCESSFUL`, tu paquete está en:
 
-Comprobar que de verdad está firmado (si falta la llave, el archivo existe
-igualmente pero **sin firma**, y Play lo rechaza):
-
-```powershell
-& "$env:LOCALAPPDATA\Android\Sdk\build-tools\36.0.0\apksigner.bat" verify --verbose --print-certs `
-  (Get-ChildItem app\build\outputs\apk\release\*.apk).FullName
+```
+app\build\outputs\bundle\release\app-release.aab
 ```
 
-`apksigner` trabaja sobre APK, así que para esa comprobación genera también
-`.\gradlew.bat assembleRelease`. Debe aparecer tu certificado y
-`Verified using v2 scheme: true`.
-
-## 4. Probar el `.aab` antes de subirlo
-
-Un `.aab` no se instala directamente. Dos caminos:
-
-- **Recomendado:** súbelo a un canal de **prueba interna** en Play Console e
-  instálalo desde el enlace que te da. Es la misma tubería que usará la gente.
-- **A mano:** con [`bundletool`](https://github.com/google/bundletool/releases):
+**Comprueba que quedó firmado.** Esto importa: si algo falla con la llave, el
+proyecto genera el paquete igual, pero **sin firma**, y no falla el build (es a
+propósito, para que cualquiera pueda compilar el proyecto sin tener tus llaves).
+Un paquete sin firma, Play lo rechaza.
 
 ```powershell
-java -jar bundletool.jar build-apks --bundle=app\build\outputs\bundle\release\app-release.aab `
-  --output=pdfgiosoft.apks --connected-device `
-  --ks=C:\Users\GIOVANNY\llaves\pdfgiosoft-release.jks --ks-key-alias=pdfgiosoft
-java -jar bundletool.jar install-apks --apks=pdfgiosoft.apks
+.\gradlew.bat assembleRelease
+& "$env:LOCALAPPDATA\Android\Sdk\build-tools\36.0.0\apksigner.bat" verify --print-certs app\build\outputs\apk\release\app-release.apk
 ```
 
-## 5. Play App Signing: actívalo
+Tiene que salir tu nombre en `Signer #1 certificate DN:`. Si sale
+`Android Debug` o un error de «no firmado», revisa el paso 3.
 
-Al crear la app en Play Console, acepta **Play App Signing**. Tu `.jks` pasa a
-ser la *llave de carga*: tú firmas el `.aab` con ella y Google lo vuelve a
-firmar con la llave de distribución, que custodia él. La ventaja es concreta:
-si algún día pierdes tu `.jks`, puedes pedir el cambio de llave de carga y
-seguir actualizando la app. Sin esto, perder el archivo significa perder la app.
+---
 
-## 6. Antes de subir
+## 5. Probar el paquete de release ANTES de subirlo
 
-- [ ] `versionCode` incrementado en `app/build.gradle.kts` (Play rechaza repetidos)
-- [ ] `versionName` actualizado
-- [ ] `.aab` probado en un dispositivo real
-- [ ] **Probadas sobre el paquete de release** (no el de debug) las cuatro
-      funciones que R8 puede romper: abrir un PDF, escanear, imprimir y poner
-      contraseña. R8 solo actúa en release, así que un fallo suyo no aparece
-      con `installDebug`
-- [ ] **Política de privacidad publicada** en una URL pública y sin login
-      (está en [`web/privacidad.html`](web/privacidad.html); ver §7)
-- [ ] Formulario de **Seguridad de los datos** completado (ver §8)
-- [ ] Capturas (mínimo 2 de teléfono), icono 512×512, gráfico destacado 1024×500
-- [ ] Descripción corta y larga
-- [ ] Cuestionario de clasificación de contenido
-- [ ] País de residencia y datos fiscales del desarrollador
+Este paso parece opcional y no lo es. Lo que instalas normalmente en el celular
+(`installDebug`) **no es lo mismo** que lo que va a Play.
 
-## 7. La página legal
+La versión que va a Play pasa por **R8**, un programa que recorta y comprime el
+código: borra lo que cree que nadie usa y acorta los nombres internos para que la
+app pese menos. El problema es que a veces se equivoca y borra algo que sí hacía
+falta, y entonces la app falla **solo en la versión de Play**.
 
-En [`web/`](web) están listas para publicar: `index.html`, `ayuda.html`,
-`privacidad.html`, `terminos.html` y `estilos.css`. Se suben a Cloudflare Pages
-(o a cualquier hosting estático) arrastrando la carpeta.
+No es teoría: en este proyecto pasó. R8 dejaba sin un pedazo al escáner de
+documentos, y tocar «Escanear» cerraba la app de golpe. En la versión de
+desarrollo funcionaba perfecto. Está arreglado (ver `app/proguard-rules.pro`),
+pero la lección queda: **prueba siempre la versión real.**
 
-A Play se le da la URL directa de `privacidad.html`. **Esa URL vive en Play
-Console, no dentro del APK**: cambiar de dominio más adelante no obliga a
-publicar una versión nueva de la app.
+Cómo probarla, de la forma más parecida a lo que recibirá la gente: sube el
+`.aab` a un canal de **prueba interna** en Play Console e instálalo desde el
+enlace que te da Google. Ahí abre la app y comprueba a mano:
 
-## 8. Seguridad de los datos: lo que hay que declarar
+- [ ] Abrir un PDF
+- [ ] Escanear un papel
+- [ ] Imprimir
+- [ ] Ponerle contraseña a un PDF, cerrar y volver a abrirlo
+- [ ] Renombrar un documento
+- [ ] Eliminar del celular
 
-La app no recoge datos personales, pero el formulario pregunta por todo lo que
-la app *puede* hacer, incluidas las librerías que arrastra:
+---
 
-- **Ubicación, contactos, mensajes, fotos:** nada.
-- **Archivos y documentos:** el usuario elige cada archivo con el selector del
-  sistema. No se recogen ni se envían; solo se copian dentro del propio
-  dispositivo en los dos casos descritos en la política.
-- **Datos de diagnóstico:** el escáner de ML Kit arrastra
-  `com.google.android.datatransport:transport-backend-cct`, que **añade
-  `android.permission.INTERNET` y `ACCESS_NETWORK_STATE` al manifiesto final**
-  aunque el proyecto no los declare. Es telemetría de Google sobre su propio
-  componente. Compruébalo tú mismo antes de responder el formulario:
+## 6. Play App Signing: actívalo, es tu seguro
+
+Cuando crees la app en Play Console, Google te ofrece **Play App Signing**. Di que
+sí.
+
+Qué significa: tu llave pasa a ser la *llave de carga* (con ella firmas lo que
+subes), y Google guarda una copia de la llave de distribución real. Si algún día
+pierdes tu `.jks`, puedes pedirle a Google cambiar la llave de carga y seguir
+actualizando tu app.
+
+Es la única red de seguridad que existe para lo que se advierte en el paso 1.
+Sin esto, perder el archivo significa perder la app.
+
+---
+
+## 7. Subir la página web (privacidad, términos y ayuda)
+
+Google **exige** una dirección web pública con tu política de privacidad, y no
+acepta un PDF ni un documento de Google: tiene que ser una página normal, abierta,
+sin pedir cuenta para verla.
+
+Ya está escrita, en la carpeta [`web/`](web) del proyecto:
+
+```
+web/index.html        portada con enlaces
+web/ayuda.html        cómo usar la app
+web/privacidad.html   ← esta es la URL que le das a Play
+web/terminos.html     condiciones de uso
+web/estilos.css       los colores y la tipografía (no se toca)
+```
+
+### Subirla a Cloudflare, paso a paso
+
+Como ya tienes `cremanti.com` comprado ahí, lo más fácil es **Cloudflare Pages**,
+que es gratis:
+
+1. Entra en [dash.cloudflare.com](https://dash.cloudflare.com) con tu cuenta.
+2. En el menú de la izquierda: **Compute (Workers & Pages)** → botón
+   **Create** → pestaña **Pages** → **Upload assets**.
+3. Ponle nombre al proyecto: `pdfgiosoft`. Clic en **Create project**.
+4. Arrastra ahí la carpeta `web` entera desde el explorador de Windows
+   (`C:\Users\GIOVANNY\AndroidStudioProjects\PDFGioSoft\web`). Suelta y espera a
+   que suban los cinco archivos.
+5. Clic en **Deploy site**. En menos de un minuto te da una dirección tipo
+   `https://pdfgiosoft.pages.dev`.
+6. Ábrela en el navegador y comprueba que se ve bien, sobre todo
+   `https://pdfgiosoft.pages.dev/privacidad.html`.
+
+**Esa dirección ya sirve para Play.** Puedes parar aquí si quieres.
+
+### Ponerle tu dominio (opcional)
+
+Si prefieres que se vea `legal.cremanti.com` en vez de `pdfgiosoft.pages.dev`:
+
+1. Dentro del proyecto recién creado, pestaña **Custom domains** → **Set up a
+   custom domain**.
+2. Escribe `legal.cremanti.com` y confirma. Como el dominio ya está en tu misma
+   cuenta de Cloudflare, él solo crea lo que hace falta; no tienes que tocar DNS.
+3. En un par de minutos funcionan **las dos** direcciones.
+
+### Cuando tengas el dominio de GioSoft
+
+No hay que republicar la app, y esto es importante que quede claro: **la dirección
+de la política vive en Play Console, no dentro de la app**. Cambiarla es editar un
+campo en la web de Google.
+
+Cuando llegue el momento:
+
+1. Añade el dominio nuevo al **mismo** proyecto de Pages (igual que el paso
+   anterior).
+2. En Play Console, cambia la URL de la política de privacidad por la nueva.
+3. Deja `cremanti.com` apuntando al mismo sitio, o crea una redirección, mientras
+   sigan circulando enlaces viejos. Y mantén ese dominio renovado.
+
+### Para actualizar la página más adelante
+
+Cambias los archivos de `web/` en tu computador, vuelves al proyecto en Cloudflare
+Pages → **Create deployment** → arrastras la carpeta otra vez. La dirección no
+cambia.
+
+---
+
+## 8. Rellenar la ficha en Play Console
+
+Además del paquete, Google pide:
+
+- [ ] **Capturas de pantalla**: mínimo 2 de teléfono. Se sacan con el celular
+      (botón de encendido + volumen abajo) abriendo la app.
+- [ ] **Icono** de 512×512 píxeles y **gráfico destacado** de 1024×500.
+- [ ] **Descripción corta** (80 caracteres) y **descripción larga**.
+- [ ] **Clasificación de contenido**: un cuestionario. Responde que no hay
+      violencia, ni sexo, ni apuestas, ni compras. Sale «Apto para todos».
+- [ ] **Política de privacidad**: la URL del paso 7.
+- [ ] **Seguridad de los datos**: ver abajo, tiene truco.
+- [ ] **Datos fiscales y país** del desarrollador.
+- [ ] `versionCode` subido en `app/build.gradle.kts` si ya subiste una versión
+      antes (Play rechaza dos paquetes con el mismo número).
+
+### El formulario de «Seguridad de los datos»
+
+Es una declaración jurada sobre qué datos recoge tu app. Miente aquí (aunque sea
+sin querer) y te pueden retirar la app. Para PDF GioSoft:
+
+- **¿Recoge datos de usuario?** → **No.** No hay cuentas, ni analítica, ni
+  publicidad, ni rastreo.
+- **¿Comparte datos con terceros?** → **No.**
+- **¿Los archivos del usuario salen del dispositivo?** → **No.** El usuario elige
+  cada archivo con el selector del sistema; las únicas copias que hace la app se
+  quedan en el propio celular, en Documentos/Mis PDF.
+- **Detalle que no es obvio y conviene declarar:** el escáner es un componente de
+  Google (ML Kit) y ese componente trae consigo una librería de telemetría propia
+  que **añade permiso de Internet a tu app** aunque tu código no lo pida, y puede
+  enviarle a Google datos técnicos sobre su propio funcionamiento (no tus
+  documentos). Está declarado en la política de privacidad publicada, sección 8.
+
+Puedes comprobarlo tú mismo:
 
 ```powershell
 .\gradlew.bat :app:processReleaseManifestForPackage
 Select-String "uses-permission" app\build\intermediates\merged_manifest\release\*\AndroidManifest.xml
-Select-String -Context 2 "INTERNET" app\build\outputs\logs\manifest-merger-release-report.txt
 ```
 
-- **Permiso propio:** `USE_BIOMETRIC`, que Android clasifica como *normal*. La
-  app nunca accede a datos biométricos; solo recibe del sistema un sí o un no.
+---
 
-## 9. Notas técnicas
+## 9. Detalles técnicos (para consultar, no para memorizar)
 
-- `compileSdk` **37** · `targetSdk` **36** · `minSdk` **31** (Android 12)
+- `compileSdk` **37** · `targetSdk` **36** · `minSdk` **31** (Android 12 en
+  adelante).
 - AGP **9.4.0**, Gradle **9.7.1**, Java **17**. Kotlin va integrado en AGP:
-  aplicar `org.jetbrains.kotlin.android` da error
-- Release con **R8** (`isMinifyEnabled`) y `shrinkResources`
-- El motor de PDF es `androidx.pdf`, Apache 2.0 y **sin librerías nativas
-  propias** (ver [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) §2)
+  aplicar `org.jetbrains.kotlin.android` da error.
+- El release usa **R8** (`isMinifyEnabled`) y `shrinkResources`.
+- Motor de PDF: `androidx.pdf`, licencia Apache 2.0, **sin librerías nativas
+  propias** (ver [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) §2).
 - El paquete incluye dos `.so` que vienen de AndroidX
-  (`libandroidx.graphics.path.so` y `libdatastore_shared_counter.so`).
-  **Ambas están alineadas a 16 KB**, el requisito de Play; verificado leyendo
-  las cabeceras de programa del ELF (`p_align = 0x4000` en los segmentos LOAD)
-- El build de debug usa `applicationIdSuffix .debug`: puedes tener instaladas a
-  la vez la de Play y la de desarrollo. Ese sufijo no llega a Play
-- El diálogo «Acerca de» ya **no** incluye el número de cuenta para donaciones
-  que tenía la v4.x. No lo vuelvas a añadir sin revisar la política de pagos de
-  Play: pedir donaciones fuera de su facturación está restringido, y la exención
-  suele ser para organizaciones sin ánimo de lucro registradas, no para personas
-- Si Play sube el `targetSdk` mínimo (suele anunciarlo cada agosto), comprueba
-  el nivel vigente en Play Console antes de publicar
+  (`libandroidx.graphics.path.so` y `libdatastore_shared_counter.so`), **ambas
+  alineadas a 16 KB**, que es lo que exige Play; verificado leyendo las cabeceras
+  del ELF (`p_align = 0x4000`).
+- La app de desarrollo se instala como `com.giosoft.pdf.debug`, para que convivan
+  en el mismo celular con la de Play. **Ese sufijo `.debug` no llega a Play**: el
+  `.aab` de release se publica como `com.giosoft.pdf`.
+- Idiomas incluidos: español, inglés, francés y portugués.
+- El diálogo «Acerca de» ya **no** incluye el número de cuenta para donaciones que
+  tenía la v4.x. No lo vuelvas a poner sin revisar la política de pagos de Play:
+  pedir donaciones fuera de su sistema de facturación está restringido, y la
+  excepción suele ser para fundaciones registradas, no para personas.
+- Si Play sube el `targetSdk` mínimo exigido (suele anunciarlo cada agosto),
+  comprueba el nivel vigente en Play Console antes de publicar.
+
+---
+
+## 10. Resumen en cinco líneas
+
+1. Genera la llave y **guárdala en dos sitios + la contraseña en un gestor**.
+2. `copy keystore.properties.template keystore.properties` y rellénalo.
+3. `.\gradlew.bat bundleRelease` y comprueba que quedó firmado.
+4. Sube la carpeta `web/` a Cloudflare Pages y quédate con la URL de
+   `privacidad.html`.
+5. Sube el `.aab` a prueba interna, pruébalo de verdad en el celular, y publica.
