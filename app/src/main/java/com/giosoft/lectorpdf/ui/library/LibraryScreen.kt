@@ -83,6 +83,7 @@ import com.giosoft.lectorpdf.data.SafDocuments
 import com.giosoft.lectorpdf.data.db.DocumentEntity
 import com.giosoft.lectorpdf.data.PublicDocuments
 import com.giosoft.lectorpdf.scan.DocumentScanner
+import com.giosoft.lectorpdf.security.DeviceLock
 import com.giosoft.lectorpdf.ui.scan.ScanSaveDialog
 import com.giosoft.lectorpdf.ui.settings.SettingsDialog
 import com.giosoft.lectorpdf.ui.about.AboutDialog
@@ -122,8 +123,32 @@ fun LibraryScreen(
     var deletingAllowed by remember { mutableStateOf(true) }
     var pendingScanPdf by remember { mutableStateOf<Uri?>(null) }
 
+    val activity = context as? Activity
+
     val documentActions = DocumentActions(
-        onOpen = { onOpenDocument(it.uri) },
+        onOpen = { document ->
+            if (!document.isLocked) {
+                onOpenDocument(document.uri)
+            } else if (activity == null) {
+                onOpenDocument(document.uri)
+            } else {
+                scope.launch {
+                    val ok = DeviceLock.authenticate(
+                        activity = activity,
+                        title = context.getString(R.string.lock_prompt_title),
+                        subtitle = context.getString(
+                            R.string.lock_prompt_subtitle,
+                            document.name,
+                        ),
+                    )
+                    if (ok) {
+                        onOpenDocument(document.uri)
+                    } else {
+                        snackbarHost.showSnackbar(context.getString(R.string.lock_failed))
+                    }
+                }
+            }
+        },
         onRename = { document ->
             scope.launch {
                 renamingAllowed = viewModel.canRename(document)
@@ -142,6 +167,16 @@ fun LibraryScreen(
         onSaveToMisPdf = { viewModel.saveToMisPdf(it) },
         onMoveToCategory = { movingDocuments = listOf(it) },
         onToggleSelection = viewModel::toggleSelection,
+        onToggleLocked = { document ->
+            // Sin huella ni PIN configurados la proteccion no serviria de nada.
+            if (activity != null && !document.isLocked && !DeviceLock.isAvailable(activity)) {
+                scope.launch {
+                    snackbarHost.showSnackbar(context.getString(R.string.lock_unavailable))
+                }
+            } else {
+                viewModel.toggleLocked(document)
+            }
+        },
     )
 
     // --- Selector del sistema: abre el archivo ORIGINAL, sin copiarlo ---

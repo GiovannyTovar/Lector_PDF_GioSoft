@@ -237,6 +237,15 @@ class LibraryViewModel(
     suspend fun registerPickedDocument(uri: Uri, persistable: Boolean): DocumentEntity =
         repository.registerOpened(uri, persistable)
 
+    fun toggleLocked(document: DocumentEntity) = viewModelScope.launch {
+        repository.setLocked(document, !document.isLocked)
+        messages.send(
+            UiMessage(
+                if (document.isLocked) R.string.lock_removed else R.string.lock_added,
+            ),
+        )
+    }
+
     fun toggleFavorite(document: DocumentEntity) = viewModelScope.launch {
         repository.setFavorite(document, !document.isFavorite)
     }

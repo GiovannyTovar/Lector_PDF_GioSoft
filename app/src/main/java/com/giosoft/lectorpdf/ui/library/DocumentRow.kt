@@ -24,6 +24,8 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.DriveFileRenameOutline
 import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.PictureAsPdf
 import androidx.compose.material.icons.outlined.SaveAlt
@@ -82,6 +84,7 @@ data class DocumentActions(
     val onSaveToMisPdf: (DocumentEntity) -> Unit,
     val onMoveToCategory: (DocumentEntity) -> Unit,
     val onToggleSelection: (DocumentEntity) -> Unit,
+    val onToggleLocked: (DocumentEntity) -> Unit,
 )
 
 /** Cada documento en su propia tarjeta blanca, con sombra muy suave. */
@@ -167,7 +170,7 @@ private fun DocumentRow(
             mutableStateOf<android.graphics.Bitmap?>(null)
         }
         LaunchedEffect(document.uri, showThumbnail) {
-            thumbnail = if (showThumbnail) {
+            thumbnail = if (showThumbnail && !document.isLocked) {
                 Thumbnails.firstPage(context, Uri.parse(document.uri))
             } else {
                 null
@@ -211,6 +214,15 @@ private fun DocumentRow(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // Punto del color de su categoria: permite reconocerla de un
                 // vistazo cuando se esta viendo "Todos".
+                if (document.isLocked) {
+                    Icon(
+                        imageVector = Icons.Outlined.Lock,
+                        contentDescription = stringResource(R.string.action_lock),
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(14.dp),
+                    )
+                    Spacer(Modifier.width(5.dp))
+                }
                 categoryColor?.let { color ->
                     Surface(modifier = Modifier.size(9.dp), shape = CircleShape, color = color) {}
                     Spacer(Modifier.width(6.dp))
@@ -313,6 +325,23 @@ private fun DocumentRow(
                         )
                     },
                     onClick = { menuOpen = false; actions.onToggleFavorite(document) },
+                )
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            stringResource(
+                                if (document.isLocked) R.string.action_unlock
+                                else R.string.action_lock,
+                            ),
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            if (document.isLocked) Icons.Outlined.LockOpen else Icons.Outlined.Lock,
+                            null,
+                        )
+                    },
+                    onClick = { menuOpen = false; actions.onToggleLocked(document) },
                 )
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.move_to_category)) },

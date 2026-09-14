@@ -43,6 +43,9 @@ interface DocumentDao {
     @Query("UPDATE documents SET location = :location WHERE uri = :uri")
     suspend fun updateLocation(uri: String, location: String?)
 
+    @Query("UPDATE documents SET isLocked = :locked WHERE uri = :uri")
+    suspend fun updateLocked(uri: String, locked: Boolean)
+
     @Query("UPDATE documents SET categoryId = :categoryId WHERE uri = :uri")
     suspend fun updateCategory(uri: String, categoryId: Long?)
 

@@ -86,6 +86,7 @@ class DocumentRepository(
             persistable = persistable || (existing?.persistable ?: false),
             location = SafDocuments.locationLabel(context, uri) ?: existing?.location,
             contentHash = contentHash ?: existing?.contentHash,
+            isLocked = existing?.isLocked ?: false,
         )
         dao.upsert(entity)
         return entity
@@ -122,6 +123,9 @@ class DocumentRepository(
 
     /** Reinserta una ficha; se usa para el "Deshacer" del historial. */
     suspend fun restore(entity: DocumentEntity) = dao.upsert(entity)
+
+    suspend fun setLocked(entity: DocumentEntity, locked: Boolean) =
+        dao.updateLocked(entity.uri, locked)
 
     suspend fun setFavorite(entity: DocumentEntity, favorite: Boolean) =
         dao.updateFavorite(entity.uri, favorite)

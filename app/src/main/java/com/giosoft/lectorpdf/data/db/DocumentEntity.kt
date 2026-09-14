@@ -42,4 +42,9 @@ data class DocumentEntity(
     val contentHash: String? = null,
     /** Categoria a la que el usuario lo asigno. null = sin categoria. */
     val categoryId: Long? = null,
+    /**
+     * Exige desbloquear el celular para abrirlo. Tampoco genera miniatura, o
+     * la lista mostraria justo el contenido que se quiso proteger.
+     */
+    val isLocked: Boolean = false,
 )

@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Sin permisos peligrosos: los archivos se leen con el selector del
-         sistema (SAF), que concede el acceso archivo por archivo. -->
+    <!-- Sin permisos PELIGROSOS: los archivos se leen con el selector del
+         sistema (SAF), que concede el acceso archivo por archivo, y el escaner
+         corre dentro de los servicios de Google Play.
+
+         USE_BIOMETRIC es un permiso "normal": Android lo concede al instalar,
+         sin preguntar al usuario, y solo habilita pedir huella o PIN. Sin
+         declararlo, consultar el sistema lanza SecurityException. -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
     <application
         android:name=".LectorPdfApp"

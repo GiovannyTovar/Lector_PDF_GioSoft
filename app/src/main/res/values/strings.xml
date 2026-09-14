@@ -57,6 +57,14 @@ Tus documentos NO se borran: quedarán como «Sin categoría».</string>
     <string name="action_share">Compartir</string>
     <string name="action_print">Imprimir</string>
     <string name="action_favorite">Añadir a favoritos</string>
+    <string name="action_lock">Proteger con desbloqueo</string>
+    <string name="action_unlock">Quitar la protección</string>
+    <string name="lock_added">Documento protegido</string>
+    <string name="lock_removed">Protección retirada</string>
+    <string name="lock_prompt_title">Documento protegido</string>
+    <string name="lock_prompt_subtitle">Desbloquea para abrir «%1$s»</string>
+    <string name="lock_unavailable">Configura una huella, un PIN o una contraseña en tu celular para usar esta función</string>
+    <string name="lock_failed">No se pudo verificar tu identidad</string>
     <string name="action_unfavorite">Quitar de favoritos</string>
     <string name="action_remove_from_history">Quitar de la lista</string>
     <string name="action_delete_device">Eliminar del celular</string>
@@ -146,7 +154,7 @@ Esta acción no se puede deshacer.</string>
     <string name="about_privacy_title">Privacidad</string>
     <string name="privacy_tagline">Todo ocurre dentro de tu celular.</string>
     <string name="privacy_point_permissions_title">Sin permisos peligrosos</string>
-    <string name="privacy_point_permissions_text">La aplicación no declara ningún permiso. Cada archivo lo abres tú con el selector del sistema, que concede el acceso uno por uno.</string>
+    <string name="privacy_point_permissions_text">La aplicación no pide acceso a tu almacenamiento ni a tu cámara. Cada archivo lo abres tú con el selector del sistema, que concede el acceso uno por uno.</string>
     <string name="privacy_point_network_title">Sin conexión a servidores</string>
     <string name="privacy_point_network_text">Tus documentos no se envían a ninguna parte. No hay cuentas, ni analítica, ni publicidad, ni rastreo.</string>
     <string name="privacy_point_copies_title">Sin copias a tus espaldas</string>
