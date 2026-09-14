@@ -451,6 +451,14 @@ Aplicado a PDF GioSoft:
   librería envíe cuenta como "recogido" aunque no sea tu servidor el que lo
   reciba y no sean tus documentos lo que viaja. Está declarado en la política
   de privacidad publicada, sección 8.
+
+  Dentro de esa categoría hay tres casillas; marca **solo «Diagnósticos»**:
+  «Registros de fallos» es específico de reportes de errores (número de
+  fallos, rastreos de pila) y `transport-backend-cct` no es un reportero de
+  fallos, sino una tubería genérica de eventos de uso/rendimiento — la propia
+  definición de Google para «Diagnósticos» incluye textualmente
+  «diagnósticos técnicos», que es justo esto. «Otros datos de rendimiento» no
+  hace falta: es un cajón de sastre para lo que no encaje en las otras dos.
 - **¿Comparte datos con terceros?** → **Sí**, en el sentido estricto de Google:
   la telemetría de ML Kit va a Google. No hay ningún otro tercero.
 
