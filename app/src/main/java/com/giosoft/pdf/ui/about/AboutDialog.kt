@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -277,12 +278,17 @@ private fun AppLogo() {
         contentAlignment = Alignment.Center,
     ) {
         // La capa frontal reserva como margen un tercio de su lienzo, y la
-        // marca ocupa aun menos. Al doble del circulo queda del mismo tamano
-        // relativo que en el lanzador, sin que el texto toque los bordes.
+        // marca ocupa aun menos: dibujada al tamano del circulo se veria
+        // diminuta, flotando en un mar de azul. Ampliada llena el hueco, y el
+        // recorte del circulo se come solo el margen sobrante.
+        //
+        // requiredSize y no size: el Box de arriba tiene tamano fijo y pasa a
+        // sus hijos esas mismas restricciones, asi que un size() mayor se
+        // quedaria recortado al del circulo y la imagen no creceria nada.
         Image(
             painter = painterResource(R.mipmap.ic_launcher_foreground),
             contentDescription = null,
-            modifier = Modifier.size(128.dp),
+            modifier = Modifier.requiredSize(116.dp),
         )
     }
 }
