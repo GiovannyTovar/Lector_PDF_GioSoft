@@ -55,8 +55,9 @@ resetearla. Si la apuntas en un papel y lo pierdes, o confías en acordarte dent
 de dos años, te quedas sin poder actualizar tu app.
 
 Lo mismo con el archivo `.jks`: guarda una copia en dos sitios distintos (por
-ejemplo, una USB y tu Google Drive privado). No dentro de la carpeta del proyecto,
-porque esa se sube a GitHub y la llave sería pública.
+ejemplo, una USB y tu Google Drive privado). Nunca dentro de la carpeta del
+proyecto, porque esa se sube a GitHub y la llave quedaría a la vista de
+cualquiera.
 
 ### ¿Qué es un `.aab`?
 
@@ -71,18 +72,53 @@ Tu proyecto ya está configurado para generarlo. Es un comando.
 
 ## 2. Crear la llave (una sola vez en la vida de la app)
 
-Abre **PowerShell** (busca «PowerShell» en el menú de inicio de Windows) y pega
-esto:
+### Dónde guardarlas cuando tienes varias apps
+
+Cada app lleva **su propia llave**. Podrían compartir una, pero no conviene: si
+algún día vendes una app, o una llave se te escapa, no querrás que eso arrastre
+a las demás. Son archivos de 3 KB; no hay ninguna razón para ahorrar.
+
+Todas juntas en una carpeta madre, una subcarpeta por app:
+
+```
+C:\Users\GIOVANNY\Documents\Trabajo\Giosoft\llaves\
+├── pdfgiosoft\
+│   ├── pdfgiosoft-release.jks
+│   └── datos.txt          ← qué app es, alias y fecha (SIN la contraseña)
+├── maskoti\
+│   ├── maskoti-release.jks
+│   └── datos.txt
+└── copitas\
+    └── ...
+```
+
+Por qué una carpeta madre y no la llave dentro de cada proyecto:
+
+- **Se respaldan todas de una vez.** Copias `llaves\` a una USB y ya está.
+- **No se comparte sin querer.** Si algún día mandas la carpeta de un proyecto o
+  la subes a algún lado, la llave no va dentro.
+
+**La carpeta no puede estar dentro de un proyecto de git.** `Documents\Trabajo\
+Giosoft` no lo es (lo comprobé), así que sirve. Lo que no vale es meterlas en
+`AndroidStudioProjects\...`, porque eso sí se sube a GitHub.
+
+> ⚠️ Esa carpeta **no se sincroniza con OneDrive** en tu equipo: Documents está
+> en el disco local. O sea que ahí no hay copia automática de nada. La copia la
+> tienes que hacer tú.
+
+### Crear la llave
+
+Abre **PowerShell** (búscalo en el menú de inicio) y pega:
 
 ```powershell
-mkdir C:\Users\GIOVANNY\llaves
-cd C:\Users\GIOVANNY\llaves
+mkdir C:\Users\GIOVANNY\Documents\Trabajo\Giosoft\llaves\pdfgiosoft
+cd C:\Users\GIOVANNY\Documents\Trabajo\Giosoft\llaves\pdfgiosoft
 
 keytool -genkeypair -v -keystore pdfgiosoft-release.jks -storetype PKCS12 -keyalg RSA -keysize 4096 -validity 10000 -alias pdfgiosoft
 ```
 
-Traducido: «crea una carpeta llamada `llaves` fuera del proyecto, métete en ella y
-genera una llave llamada `pdfgiosoft-release.jks`».
+Para la siguiente app, cambias las tres veces que aparece `pdfgiosoft` por el
+nombre de esa app y ya está.
 
 **Si dice que `keytool` no existe**, es porque esa herramienta viene con Java y
 Windows no sabe dónde está. Usa esta versión, que apunta al Java de Android
@@ -95,9 +131,12 @@ Studio:
 ### Qué te va a preguntar
 
 **Primero, una contraseña.** Invéntate una larga. **Antes de escribirla, guárdala
-en tu gestor de contraseñas** con un nombre claro, tipo «Llave de firma PDF
-GioSoft». No la escribas primero y la guardes después: al escribirla no se ve en
-pantalla y es fácil equivocarse.
+en tu gestor de contraseñas** con un nombre que diga de qué app es: «Llave de
+firma — PDF GioSoft». Con varias apps esto deja de ser un detalle; dentro de un
+año no vas a saber qué contraseña era de cuál llave.
+
+No la escribas primero y la guardes después: al teclearla no se ve en pantalla y
+es fácil equivocarse sin enterarse.
 
 **Después, unos datos tuyos**, uno por línea. Puedes responder así:
 
@@ -113,19 +152,41 @@ pantalla y es fácil equivocarse.
 Al final te pregunta `Is CN=Giovanny Tovar, OU=GioSoft... correct?` → escribe
 **`yes`** y Enter.
 
-Esos datos quedan dentro del certificado para siempre, pero **no se muestran a los
-usuarios** en Play. Evita tildes y la ñ.
+Esos datos quedan dentro del certificado para siempre, pero **no se muestran a
+los usuarios** en Play. Evita tildes y la ñ.
 
-Cuando termine, comprueba que el archivo está ahí:
+### Dejar constancia de qué es cada llave
+
+Al lado de cada `.jks`, un `datos.txt` con lo que vas a necesitar recordar.
+**Nunca la contraseña**: esa vive en el gestor.
 
 ```powershell
-dir C:\Users\GIOVANNY\llaves
+notepad datos.txt
 ```
 
-**Ahora, antes de seguir: copia ese `.jks` a otro sitio.** Una USB, un disco
-externo, tu Drive personal. Es el momento, no «luego».
+```
+App:           PDF GioSoft
+applicationId: com.giosoft.pdf
+Alias:         pdfgiosoft
+Creada:        septiembre de 2026
+Contraseña:    en el gestor, como "Llave de firma — PDF GioSoft"
+```
 
----
+Y si algún día abres una carpeta y no sabes qué llave es, esto te lo dice (pide
+la contraseña del almacén):
+
+```powershell
+keytool -list -v -keystore pdfgiosoft-release.jks
+```
+
+Te muestra el alias, cuándo se creó, hasta cuándo vale y las huellas del
+certificado.
+
+### Y ahora, la copia de seguridad
+
+**Antes de seguir**, copia la carpeta `llaves` a otro sitio: una USB, un disco
+externo, tu Drive personal. Es el momento, no «luego». Si el disco de este
+computador muere mañana, con él se van todas tus apps.
 
 ## 3. Decirle al proyecto dónde está la llave
 
@@ -142,7 +203,7 @@ notepad keystore.properties
 Se abre el Bloc de notas. Déjalo así, con tu contraseña de verdad:
 
 ```properties
-storeFile=C:/Users/GIOVANNY/llaves/pdfgiosoft-release.jks
+storeFile=C:/Users/GIOVANNY/Documents/Trabajo/Giosoft/llaves/pdfgiosoft/pdfgiosoft-release.jks
 storePassword=AQUI_TU_CONTRASEÑA
 keyAlias=pdfgiosoft
 keyPassword=AQUI_TU_CONTRASEÑA
@@ -412,7 +473,8 @@ Select-String "uses-permission" app\build\intermediates\merged_manifest\release\
 
 ## 10. Resumen en cinco líneas
 
-1. Genera la llave y **guárdala en dos sitios + la contraseña en un gestor**.
+1. Genera la llave en `Documents\Trabajo\Giosoft\llaves\<app>\` y **guárdala en
+   dos sitios, con la contraseña en un gestor**.
 2. `copy keystore.properties.template keystore.properties` y rellénalo.
 3. `.\gradlew.bat bundleRelease` y comprueba que quedó firmado.
 4. Sube la carpeta `web/` a Cloudflare Pages y quédate con la URL de
