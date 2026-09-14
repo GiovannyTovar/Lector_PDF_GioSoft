@@ -413,7 +413,8 @@ Además del paquete, Google pide:
 - [x] **Categoría**: Productividad.
 - [x] **Etiquetas** (hasta 5): PDF, escáner de documentos, gestor de
       documentos, impresión, oficina.
-- [ ] **Descripción corta** (80 caracteres) y **descripción larga**.
+- [x] **Descripción corta** (80 caracteres) y **descripción larga**: redactadas,
+      ver conversación / historial de commits de esta guía.
 - [ ] **Clasificación de contenido**: un cuestionario. Responde que no hay
       violencia, ni sexo, ni apuestas, ni compras. Sale «Apto para todos».
 - [ ] **Política de privacidad**: la URL del paso 7.
