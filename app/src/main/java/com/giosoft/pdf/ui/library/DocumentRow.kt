@@ -327,6 +327,16 @@ private fun DocumentRow(
                 )
             }
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                // El menu va en cuatro grupos, de lo cotidiano a lo que no
+                // tiene vuelta atras: uso diario, proteccion, y las dos formas
+                // de quitar el documento, cada una con su separador.
+                if (!document.persistable) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.action_save_copy)) },
+                        leadingIcon = { Icon(Icons.Outlined.SaveAlt, null) },
+                        onClick = { menuOpen = false; actions.onSaveToMisPdf(document) },
+                    )
+                }
                 DropdownMenuItem(
                     text = {
                         Text(
@@ -345,6 +355,22 @@ private fun DocumentRow(
                     },
                     onClick = { menuOpen = false; actions.onToggleFavorite(document) },
                 )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.action_share)) },
+                    leadingIcon = { Icon(Icons.Outlined.Share, null) },
+                    onClick = { menuOpen = false; actions.onShare(document) },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.action_rename)) },
+                    leadingIcon = { Icon(Icons.Outlined.DriveFileRenameOutline, null) },
+                    onClick = { menuOpen = false; actions.onRename(document) },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.move_to_category)) },
+                    leadingIcon = { Icon(Icons.Outlined.Folder, null) },
+                    onClick = { menuOpen = false; actions.onMoveToCategory(document) },
+                )
+                HorizontalDivider()
                 DropdownMenuItem(
                     text = {
                         Text(
@@ -374,28 +400,7 @@ private fun DocumentRow(
                     },
                     onClick = { menuOpen = false; actions.onChangePassword(document) },
                 )
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.move_to_category)) },
-                    leadingIcon = { Icon(Icons.Outlined.Folder, null) },
-                    onClick = { menuOpen = false; actions.onMoveToCategory(document) },
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.action_rename)) },
-                    leadingIcon = { Icon(Icons.Outlined.DriveFileRenameOutline, null) },
-                    onClick = { menuOpen = false; actions.onRename(document) },
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.action_share)) },
-                    leadingIcon = { Icon(Icons.Outlined.Share, null) },
-                    onClick = { menuOpen = false; actions.onShare(document) },
-                )
-                if (!document.persistable) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.action_save_copy)) },
-                        leadingIcon = { Icon(Icons.Outlined.SaveAlt, null) },
-                        onClick = { menuOpen = false; actions.onSaveToMisPdf(document) },
-                    )
-                }
+                HorizontalDivider()
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.action_remove_from_history)) },
                     leadingIcon = { Icon(Icons.Outlined.Delete, null) },

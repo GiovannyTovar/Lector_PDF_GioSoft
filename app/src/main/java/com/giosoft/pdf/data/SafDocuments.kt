@@ -111,7 +111,15 @@ object SafDocuments {
         val flags = queryColumn(context, uri, DocumentsContract.Document.COLUMN_FLAGS) { c, i ->
             c.getInt(i)
         } ?: return@withContext false
-        flags and DocumentsContract.Document.FLAG_SUPPORTS_RENAME != 0
+        val admite = flags and DocumentsContract.Document.FLAG_SUPPORTS_RENAME != 0
+        // Quien decide es el proveedor, no la app: MediaDocumentsProvider (los
+        // PDF que el selector ofrece en "Recientes" o por tipo de archivo) no
+        // implementa renombrar, mientras que el mismo archivo abierto desde
+        // "Almacenamiento interno" llega por otro proveedor que si lo admite.
+        if (!admite) {
+            Log.i(TAG, "El proveedor ${uri.authority} no admite renombrar (flags=0x${flags.toString(16)})")
+        }
+        admite
     }
 
     /**
