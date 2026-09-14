@@ -156,14 +156,14 @@ Cette action est irréversible.</string>
     <string name="settings_dark_title">Thème sombre</string>
     <string name="settings_dark_desc">Il est aussi dans la barre du haut.</string>
     <string name="about_title">PDF GioSoft</string>
-    <string name="about_tagline">Vos PDF, sans pub et sans prise de tête.</string>
+    <string name="about_tagline">Vos documents, sans publicité et sans complications.</string>
     <string name="about_version">Version %1$s</string>
     <string name="about_developed_by">Giovanny Tovar</string>
-    <string name="about_developer_label">Créée par</string>
+    <string name="about_developer_label">Développée par</string>
     <string name="about_why_title">Pourquoi elle existe</string>
-    <string name="about_why_text">Les lecteurs de PDF que j’essayais étaient pleins de pubs, ou demandaient des autorisations qui n’avaient rien à y faire. Je voulais quelque chose de simple pour ma famille et mes amis : vous ouvrez le document, vous le lisez, et vous passez à autre chose.</string>
+    <string name="about_why_text">Cette application a été créée pour offrir une alternative sans publicité à la lecture de documents PDF. Elle s’adresse tout particulièrement aux amis, à la famille et aux proches, afin de leur faciliter la gestion de leurs documents de façon rapide, privée et sans interruptions.</string>
     <string name="about_what_title">Ce qu’elle fait</string>
-    <string name="about_what_text">Elle ouvre vos fichiers tels quels, sans en faire des copies dans votre dos. Vous les classez par catégories, vous numérisez des papiers avec l’appareil photo, vous imprimez et vous partagez. C’est tout.</string>
+    <string name="about_what_text">Elle ouvre vos fichiers d’origine sans les dupliquer, les classe par catégories, numérise des documents avec l’appareil photo, imprime et partage. Rien de plus, rien de moins.</string>
     <string name="about_thanks">Merci de l’utiliser.</string>
     <string name="about_close">Fermer</string>
 
