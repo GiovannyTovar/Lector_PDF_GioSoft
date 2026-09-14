@@ -163,7 +163,7 @@ Esta ação não pode ser desfeita.</string>
     <string name="about_why_title">Por que ela existe</string>
     <string name="about_why_text">Este aplicativo foi criado com o propósito de oferecer uma alternativa livre de publicidade para a leitura de documentos PDF. É voltado especialmente a amigos, familiares e conhecidos, com o objetivo de facilitar o manejo dos seus documentos de forma rápida, privada e sem interrupções.</string>
     <string name="about_what_title">O que ela faz</string>
-    <string name="about_what_text">Abre seus arquivos originais sem duplicá-los, organiza por categorias, digitaliza documentos com a câmera, imprime e compartilha. Nada mais, nada menos.</string>
+    <string name="about_what_text">Abre seus arquivos originais sem duplicá-los e organiza por categorias e favoritos. Permite pesquisar dentro de um documento, protegê-lo com a digital ou com senha, digitalizar com a câmera, imprimir, compartilhar e ler no modo escuro, entre outras funções.</string>
     <string name="about_thanks">Obrigado por usar.</string>
     <string name="about_close">Fechar</string>
 
