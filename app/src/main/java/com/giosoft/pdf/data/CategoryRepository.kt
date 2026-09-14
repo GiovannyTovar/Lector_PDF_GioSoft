@@ -22,6 +22,7 @@ val CATEGORY_COLORS = listOf(
     0xFFF4511E.toInt(), // naranja intenso
     0xFFFB8C00.toInt(), // naranja
     0xFFFFB300.toInt(), // ambar
+    0xFFFDD835.toInt(), // amarillo
     0xFFC0CA33.toInt(), // lima
     0xFF7CB342.toInt(), // verde claro
     0xFF43A047.toInt(), // verde
@@ -50,13 +51,9 @@ class CategoryRepository(
     suspend fun seedDefaultsIfNeeded(settings: SettingsRepository) {
         if (settings.areCategoriesSeeded()) return
         if (categoryDao.count() == 0) {
-            listOf("Personal", "Trabajo", "Recibos", "Estudio").forEachIndexed { index, name ->
+            DEFAULT_CATEGORIES.forEachIndexed { index, (name, color) ->
                 categoryDao.insert(
-                    CategoryEntity(
-                        name = name,
-                        colorArgb = CATEGORY_COLORS[index % CATEGORY_COLORS.size],
-                        position = index,
-                    ),
+                    CategoryEntity(name = name, colorArgb = color, position = index),
                 )
             }
         }
@@ -108,6 +105,24 @@ class CategoryRepository(
     companion object {
         /** Marca de nombre repetido, para distinguirla de "nombre vacio". */
         const val DUPLICATE = "duplicado"
+
+        /**
+         * Categorias con las que arranca la app.
+         *
+         * Los tres primeros colores siguen el orden de un semaforo (rojo,
+         * amarillo, verde), que se reconoce sin pensarlo. El amarillo es un
+         * tono limon a proposito, para no confundirse con el dorado de la
+         * estrella de favoritos.
+         *
+         * Es solo el punto de partida: el usuario las renombra, recolorea,
+         * reordena o borra a su gusto, y no vuelven a crearse.
+         */
+        private val DEFAULT_CATEGORIES = listOf(
+            "Trabajo" to 0xFFE53935.toInt(),   // rojo
+            "Estudio" to 0xFFFDD835.toInt(),   // amarillo
+            "Personal" to 0xFF43A047.toInt(),  // verde
+            "Facturas" to 0xFF8E24AA.toInt(),  // morado
+        )
     }
 
     suspend fun setColor(category: CategoryEntity, colorArgb: Int) =

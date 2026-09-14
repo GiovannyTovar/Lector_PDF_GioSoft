@@ -20,5 +20,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Lector PDF GioSoft"
+rootProject.name = "PDF GioSoft"
 include(":app")

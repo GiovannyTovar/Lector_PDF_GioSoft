@@ -22,6 +22,14 @@ enum class ThemeMode {
     DARK,
 }
 
+/**
+ * Valor por defecto de la posicion de Favoritos: al final.
+ *
+ * Se usa un numero alto en vez de un indice fijo para que, se creen o se borren
+ * categorias, siga quedando el ultimo hasta que el usuario lo mueva a mano.
+ */
+const val FAVORITES_AT_END = Int.MAX_VALUE
+
 class SettingsRepository(private val context: Context) {
 
     private val themeKey = stringPreferencesKey("theme_mode")
@@ -61,7 +69,7 @@ class SettingsRepository(private val context: Context) {
      * y ademas ser favorito).
      */
     val favoritesPosition: Flow<Int> =
-        context.dataStore.data.map { it[favoritesPositionKey] ?: 0 }
+        context.dataStore.data.map { it[favoritesPositionKey] ?: FAVORITES_AT_END }
 
     suspend fun setFavoritesPosition(position: Int) {
         context.dataStore.edit { it[favoritesPositionKey] = position.coerceAtLeast(0) }

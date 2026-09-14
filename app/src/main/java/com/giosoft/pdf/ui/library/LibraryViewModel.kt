@@ -124,7 +124,7 @@ class LibraryViewModel(
                 isEmpty = filtered.isEmpty(),
                 hasAnyDocument = documents.isNotEmpty(),
                 categories = allCategories,
-                favoritesPosition = favPosition,
+                favoritesPosition = favPosition.coerceIn(0, allCategories.size),
                 showThumbnails = thumbnails,
                 // Solo se conservan los seleccionados que siguen visibles tras
                 // filtrar o buscar, para no operar sobre lo que no se ve.
