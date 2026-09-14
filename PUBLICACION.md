@@ -498,6 +498,24 @@ Select-String "uses-permission" app\build\intermediates\merged_manifest\release\
 
 ---
 
+### ID de publicidad
+
+En algún punto del formulario, Play pregunta si la app usa un ID de
+publicidad (`com.google.android.gms.permission.AD_ID`). Respuesta: **No**.
+Verificado en el manifiesto de release fusionado — solo aparecen
+`USE_BIOMETRIC`, `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`,
+`ACCESS_NETWORK_STATE` e `INTERNET`. Ninguna dependencia del proyecto es un
+SDK de publicidad; el permiso `AD_ID` no aparece en ningún sitio:
+
+```powershell
+.\gradlew.bat :app:processReleaseManifestForPackage
+Select-String "AD_ID" appuild\intermediates\merged_manifestelease\*\AndroidManifest.xml
+```
+
+Si algún día añades un SDK que sí lo traiga, este comando vuelve a decírtelo.
+
+---
+
 ## 9. Detalles técnicos (para consultar, no para memorizar)
 
 - `compileSdk` **37** · `targetSdk` **36** · `minSdk` **31** (Android 12 en
