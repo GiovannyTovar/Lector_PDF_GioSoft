@@ -35,6 +35,9 @@ fun AppDialog(
     onConfirm: () -> Unit,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
+    /** Alternativa a [icon] cuando lo que va en el encabezado no es un icono
+     *  del sistema, como el logo de la app. Tiene prioridad sobre [icon]. */
+    iconContent: (@Composable () -> Unit)? = null,
     iconTint: Color = MaterialTheme.colorScheme.primary,
     dismissText: String? = null,
     confirmEnabled: Boolean = true,
@@ -49,7 +52,7 @@ fun AppDialog(
         shape = RoundedCornerShape(28.dp),
         tonalElevation = 0.dp,
         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-        icon = icon?.let {
+        icon = iconContent ?: icon?.let {
             {
                 // Icono dentro de un circulo tenue de su propio color: da peso
                 // al encabezado sin recurrir a un bloque de color plano.

@@ -1,5 +1,6 @@
 package com.giosoft.pdf.ui.about
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,7 +22,6 @@ import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Fingerprint
 import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.PictureAsPdf
 import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.HorizontalDivider
@@ -33,6 +33,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,9 +59,13 @@ fun AboutDialog(
     onDismiss: () -> Unit,
 ) {
     AppDialog(
-        icon = when (section) {
-            AboutSection.ABOUT -> Icons.Outlined.PictureAsPdf
-            AboutSection.PRIVACY -> Icons.Outlined.Shield
+        // En "Acerca de" el encabezado es el logo de la app, no un icono
+        // generico de PDF: es la pantalla donde la app se presenta.
+        icon = if (section == AboutSection.PRIVACY) Icons.Outlined.Shield else null,
+        iconContent = if (section == AboutSection.ABOUT) {
+            { AppLogo() }
+        } else {
+            null
         },
         title = stringResource(
             when (section) {
@@ -248,6 +255,34 @@ private fun InfoLine(label: String, value: String) {
             text = value,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
+        )
+    }
+}
+
+/**
+ * El logo de la app, el mismo que se ve en el lanzador.
+ *
+ * Se compone a mano la capa frontal sobre su color de fondo. No se puede usar
+ * `R.mipmap.ic_launcher_round` directamente: desde Android 8 ese recurso es un
+ * XML de icono adaptativo, y `painterResource` solo admite vectores y mapas de
+ * bits ("Only VectorDrawables and rasterized asset types are supported").
+ */
+@Composable
+private fun AppLogo() {
+    Box(
+        modifier = Modifier
+            .size(64.dp)
+            .clip(CircleShape)
+            .background(colorResource(R.color.ic_launcher_background)),
+        contentAlignment = Alignment.Center,
+    ) {
+        // La capa frontal reserva como margen un tercio de su lienzo, y la
+        // marca ocupa aun menos. Al doble del circulo queda del mismo tamano
+        // relativo que en el lanzador, sin que el texto toque los bordes.
+        Image(
+            painter = painterResource(R.mipmap.ic_launcher_foreground),
+            contentDescription = null,
+            modifier = Modifier.size(128.dp),
         )
     }
 }
