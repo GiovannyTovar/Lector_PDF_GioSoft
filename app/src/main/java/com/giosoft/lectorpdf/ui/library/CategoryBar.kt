@@ -79,9 +79,9 @@ fun CategoryBar(
                         onClick = { onSelect(LibraryFilter.Favorites) },
                     )
                 }
-            }
-            val categoryIndex = if (slot >= favoritesIndex) slot - 1 else slot
-            if (categoryIndex in categories.indices) {
+            } else {
+                // Cada paso emite UNA cosa: o Favoritos, o una categoria.
+                val categoryIndex = if (slot > favoritesIndex) slot - 1 else slot
                 val category = categories[categoryIndex]
                 item(key = "cat-${category.id}") {
                     Chip(

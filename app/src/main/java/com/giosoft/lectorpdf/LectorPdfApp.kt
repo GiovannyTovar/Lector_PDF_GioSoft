@@ -19,9 +19,16 @@ class LectorPdfApp : Application() {
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(this)
-        // Crear las categorias sugeridas la primera vez, fuera del hilo principal.
-        CoroutineScope(Dispatchers.IO).launch {
-            container.categoryRepository.seedDefaultsIfNeeded(container.settingsRepository)
+
+        // onCreate() se ejecuta en TODOS los procesos de la app, incluido el
+        // proceso aislado donde androidx.pdf parsea los documentos. Ese proceso
+        // tiene prohibido abrir bases de datos (SecurityException: "Isolated
+        // process not allowed to call getContentProvider"), asi que la siembra
+        // solo debe correr en el proceso principal.
+        if (getProcessName() == packageName) {
+            CoroutineScope(Dispatchers.IO).launch {
+                container.categoryRepository.seedDefaultsIfNeeded(container.settingsRepository)
+            }
         }
     }
 }

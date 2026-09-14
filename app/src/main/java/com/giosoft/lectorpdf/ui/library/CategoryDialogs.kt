@@ -221,10 +221,10 @@ fun ManageCategoriesDialog(
                         canMoveDown = favoritesIndex < categories.size,
                         onMove = onMoveFavorites,
                     )
-                }
-                val categoryIndex = if (slot >= favoritesIndex) slot - 1 else slot
-                if (categoryIndex in categories.indices) {
+                } else {
+                    // Cada paso muestra UNA fila: o Favoritos, o una categoria.
                     numero++
+                    val categoryIndex = if (slot > favoritesIndex) slot - 1 else slot
                     val category = categories[categoryIndex]
                     CategoryRow(
                         position = numero,
