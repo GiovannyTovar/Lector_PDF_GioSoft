@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Proyecto
 
-"PDF GioSoft" (`com.giosoft.lectorpdf`): visor de PDF para Android sin publicidad, con historial, escáner de documentos e impresión. **Kotlin + Jetpack Compose**, un solo módulo `:app`.
+"PDF GioSoft" (`com.giosoft.pdf`): visor de PDF para Android sin publicidad, con historial, escáner de documentos e impresión. **Kotlin + Jetpack Compose**, un solo módulo `:app`.
 
 El código, comentarios, strings de UI y mensajes de commit están en **español**. Mantener ese idioma.
 
-**Nombre visible: «PDF GioSoft»** (string `app_name`). El `applicationId` sigue siendo `com.giosoft.lectorpdf` y **no se puede cambiar nunca** una vez publicada en Play: sería otra app distinta y los usuarios perderían las actualizaciones. No intentar "corregirlo" para que coincida con el nombre.
+**Nombre visible: «PDF GioSoft»** (string `app_name`). El `applicationId` sigue siendo `com.giosoft.pdf` y **no se puede cambiar nunca** una vez publicada en Play: sería otra app distinta y los usuarios perderían las actualizaciones. No intentar "corregirlo" para que coincida con el nombre.
 
 **Mensajes de commit: máximo 100 caracteres**, una sola línea.
 
@@ -110,7 +110,7 @@ Si la copia falla (sin espacio, por ejemplo), se registra la URI temporal con `p
 ## Estructura
 
 ```
-com.giosoft.lectorpdf/
+com.giosoft.pdf/
 ├── LectorPdfApp.kt          Application + AppContainer (DI a mano, sin Hilt)
 ├── MainActivity.kt          Única Activity; recibe los intents VIEW/SEND
 ├── data/

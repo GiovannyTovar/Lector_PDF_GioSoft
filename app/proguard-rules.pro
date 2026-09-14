@@ -6,7 +6,7 @@
 # --- Entidades de Room ---
 # Los nombres de campo de la entidad son las columnas de la base de datos y el
 # codigo que genera Room las referencia por nombre.
--keep class com.giosoft.lectorpdf.data.db.** { *; }
+-keep class com.giosoft.pdf.data.db.** { *; }
 
 # --- Excepciones que la app distingue por tipo ---
 # El visor decide que mostrar segun la excepcion exacta que lanza el cargador:

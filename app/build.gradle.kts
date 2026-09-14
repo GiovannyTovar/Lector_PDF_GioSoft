@@ -17,11 +17,11 @@ val keystoreProperties = Properties().apply {
 }
 
 android {
-    namespace = "com.giosoft.lectorpdf"
+    namespace = "com.giosoft.pdf"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.giosoft.lectorpdf"
+        applicationId = "com.giosoft.pdf"
         minSdk = 31
         targetSdk = 36
         versionCode = 5
