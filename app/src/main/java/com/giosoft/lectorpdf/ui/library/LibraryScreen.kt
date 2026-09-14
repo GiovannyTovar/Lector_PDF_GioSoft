@@ -38,6 +38,7 @@ import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -81,6 +82,7 @@ import com.giosoft.lectorpdf.data.db.DocumentEntity
 import com.giosoft.lectorpdf.data.PublicDocuments
 import com.giosoft.lectorpdf.scan.DocumentScanner
 import com.giosoft.lectorpdf.ui.scan.ScanSaveDialog
+import com.giosoft.lectorpdf.ui.settings.SettingsDialog
 import com.giosoft.lectorpdf.ui.about.AboutDialog
 import com.giosoft.lectorpdf.ui.about.AboutSection
 import com.giosoft.lectorpdf.ui.theme.LocalIsDarkTheme
@@ -106,6 +108,7 @@ fun LibraryScreen(
     var aboutSection by remember { mutableStateOf<AboutSection?>(null) }
     var overflowOpen by remember { mutableStateOf(false) }
     var manageCategories by remember { mutableStateOf(false) }
+    var showSettings by remember { mutableStateOf(false) }
     var movingDocuments by remember { mutableStateOf<List<DocumentEntity>>(emptyList()) }
     var renaming by remember { mutableStateOf<DocumentEntity?>(null) }
     var renamingAllowed by remember { mutableStateOf(true) }
@@ -233,6 +236,7 @@ fun LibraryScreen(
                                 Text(
                                     text = stringResource(R.string.library_search_hint),
                                     color = onBar.copy(alpha = 0.6f),
+                                    maxLines = 1,
                                 )
                             },
                             singleLine = true,
@@ -269,14 +273,17 @@ fun LibraryScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = {
-                        searching = !searching
-                        if (!searching) viewModel.onQueryChange("")
-                    }) {
+                    IconButton(
+                        onClick = {
+                            searching = !searching
+                            if (!searching) viewModel.onQueryChange("")
+                        },
+                        modifier = Modifier.size(42.dp),
+                    ) {
                         Icon(Icons.Outlined.Search, stringResource(R.string.cd_search))
                     }
                     // Tema claro/oscuro independiente del celular.
-                    IconButton(onClick = onToggleTheme) {
+                    IconButton(onClick = onToggleTheme, modifier = Modifier.size(42.dp)) {
                         Icon(
                             imageVector = if (isDarkTheme) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
                             contentDescription = stringResource(
@@ -285,7 +292,10 @@ fun LibraryScreen(
                         )
                     }
                     Box {
-                        IconButton(onClick = { overflowOpen = true }) {
+                        IconButton(
+                            onClick = { overflowOpen = true },
+                            modifier = Modifier.size(42.dp),
+                        ) {
                             Icon(
                                 Icons.Outlined.MoreVert,
                                 stringResource(R.string.cd_more_options),
@@ -295,6 +305,14 @@ fun LibraryScreen(
                             expanded = overflowOpen,
                             onDismissRequest = { overflowOpen = false },
                         ) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.settings_title)) },
+                                leadingIcon = { Icon(Icons.Outlined.Tune, null) },
+                                onClick = {
+                                    overflowOpen = false
+                                    showSettings = true
+                                },
+                            )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.categories_title)) },
                                 leadingIcon = { Icon(Icons.Outlined.Folder, null) },
@@ -396,6 +414,7 @@ fun LibraryScreen(
         Column(Modifier.padding(top = padding.calculateTopPadding())) {
             CategoryBar(
                 categories = state.categories,
+                favoritesPosition = state.favoritesPosition,
                 selected = state.filter,
                 hasUncategorized = state.hasUncategorized,
                 onSelect = viewModel::onFilterChange,
@@ -428,6 +447,7 @@ fun LibraryScreen(
                             categoryColor = state.categories
                                 .firstOrNull { it.id == document.categoryId }
                                 ?.let { Color(it.colorArgb) },
+                            showThumbnail = state.showThumbnails,
                         )
                     }
                 }
@@ -498,6 +518,8 @@ fun LibraryScreen(
             onRename = viewModel::renameCategory,
             onRecolor = viewModel::setCategoryColor,
             onMove = viewModel::moveCategory,
+            onMoveFavorites = viewModel::moveFavorites,
+            favoritesPosition = state.favoritesPosition,
             onDelete = viewModel::deleteCategory,
             onDismiss = { manageCategories = false },
         )
@@ -517,6 +539,16 @@ fun LibraryScreen(
                 manageCategories = true
             },
             onDismiss = { movingDocuments = emptyList() },
+        )
+    }
+
+    if (showSettings) {
+        SettingsDialog(
+            showThumbnails = state.showThumbnails,
+            onShowThumbnailsChange = viewModel::setShowThumbnails,
+            isDarkTheme = isDarkTheme,
+            onDarkThemeChange = { onToggleTheme() },
+            onDismiss = { showSettings = false },
         )
     }
 

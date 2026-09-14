@@ -14,6 +14,7 @@ import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -44,6 +45,7 @@ sealed interface LibraryFilter {
 @Composable
 fun CategoryBar(
     categories: List<CategoryEntity>,
+    favoritesPosition: Int,
     selected: LibraryFilter,
     hasUncategorized: Boolean,
     onSelect: (LibraryFilter) -> Unit,
@@ -63,22 +65,33 @@ fun CategoryBar(
                 onClick = { onSelect(LibraryFilter.All) },
             )
         }
-        item(key = "favoritos") {
-            Chip(
-                label = stringResource(R.string.favorites),
-                selected = selected is LibraryFilter.Favorites,
-                dotColor = FavoriteGold,
-                leadingIcon = Icons.Outlined.Star,
-                onClick = { onSelect(LibraryFilter.Favorites) },
-            )
-        }
-        items(categories, key = { it.id }) { category ->
-            Chip(
-                label = category.name,
-                selected = selected == LibraryFilter.Category(category.id),
-                dotColor = Color(category.colorArgb),
-                onClick = { onSelect(LibraryFilter.Category(category.id)) },
-            )
+        // Favoritos ocupa el hueco que el usuario haya elegido entre las
+        // categorias, por eso se intercalan en un solo recorrido.
+        val favoritesIndex = favoritesPosition.coerceIn(0, categories.size)
+        repeat(categories.size + 1) { slot ->
+            if (slot == favoritesIndex) {
+                item(key = "favoritos") {
+                    Chip(
+                        label = stringResource(R.string.favorites),
+                        selected = selected is LibraryFilter.Favorites,
+                        leadingIcon = Icons.Outlined.Star,
+                        leadingIconTint = FavoriteGold,
+                        onClick = { onSelect(LibraryFilter.Favorites) },
+                    )
+                }
+            }
+            val categoryIndex = if (slot >= favoritesIndex) slot - 1 else slot
+            if (categoryIndex in categories.indices) {
+                val category = categories[categoryIndex]
+                item(key = "cat-${category.id}") {
+                    Chip(
+                        label = category.name,
+                        selected = selected == LibraryFilter.Category(category.id),
+                        dotColor = Color(category.colorArgb),
+                        onClick = { onSelect(LibraryFilter.Category(category.id)) },
+                    )
+                }
+            }
         }
         if (hasUncategorized) {
             item(key = "sin-categoria") {
@@ -107,6 +120,7 @@ private fun Chip(
     onClick: () -> Unit,
     dotColor: Color? = null,
     leadingIcon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    leadingIconTint: Color? = null,
 ) {
     FilterChip(
         selected = selected,
@@ -115,7 +129,14 @@ private fun Chip(
         shape = CircleShape,
         leadingIcon = when {
             leadingIcon != null -> {
-                { Icon(leadingIcon, null, Modifier.size(16.dp)) }
+                {
+                    Icon(
+                        imageVector = leadingIcon,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = leadingIconTint ?: LocalContentColor.current,
+                    )
+                }
             }
             dotColor != null -> {
                 {

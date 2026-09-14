@@ -1,6 +1,9 @@
 package com.giosoft.lectorpdf.ui.library
 
+import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,18 +36,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.giosoft.lectorpdf.R
+import com.giosoft.lectorpdf.data.Thumbnails
 import com.giosoft.lectorpdf.data.db.DocumentEntity
 import com.giosoft.lectorpdf.ui.theme.LocalIsDarkTheme
 import com.giosoft.lectorpdf.ui.theme.FavoriteGold
@@ -71,6 +80,7 @@ fun DocumentCard(
     document: DocumentEntity,
     actions: DocumentActions,
     categoryColor: Color? = null,
+    showThumbnail: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -79,7 +89,7 @@ fun DocumentCard(
         shape = RoundedCornerShape(18.dp),
         shadowElevation = 1.dp,
     ) {
-        DocumentRow(document, actions, categoryColor)
+        DocumentRow(document, actions, categoryColor, showThumbnail)
     }
 }
 
@@ -88,6 +98,7 @@ private fun DocumentRow(
     document: DocumentEntity,
     actions: DocumentActions,
     categoryColor: Color?,
+    showThumbnail: Boolean,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     val isDark = LocalIsDarkTheme.current
@@ -109,18 +120,47 @@ private fun DocumentRow(
             .padding(start = 12.dp, end = 0.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .background(color = iconBackground, shape = CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.PictureAsPdf,
+        val context = LocalContext.current
+        var thumbnail by remember(document.uri, showThumbnail) {
+            mutableStateOf<android.graphics.Bitmap?>(null)
+        }
+        LaunchedEffect(document.uri, showThumbnail) {
+            thumbnail = if (showThumbnail) {
+                Thumbnails.firstPage(context, Uri.parse(document.uri))
+            } else {
+                null
+            }
+        }
+
+        val preview = thumbnail
+        if (preview != null) {
+            Image(
+                bitmap = preview.asImageBitmap(),
                 contentDescription = null,
-                tint = iconColor,
-                modifier = Modifier.size(if (isDark) 21.dp else 30.dp),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(width = 38.dp, height = 48.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .border(
+                        1.dp,
+                        MaterialTheme.colorScheme.outlineVariant,
+                        RoundedCornerShape(6.dp),
+                    ),
             )
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(color = iconBackground, shape = CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.PictureAsPdf,
+                    contentDescription = null,
+                    tint = iconColor,
+                    modifier = Modifier.size(if (isDark) 21.dp else 30.dp),
+                )
+            }
         }
 
         Spacer(Modifier.width(12.dp))

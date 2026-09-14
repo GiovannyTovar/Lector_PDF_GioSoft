@@ -6,15 +6,30 @@ import com.giosoft.lectorpdf.data.db.DocumentDao
 import com.giosoft.lectorpdf.data.db.DocumentEntity
 import kotlinx.coroutines.flow.Flow
 
-/** Paleta de la que se toma el color al crear una categoria. */
+/**
+ * Paleta para las categorias.
+ *
+ * Tonos de saturacion parecida para que ninguno destaque sobre los demas, y
+ * suficientes para que el usuario no tenga que repetir color.
+ */
 val CATEGORY_COLORS = listOf(
-    0xFF2196F3.toInt(), // azul
-    0xFF43A047.toInt(), // verde
-    0xFFF4511E.toInt(), // naranja
+    0xFF1E88E5.toInt(), // azul
+    0xFF3949AB.toInt(), // indigo
+    0xFF5E35B1.toInt(), // violeta
     0xFF8E24AA.toInt(), // morado
+    0xFFD81B60.toInt(), // fucsia
+    0xFFE53935.toInt(), // rojo
+    0xFFF4511E.toInt(), // naranja intenso
+    0xFFFB8C00.toInt(), // naranja
+    0xFFFFB300.toInt(), // ambar
+    0xFFC0CA33.toInt(), // lima
+    0xFF7CB342.toInt(), // verde claro
+    0xFF43A047.toInt(), // verde
     0xFF00897B.toInt(), // turquesa
-    0xFFD81B60.toInt(), // rosa
-    0xFF6D4C41.toInt(), // marron
+    0xFF00ACC1.toInt(), // cian
+    0xFF039BE5.toInt(), // celeste
+    0xFF6D4C41.toInt(), // cafe
+    0xFF757575.toInt(), // gris
     0xFF546E7A.toInt(), // gris azulado
 )
 
@@ -51,6 +66,7 @@ class CategoryRepository(
     suspend fun create(name: String, colorArgb: Int? = null): Result<Unit> = runCatching {
         val clean = name.trim()
         require(clean.isNotEmpty()) { "El nombre no puede estar vacio" }
+        require(categoryDao.findByName(clean) == null) { DUPLICATE }
         val position = (categoryDao.maxPosition() ?: -1) + 1
         categoryDao.insert(
             CategoryEntity(
@@ -84,7 +100,14 @@ class CategoryRepository(
     suspend fun rename(category: CategoryEntity, newName: String): Result<Unit> = runCatching {
         val clean = newName.trim()
         require(clean.isNotEmpty()) { "El nombre no puede estar vacio" }
+        val existing = categoryDao.findByName(clean)
+        require(existing == null || existing.id == category.id) { DUPLICATE }
         categoryDao.update(category.copy(name = clean))
+    }
+
+    companion object {
+        /** Marca de nombre repetido, para distinguirla de "nombre vacio". */
+        const val DUPLICATE = "duplicado"
     }
 
     suspend fun setColor(category: CategoryEntity, colorArgb: Int) =

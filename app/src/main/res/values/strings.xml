@@ -9,7 +9,7 @@
     <string name="library_title">Mis documentos</string>
     <string name="library_empty_title">Todavía no has abierto ningún PDF</string>
     <string name="library_empty_body">Toca el botón de abajo para buscar un documento en tu celular, o escanea unas fotos para crear uno nuevo.</string>
-    <string name="library_search_hint">Buscar por nombre</string>
+    <string name="library_search_hint">Buscar…</string>
     <string name="library_no_results">Ningún documento coincide con «%1$s»</string>
     <string name="open_pdf">Abrir un PDF</string>
     <string name="scan_to_pdf">Escanear a PDF</string>
@@ -31,7 +31,9 @@
     <string name="category_name_hint">Nombre de la categoría</string>
     <string name="category_create_title">Nueva categoría</string>
     <string name="category_edit_title">Editar categoría</string>
-    <string name="categories_reorder_hint">Usa las flechas para cambiar el orden en que aparecen.</string>
+    <string name="categories_reorder_hint">Toca una categoría para cambiar su nombre o su color. Usa las flechas para reordenarlas.</string>
+    <string name="category_duplicate">Ya existe una categoría con ese nombre</string>
+    <string name="category_position">Posición %1$d</string>
     <string name="category_rename">Renombrar categoría</string>
     <string name="category_empty">El nombre de la categoría no puede estar vacío</string>
     <string name="category_deleted">Categoría «%1$s» eliminada</string>
@@ -112,6 +114,11 @@ Esta acción no se puede deshacer.</string>
 
     <!-- Acerca de -->
     <string name="about">Acerca de</string>
+    <string name="settings_title">Configuración</string>
+    <string name="settings_thumbnails_title">Vista previa del documento</string>
+    <string name="settings_thumbnails_desc">Muestra la primera página en lugar del icono.</string>
+    <string name="settings_dark_title">Tema oscuro</string>
+    <string name="settings_dark_desc">También está en la barra superior.</string>
     <string name="about_title">Lector PDF GioSoft</string>
     <string name="about_tagline">Tus documentos, sin publicidad y sin complicaciones.</string>
     <string name="about_version">Versión %1$s</string>

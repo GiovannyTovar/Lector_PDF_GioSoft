@@ -19,6 +19,10 @@ interface CategoryDao {
     @Query("SELECT MAX(position) FROM categories")
     suspend fun maxPosition(): Int?
 
+    /** Comparacion sin distinguir mayusculas: "Trabajo" y "trabajo" son la misma. */
+    @Query("SELECT * FROM categories WHERE name = :name COLLATE NOCASE LIMIT 1")
+    suspend fun findByName(name: String): CategoryEntity?
+
     @Insert
     suspend fun insert(category: CategoryEntity): Long
 

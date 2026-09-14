@@ -13,6 +13,7 @@ import com.giosoft.lectorpdf.R
 import com.giosoft.lectorpdf.data.CategoryRepository
 import com.giosoft.lectorpdf.data.DocumentRepository
 import com.giosoft.lectorpdf.data.PublicDocuments
+import com.giosoft.lectorpdf.data.SettingsRepository
 import com.giosoft.lectorpdf.data.SafDocuments
 import com.giosoft.lectorpdf.data.db.CategoryEntity
 import com.giosoft.lectorpdf.data.db.DocumentEntity
@@ -54,6 +55,8 @@ data class LibraryUiState(
     val isEmpty: Boolean = false,
     val hasAnyDocument: Boolean = false,
     val categories: List<CategoryEntity> = emptyList(),
+    val favoritesPosition: Int = 0,
+    val showThumbnails: Boolean = false,
     val filter: LibraryFilter = LibraryFilter.All,
     val hasUncategorized: Boolean = false,
 )
@@ -61,6 +64,7 @@ data class LibraryUiState(
 class LibraryViewModel(
     private val repository: DocumentRepository,
     private val categories: CategoryRepository,
+    private val settings: SettingsRepository,
     private val context: android.content.Context,
 ) : ViewModel() {
 
@@ -76,7 +80,17 @@ class LibraryViewModel(
             query,
             filter,
             categories.observeAll(),
-        ) { documents, currentQuery, currentFilter, allCategories ->
+            settings.favoritesPosition,
+            settings.showThumbnails,
+        ) { values ->
+            @Suppress("UNCHECKED_CAST")
+            val documents = values[0] as List<DocumentEntity>
+            val currentQuery = values[1] as String
+            val currentFilter = values[2] as LibraryFilter
+            @Suppress("UNCHECKED_CAST")
+            val allCategories = values[3] as List<CategoryEntity>
+            val favPosition = values[4] as Int
+            val thumbnails = values[5] as Boolean
             // Si la categoria seleccionada se borro, se vuelve a "Todos" en vez
             // de dejar la lista vacia sin explicacion.
             val activeFilter = when {
@@ -104,6 +118,8 @@ class LibraryViewModel(
                 isEmpty = filtered.isEmpty(),
                 hasAnyDocument = documents.isNotEmpty(),
                 categories = allCategories,
+                favoritesPosition = favPosition,
+                showThumbnails = thumbnails,
                 filter = activeFilter,
                 hasUncategorized = documents.any { it.categoryId == null },
             )
@@ -124,8 +140,25 @@ class LibraryViewModel(
     // --- Categorias ---
 
     fun createCategory(name: String, colorArgb: Int?) = viewModelScope.launch {
-        categories.create(name, colorArgb)
-            .onFailure { messages.send(UiMessage(R.string.category_empty)) }
+        categories.create(name, colorArgb).onFailure { error ->
+            val message = if (error.message == CategoryRepository.DUPLICATE) {
+                R.string.category_duplicate
+            } else {
+                R.string.category_empty
+            }
+            messages.send(UiMessage(message))
+        }
+    }
+
+    /** Mueve la ficha de Favoritos entre las categorias de la fila de filtros. */
+    fun setShowThumbnails(enabled: Boolean) = viewModelScope.launch {
+        settings.setShowThumbnails(enabled)
+    }
+
+    fun moveFavorites(up: Boolean) = viewModelScope.launch {
+        val current = uiState.value.favoritesPosition
+        val limit = uiState.value.categories.size
+        settings.setFavoritesPosition((if (up) current - 1 else current + 1).coerceIn(0, limit))
     }
 
     fun moveCategory(from: Int, up: Boolean) = viewModelScope.launch {
@@ -257,6 +290,7 @@ class LibraryViewModel(
                 LibraryViewModel(
                     app.container.documentRepository,
                     app.container.categoryRepository,
+                    app.container.settingsRepository,
                     app,
                 )
             }

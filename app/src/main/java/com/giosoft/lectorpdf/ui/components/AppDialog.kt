@@ -39,6 +39,7 @@ fun AppDialog(
     dismissText: String? = null,
     confirmEnabled: Boolean = true,
     confirmIsDestructive: Boolean = false,
+    dismissIsDestructive: Boolean = false,
     supportingText: String? = null,
     content: @Composable () -> Unit,
 ) {
@@ -107,7 +108,7 @@ fun AppDialog(
                 TextButton(
                     onClick = onDismiss,
                     colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        contentColor = if (dismissIsDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                     ),
                 ) {
                     Text(it)

@@ -3,6 +3,7 @@ package com.giosoft.lectorpdf.data
 import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -26,6 +27,7 @@ class SettingsRepository(private val context: Context) {
     private val themeKey = stringPreferencesKey("theme_mode")
     private val thumbnailsKey = booleanPreferencesKey("show_thumbnails")
     private val categoriesSeededKey = booleanPreferencesKey("categories_seeded")
+    private val favoritesPositionKey = intPreferencesKey("favorites_position")
 
     val themeMode: Flow<ThemeMode> = context.dataStore.data.map { preferences ->
         preferences[themeKey]
@@ -49,6 +51,20 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setShowThumbnails(enabled: Boolean) {
         context.dataStore.edit { it[thumbnailsKey] = enabled }
+    }
+
+    /**
+     * Posicion de la ficha "Favoritos" dentro de la fila de filtros.
+     *
+     * Es un ajuste y no una fila mas en la tabla de categorias porque Favoritos
+     * no es una categoria: cruza a todas (un documento puede estar en Trabajo
+     * y ademas ser favorito).
+     */
+    val favoritesPosition: Flow<Int> =
+        context.dataStore.data.map { it[favoritesPositionKey] ?: 0 }
+
+    suspend fun setFavoritesPosition(position: Int) {
+        context.dataStore.edit { it[favoritesPositionKey] = position.coerceAtLeast(0) }
     }
 
     suspend fun areCategoriesSeeded(): Boolean =
