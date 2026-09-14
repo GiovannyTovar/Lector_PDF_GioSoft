@@ -1,0 +1,205 @@
+<resources>
+    <!-- Traduccion al frances. El nombre de la app no se traduce. -->
+    <string name="app_name">PDF GioSoft</string>
+
+    <!-- Biblioteca -->
+    <string name="app_title_bar">PDF GioSoft</string>
+    <string name="history_title">Historique</string>
+    <string name="theme_to_dark">Passer au thème sombre</string>
+    <string name="theme_to_light">Passer au thème clair</string>
+    <string name="library_title">Mes documents</string>
+    <string name="library_empty_title">Vous n’avez encore ouvert aucun PDF</string>
+    <string name="library_empty_body">Touchez le bouton ci-dessous pour chercher un document sur votre téléphone, ou numérisez quelques photos pour en créer un.</string>
+    <string name="library_search_hint">Rechercher…</string>
+    <string name="library_no_results">Aucun document ne correspond à « %1$s »</string>
+    <string name="open_pdf">Ouvrir un PDF</string>
+    <string name="scan_to_pdf">Numériser en PDF</string>
+    <string name="scan_short">Numériser</string>
+    <string name="open_short">Ouvrir un PDF</string>
+    <string name="group_today">Aujourd’hui</string>
+    <string name="group_yesterday">Hier</string>
+    <string name="favorites">Favoris</string>
+    <string name="selection_count">%1$d sélectionnés</string>
+    <string name="selection_all">Tout sélectionner</string>
+    <string name="selection_clear">Annuler la sélection</string>
+    <string name="selection_removed">%1$s documents retirés de la liste</string>
+    <string name="selection_hint">Appuyez longuement sur un document pour en sélectionner plusieurs</string>
+    <string name="filter_all">Tous</string>
+    <string name="filter_uncategorized">Sans catégorie</string>
+    <string name="categories_title">Catégories</string>
+    <string name="categories_manage">Gérer</string>
+    <string name="categories_empty">Vous n’avez pas encore de catégories. Créez-en une ci-dessous pour commencer à organiser vos documents.</string>
+    <string name="category_new">Nouvelle catégorie</string>
+    <string name="category_add">Ajouter</string>
+    <string name="category_color">Couleur</string>
+    <string name="category_move_up">Monter</string>
+    <string name="category_move_down">Descendre</string>
+    <string name="category_name_hint">Nom de la catégorie</string>
+    <string name="category_create_title">Nouvelle catégorie</string>
+    <string name="category_edit_title">Modifier la catégorie</string>
+    <string name="categories_reorder_hint">Touchez une catégorie pour changer son nom ou sa couleur. Utilisez les flèches pour les réordonner.</string>
+    <string name="category_duplicate">Une catégorie porte déjà ce nom</string>
+    <string name="category_position">Position %1$d</string>
+    <string name="category_rename">Renommer la catégorie</string>
+    <string name="category_empty">Le nom de la catégorie ne peut pas être vide</string>
+    <string name="category_deleted">Catégorie « %1$s » supprimée</string>
+    <string name="category_assigned">Documents organisés</string>
+    <string name="category_delete_title">Supprimer la catégorie ?</string>
+    <string name="category_delete_message">La catégorie « %1$s » sera supprimée.
+
+Vos documents NE sont PAS supprimés : ils passeront en « Sans catégorie ».</string>
+    <string name="action_delete_category">Supprimer la catégorie</string>
+    <string name="move_to_category">Ajouter à une catégorie</string>
+    <string name="move_to_category_many">Ajouter %1$d documents</string>
+
+    <!-- Acciones sobre un documento -->
+    <string name="action_open">Ouvrir</string>
+    <string name="action_rename">Renommer</string>
+    <string name="action_share">Partager</string>
+    <string name="action_print">Imprimer</string>
+    <string name="action_favorite">Ajouter aux favoris</string>
+    <string name="action_lock">Protéger par empreinte</string>
+    <string name="action_password">Ajouter un mot de passe au fichier</string>
+    <string name="action_remove_password">Retirer le mot de passe du fichier</string>
+    <string name="password_set_title">Mot de passe du fichier</string>
+    <string name="password_set_explain">Le mot de passe est enregistré DANS le PDF. Si vous le partagez, il sera demandé aussi à la personne qui le reçoit, dans n’importe quelle application.</string>
+    <string name="password_remove_title">Retirer le mot de passe</string>
+    <string name="password_remove_explain">Le fichier restera sans mot de passe. Quiconque le possède pourra l’ouvrir.</string>
+    <string name="password_current">Mot de passe actuel</string>
+    <string name="password_new">Nouveau mot de passe</string>
+    <string name="password_repeat">Répétez le mot de passe</string>
+    <string name="password_mismatch">Les mots de passe ne correspondent pas</string>
+    <string name="password_too_short">Utilisez au moins 4 caractères</string>
+    <string name="password_set_done">Mot de passe appliqué au fichier</string>
+    <string name="password_removed_done">Mot de passe retiré du fichier</string>
+    <string name="password_change_failed">Le mot de passe n’a pas pu être modifié. Vérifiez que l’actuel est correct.</string>
+    <string name="password_readonly">Ce fichier ne peut pas être modifié d’ici. Enregistrez-le dans Mes PDF et réessayez.</string>
+    <string name="lock_explain">Protège le document uniquement dans cette application et sur ce téléphone. Si vous partagez le fichier, la personne qui le reçoit l’ouvrira sans déverrouillage.</string>
+    <string name="action_unlock">Retirer la protection</string>
+    <string name="lock_added">Document protégé</string>
+    <string name="lock_removed">Protection retirée</string>
+    <string name="lock_confirm_add">Protéger le document</string>
+    <string name="lock_confirm_remove">Retirer la protection</string>
+    <string name="lock_confirm_subtitle">Déverrouillez pour confirmer le changement</string>
+    <string name="lock_prompt_title">Document protégé</string>
+    <string name="lock_prompt_subtitle">Déverrouillez pour ouvrir « %1$s »</string>
+    <string name="lock_unavailable">Configurez une empreinte, un code PIN ou un mot de passe sur votre téléphone pour utiliser cette fonction</string>
+    <string name="lock_failed">Impossible de vérifier votre identité</string>
+    <string name="lock_scope_title">Protéger par empreinte ?</string>
+    <string name="lock_scope_intro">Voici ce qui change pour « %1$s » :</string>
+    <string name="lock_scope_yes_open">Votre empreinte (ou le code PIN du téléphone) vous sera demandée chaque fois que vous l’ouvrirez depuis cette application.</string>
+    <string name="lock_scope_yes_change">Également pour retirer la protection plus tard.</string>
+    <string name="lock_scope_yes_preview">La liste n’affichera pas d’aperçu de son contenu.</string>
+    <string name="lock_scope_no_file">Le fichier n’est ni chiffré ni modifié : la protection vit dans cette application et sur ce téléphone.</string>
+    <string name="lock_scope_no_other_apps">Si vous le partagez ou l’ouvrez avec une autre application, il s’ouvrira sans rien demander. Pour cela, utilisez « Ajouter un mot de passe au fichier ».</string>
+    <string name="lock_scope_confirm">Protéger</string>
+    <string name="lock_scope_more">Voir plus</string>
+    <string name="action_unfavorite">Retirer des favoris</string>
+    <string name="action_remove_from_history">Retirer de la liste</string>
+    <string name="action_delete_device">Supprimer du téléphone</string>
+    <string name="delete_title">Supprimer du téléphone ?</string>
+    <string name="delete_message">« %1$s » sera définitivement supprimé de votre téléphone.
+
+Cette action est irréversible.</string>
+    <string name="delete_confirm">Supprimer</string>
+    <string name="delete_done">« %1$s » supprimé du téléphone</string>
+    <string name="delete_failed">Suppression impossible. L’application qui stocke ce fichier ne l’autorise pas.</string>
+    <string name="action_cancel">Annuler</string>
+    <string name="action_accept">OK</string>
+    <string name="action_save_copy">Enregistrer dans Mes PDF</string>
+    <string name="save_copy_done">Enregistré dans %1$s. L’accès n’expirera plus.</string>
+    <string name="save_copy_failed">La copie n’a pas pu être enregistrée</string>
+    <string name="temporary_access">Accès temporaire</string>
+    <string name="temporary_access_explain">Ce document vous a été partagé depuis une autre application et son accès peut expirer. Enregistrez-le dans Mes PDF pour le conserver.</string>
+    <string name="action_retry">Réessayer</string>
+
+    <!-- Renombrar -->
+    <string name="rename_title">Renommer le document</string>
+    <string name="rename_label">Nouveau nom</string>
+    <string name="rename_explains">Le fichier d’origine est renommé sur votre téléphone.</string>
+    <string name="rename_done">Renommé en « %1$s »</string>
+    <string name="rename_failed">Impossible de renommer. L’application qui stocke ce fichier ne l’autorise pas.</string>
+    <string name="rename_empty">Le nom ne peut pas être vide</string>
+    <string name="rename_explains_permission">Le fichier d’origine est renommé sur votre téléphone. Android vous demandera l’autorisation de le modifier.</string>
+    <string name="rename_permission_denied">Non renommé : votre autorisation est nécessaire pour modifier le fichier.</string>
+
+    <!-- Quitar del historial -->
+    <string name="remove_title">Retirer de l’historique</string>
+    <string name="remove_message">« %1$s » sera retiré de cette liste.\n\nLe fichier N’EST PAS supprimé de votre téléphone : il reste où il est.</string>
+    <string name="remove_done">Retiré de l’historique</string>
+    <string name="undo">Annuler</string>
+
+    <!-- Visor -->
+    <string name="viewer_loading">Ouverture du document…</string>
+    <string name="search_in_document">Rechercher dans le document…</string>
+    <string name="search_match_of">%1$d/%2$d</string>
+    <string name="search_no_results">Aucun résultat</string>
+    <string name="search_previous">Précédent</string>
+    <string name="search_next">Suivant</string>
+    <string name="search_close">Fermer la recherche</string>
+    <string name="viewer_page_of">Page %1$d sur %2$d</string>
+    <string name="viewer_error_title">Le document n’a pas pu être ouvert</string>
+    <string name="viewer_error_missing">Le fichier n’est plus disponible. Il a peut-être été déplacé ou supprimé, ou l’application qui l’a partagé n’y donne plus accès.</string>
+    <string name="viewer_error_generic">Une erreur s’est produite à l’ouverture du document.</string>
+
+    <!-- Contraseña -->
+    <string name="password_title">Document protégé</string>
+    <string name="password_body">« %1$s » nécessite un mot de passe pour s’ouvrir.</string>
+    <string name="password_label">Mot de passe</string>
+    <string name="password_wrong">Mot de passe incorrect. Réessayez.</string>
+    <string name="password_show">Afficher le mot de passe</string>
+    <string name="password_hide">Masquer le mot de passe</string>
+    <string name="password_unsupported">Ce téléphone ne peut pas ouvrir les PDF protégés par mot de passe. Il faut Android 12 ou plus récent avec les services système à jour.</string>
+
+    <!-- Escaner -->
+    <string name="scan_saved">Document numérisé enregistré</string>
+    <string name="scan_failed">La numérisation n’a pas pu être terminée</string>
+    <string name="scan_cancelled">Numérisation annulée</string>
+    <string name="scan_name_title">Nom du document</string>
+    <string name="scan_save_hint">Il sera enregistré dans %1$s, où vous pourrez le retrouver depuis n’importe quelle application.</string>
+    <string name="scan_save_here">Enregistrer dans Mes PDF</string>
+    <string name="scan_choose_folder">Choisir un autre dossier…</string>
+    <string name="scan_saved_at">Enregistré dans %1$s</string>
+    <string name="action_open_now">Ouvrir</string>
+
+    <!-- Acerca de -->
+    <string name="about">À propos</string>
+    <string name="settings_title">Paramètres</string>
+    <string name="settings_thumbnails_title">Aperçu du document</string>
+    <string name="settings_thumbnails_desc">Afficher la première page au lieu de l’icône.</string>
+    <string name="settings_dark_title">Thème sombre</string>
+    <string name="settings_dark_desc">Il est aussi dans la barre du haut.</string>
+    <string name="about_title">PDF GioSoft</string>
+    <string name="about_tagline">Vos documents, sans publicité et sans complications.</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_developed_by">Giovanny Tovar</string>
+    <string name="about_developer_label">Développement</string>
+    <string name="about_why_title">Pourquoi elle existe</string>
+    <string name="about_why_text">Presque tous les lecteurs de PDF remplissent l’écran de publicités ou demandent des autorisations dont ils n’ont pas besoin. Cette application est née pour offrir une solution simple aux amis, à la famille et aux proches : ouvrir un document, le lire, et passer à autre chose.</string>
+    <string name="about_what_title">Ce qu’elle fait</string>
+    <string name="about_what_text">Elle ouvre vos fichiers d’origine sans les dupliquer, les classe par catégories, numérise des documents avec l’appareil photo, imprime et partage. Rien de plus, rien de moins.</string>
+    <string name="about_thanks">Merci de l’utiliser.</string>
+    <string name="about_close">Fermer</string>
+
+    <!-- Privacidad -->
+    <string name="about_privacy_title">Confidentialité</string>
+    <string name="privacy_tagline">Tout se passe dans votre téléphone.</string>
+    <string name="privacy_point_permissions_title">Aucune autorisation dangereuse</string>
+    <string name="privacy_point_permissions_text">L’application ne demande accès ni à votre stockage ni à votre appareil photo. Vous ouvrez chaque fichier avec le sélecteur du système, qui accorde l’accès fichier par fichier.</string>
+    <string name="privacy_point_network_title">Aucune connexion à des serveurs</string>
+    <string name="privacy_point_network_text">Vos documents ne sont envoyés nulle part. Il n’y a ni comptes, ni analyse d’usage, ni publicité, ni pistage.</string>
+    <string name="privacy_point_copies_title">Aucune copie à votre insu</string>
+    <string name="privacy_point_copies_text">C’est le fichier d’origine qui est lu. La seule copie réalisée concerne les documents partagés par WhatsApp ou par courriel, dont l’accès expire, et elle est enregistrée dans Documents/Mes PDF.</string>
+    <string name="privacy_point_delete_title">Rien ne s’efface tout seul</string>
+    <string name="privacy_point_delete_text">Retirer un document de la liste ne supprime jamais le fichier. Il n’est supprimé du téléphone que si vous le demandez expressément et le confirmez.</string>
+    <string name="privacy_point_lock_title">Protection par empreinte</string>
+    <string name="privacy_point_lock_text">Elle protège le document dans cette application et sur ce téléphone : le fichier n’est pas chiffré. Si vous le partagez ou l’ouvrez avec une autre application, il s’ouvrira sans rien demander. Pour que la protection accompagne le fichier, mettez-lui un mot de passe.</string>
+    <string name="privacy_point_isolated_title">Lecture isolée</string>
+    <string name="privacy_point_isolated_text">Les PDF sont traités dans un espace séparé du reste de l’application, de sorte qu’un fichier endommagé ne peut pas l’affecter.</string>
+
+    <!-- Comunes -->
+    <string name="cd_more_options">Plus d’options</string>
+    <string name="cd_back">Retour</string>
+    <string name="cd_search">Rechercher</string>
+    <string name="file_unavailable">Fichier non disponible</string>
+</resources>

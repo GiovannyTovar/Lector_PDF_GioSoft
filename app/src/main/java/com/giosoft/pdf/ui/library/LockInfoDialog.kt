@@ -1,6 +1,7 @@
 package com.giosoft.pdf.ui.library
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
@@ -12,7 +13,12 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -24,10 +30,11 @@ import com.giosoft.pdf.ui.components.AppDialog
 /**
  * Explica QUE protege la huella antes de activarla.
  *
- * Es una proteccion de la app, no del archivo: quien reciba el PDF por
- * WhatsApp lo abrira sin que nadie le pida nada. Decirlo por adelantado evita
- * la confusion con "Poner contrasena al archivo", que si viaja con el
- * documento, y evita que alguien confie en una proteccion que no tiene.
+ * Primero lo que la proteccion SI hace. Sus dos limites -no cifra el archivo y
+ * no viaja con el- quedan tras "Ver mas", y tambien en Acerca de > Privacidad:
+ * quien active la proteccion de verdad puede leerlos cuando quiera, pero no se
+ * le regalan en pantalla a quien tome el celular ajeno y vea de un vistazo
+ * hasta donde llega (y hasta donde no) lo que acaba de encontrarse.
  */
 @Composable
 fun LockInfoDialog(
@@ -44,12 +51,27 @@ fun LockInfoDialog(
         onConfirm = onConfirm,
         dismissText = stringResource(R.string.action_cancel),
     ) {
+        var detalle by remember { mutableStateOf(false) }
+
         Column {
             Punto(Icons.Outlined.Check, stringResource(R.string.lock_scope_yes_open))
             Punto(Icons.Outlined.Check, stringResource(R.string.lock_scope_yes_change))
             Punto(Icons.Outlined.Check, stringResource(R.string.lock_scope_yes_preview))
-            Punto(Icons.Outlined.Info, stringResource(R.string.lock_scope_no_file))
-            Punto(Icons.Outlined.Info, stringResource(R.string.lock_scope_no_other_apps))
+
+            if (detalle) {
+                Punto(Icons.Outlined.Info, stringResource(R.string.lock_scope_no_file))
+                Punto(Icons.Outlined.Info, stringResource(R.string.lock_scope_no_other_apps))
+            } else {
+                TextButton(
+                    onClick = { detalle = true },
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.lock_scope_more),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+            }
         }
     }
 }

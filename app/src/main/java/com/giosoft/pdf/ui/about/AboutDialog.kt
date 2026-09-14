@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.Fingerprint
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.PictureAsPdf
 import androidx.compose.material.icons.outlined.Security
@@ -169,6 +170,11 @@ private fun PrivacyContent() {
             icon = Icons.Outlined.DeleteOutline,
             title = stringResource(R.string.privacy_point_delete_title),
             body = stringResource(R.string.privacy_point_delete_text),
+        )
+        PrivacyPoint(
+            icon = Icons.Outlined.Fingerprint,
+            title = stringResource(R.string.privacy_point_lock_title),
+            body = stringResource(R.string.privacy_point_lock_text),
         )
         PrivacyPoint(
             icon = Icons.Outlined.Security,

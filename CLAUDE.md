@@ -6,7 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 "PDF GioSoft" (`com.giosoft.pdf`): visor de PDF para Android sin publicidad, con historial, escáner de documentos e impresión. **Kotlin + Jetpack Compose**, un solo módulo `:app`.
 
-El código, comentarios, strings de UI y mensajes de commit están en **español**. Mantener ese idioma.
+El código, los comentarios y los mensajes de commit están en **español**. Mantener ese idioma.
+
+Los textos de la interfaz se escriben primero en `values/strings.xml` (español) y **toda cadena nueva hay que añadirla también** a `values-en`, `values-fr` y `values-pt`.
+
+Guía técnica completa (por qué no MuPDF, cómo funciona cada pieza, recetas): [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md).
 
 **Nombre visible: «PDF GioSoft»** (string `app_name`). El `applicationId` sigue siendo `com.giosoft.pdf` y **no se puede cambiar nunca** una vez publicada en Play: sería otra app distinta y los usuarios perderían las actualizaciones. No intentar "corregirlo" para que coincida con el nombre.
 

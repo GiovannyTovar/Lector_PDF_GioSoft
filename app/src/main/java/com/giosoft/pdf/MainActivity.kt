@@ -2,6 +2,7 @@ package com.giosoft.pdf
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -80,7 +81,16 @@ class MainActivity : ComponentActivity() {
     private fun handleIncomingIntent(intent: Intent) {
         val uri: Uri? = when (intent.action) {
             Intent.ACTION_VIEW -> intent.data
-            Intent.ACTION_SEND -> intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+            // La sobrecarga con Class llego en Android 13. En 12, que es el
+            // minimo que soporta la app, no existe: llamarla ahi revienta con
+            // NoSuchMethodError en cuanto alguien comparte un PDF.
+            Intent.ACTION_SEND ->
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+                }
             else -> null
         }
         if (uri == null) return

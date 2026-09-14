@@ -1,0 +1,205 @@
+<resources>
+    <!-- Traduccion al ingles. El nombre de la app no se traduce. -->
+    <string name="app_name">PDF GioSoft</string>
+
+    <!-- Biblioteca -->
+    <string name="app_title_bar">PDF GioSoft</string>
+    <string name="history_title">History</string>
+    <string name="theme_to_dark">Switch to dark theme</string>
+    <string name="theme_to_light">Switch to light theme</string>
+    <string name="library_title">My documents</string>
+    <string name="library_empty_title">You haven’t opened any PDF yet</string>
+    <string name="library_empty_body">Tap the button below to find a document on your phone, or scan a few photos to create a new one.</string>
+    <string name="library_search_hint">Search…</string>
+    <string name="library_no_results">No document matches “%1$s”</string>
+    <string name="open_pdf">Open a PDF</string>
+    <string name="scan_to_pdf">Scan to PDF</string>
+    <string name="scan_short">Scan</string>
+    <string name="open_short">Open PDF</string>
+    <string name="group_today">Today</string>
+    <string name="group_yesterday">Yesterday</string>
+    <string name="favorites">Favorites</string>
+    <string name="selection_count">%1$d selected</string>
+    <string name="selection_all">Select all</string>
+    <string name="selection_clear">Clear selection</string>
+    <string name="selection_removed">%1$s documents removed from the list</string>
+    <string name="selection_hint">Press and hold a document to select several</string>
+    <string name="filter_all">All</string>
+    <string name="filter_uncategorized">No category</string>
+    <string name="categories_title">Categories</string>
+    <string name="categories_manage">Manage</string>
+    <string name="categories_empty">You don’t have any categories yet. Create one below to start organizing your documents.</string>
+    <string name="category_new">New category</string>
+    <string name="category_add">Add</string>
+    <string name="category_color">Color</string>
+    <string name="category_move_up">Move up</string>
+    <string name="category_move_down">Move down</string>
+    <string name="category_name_hint">Category name</string>
+    <string name="category_create_title">New category</string>
+    <string name="category_edit_title">Edit category</string>
+    <string name="categories_reorder_hint">Tap a category to change its name or color. Use the arrows to reorder them.</string>
+    <string name="category_duplicate">A category with that name already exists</string>
+    <string name="category_position">Position %1$d</string>
+    <string name="category_rename">Rename category</string>
+    <string name="category_empty">The category name can’t be empty</string>
+    <string name="category_deleted">Category “%1$s” deleted</string>
+    <string name="category_assigned">Documents organized</string>
+    <string name="category_delete_title">Delete category?</string>
+    <string name="category_delete_message">The category “%1$s” will be deleted.
+
+Your documents are NOT deleted: they will show as “No category”.</string>
+    <string name="action_delete_category">Delete category</string>
+    <string name="move_to_category">Add to category</string>
+    <string name="move_to_category_many">Add %1$d documents</string>
+
+    <!-- Acciones sobre un documento -->
+    <string name="action_open">Open</string>
+    <string name="action_rename">Rename</string>
+    <string name="action_share">Share</string>
+    <string name="action_print">Print</string>
+    <string name="action_favorite">Add to favorites</string>
+    <string name="action_lock">Protect with fingerprint</string>
+    <string name="action_password">Add a password to the file</string>
+    <string name="action_remove_password">Remove the file password</string>
+    <string name="password_set_title">File password</string>
+    <string name="password_set_explain">The password is stored INSIDE the PDF. If you share it, whoever receives it will be asked for the password too, in any app.</string>
+    <string name="password_remove_title">Remove the password</string>
+    <string name="password_remove_explain">The file will be left without a password. Anyone who has it will be able to open it.</string>
+    <string name="password_current">Current password</string>
+    <string name="password_new">New password</string>
+    <string name="password_repeat">Repeat the password</string>
+    <string name="password_mismatch">The passwords don’t match</string>
+    <string name="password_too_short">Use at least 4 characters</string>
+    <string name="password_set_done">Password applied to the file</string>
+    <string name="password_removed_done">Password removed from the file</string>
+    <string name="password_change_failed">The password couldn’t be changed. Check that the current one is correct.</string>
+    <string name="password_readonly">This file can’t be modified from here. Save it to My PDFs and try again.</string>
+    <string name="lock_explain">It only protects the document inside this app and on this phone. If you share the file, whoever receives it will open it without unlocking.</string>
+    <string name="action_unlock">Remove the protection</string>
+    <string name="lock_added">Document protected</string>
+    <string name="lock_removed">Protection removed</string>
+    <string name="lock_confirm_add">Protect document</string>
+    <string name="lock_confirm_remove">Remove the protection</string>
+    <string name="lock_confirm_subtitle">Unlock to confirm the change</string>
+    <string name="lock_prompt_title">Protected document</string>
+    <string name="lock_prompt_subtitle">Unlock to open “%1$s”</string>
+    <string name="lock_unavailable">Set up a fingerprint, PIN or password on your phone to use this feature</string>
+    <string name="lock_failed">We couldn’t verify your identity</string>
+    <string name="lock_scope_title">Protect with fingerprint?</string>
+    <string name="lock_scope_intro">This is what changes for “%1$s”:</string>
+    <string name="lock_scope_yes_open">You’ll be asked for your fingerprint (or your phone PIN) every time you open it from this app.</string>
+    <string name="lock_scope_yes_change">Also to remove the protection later on.</string>
+    <string name="lock_scope_yes_preview">The list won’t show a preview of its contents.</string>
+    <string name="lock_scope_no_file">The file is not encrypted or changed: the protection lives in this app and on this phone.</string>
+    <string name="lock_scope_no_other_apps">If you share it or open it with another app, it will open without asking for anything. For that, use “Add a password to the file”.</string>
+    <string name="lock_scope_confirm">Protect</string>
+    <string name="lock_scope_more">See more</string>
+    <string name="action_unfavorite">Remove from favorites</string>
+    <string name="action_remove_from_history">Remove from the list</string>
+    <string name="action_delete_device">Delete from phone</string>
+    <string name="delete_title">Delete from phone?</string>
+    <string name="delete_message">“%1$s” will be permanently deleted from your phone.
+
+This action can’t be undone.</string>
+    <string name="delete_confirm">Delete</string>
+    <string name="delete_done">“%1$s” deleted from your phone</string>
+    <string name="delete_failed">Couldn’t delete it. The app that stores this file doesn’t allow it.</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_accept">OK</string>
+    <string name="action_save_copy">Save to My PDFs</string>
+    <string name="save_copy_done">Saved to %1$s. It won’t expire any more.</string>
+    <string name="save_copy_failed">The copy couldn’t be saved</string>
+    <string name="temporary_access">Temporary access</string>
+    <string name="temporary_access_explain">This document was shared with you from another app and its access may expire. Save it to My PDFs to keep it.</string>
+    <string name="action_retry">Try again</string>
+
+    <!-- Renombrar -->
+    <string name="rename_title">Rename document</string>
+    <string name="rename_label">New name</string>
+    <string name="rename_explains">The original file on your phone is renamed.</string>
+    <string name="rename_done">Renamed to “%1$s”</string>
+    <string name="rename_failed">Couldn’t rename it. The app that stores this file doesn’t allow it.</string>
+    <string name="rename_empty">The name can’t be empty</string>
+    <string name="rename_explains_permission">The original file on your phone is renamed. Android will ask you for permission to modify it.</string>
+    <string name="rename_permission_denied">Not renamed: your permission is needed to modify the file.</string>
+
+    <!-- Quitar del historial -->
+    <string name="remove_title">Remove from history</string>
+    <string name="remove_message">“%1$s” will be removed from this list.\n\nThe file is NOT deleted from your phone: it stays where it is.</string>
+    <string name="remove_done">Removed from history</string>
+    <string name="undo">Undo</string>
+
+    <!-- Visor -->
+    <string name="viewer_loading">Opening document…</string>
+    <string name="search_in_document">Search in the document…</string>
+    <string name="search_match_of">%1$d/%2$d</string>
+    <string name="search_no_results">No results</string>
+    <string name="search_previous">Previous</string>
+    <string name="search_next">Next</string>
+    <string name="search_close">Close search</string>
+    <string name="viewer_page_of">Page %1$d of %2$d</string>
+    <string name="viewer_error_title">The document couldn’t be opened</string>
+    <string name="viewer_error_missing">The file is no longer available. It may have been moved or deleted, or the app that shared it may no longer grant access.</string>
+    <string name="viewer_error_generic">Something went wrong while opening the document.</string>
+
+    <!-- Contraseña -->
+    <string name="password_title">Protected document</string>
+    <string name="password_body">“%1$s” needs a password to open.</string>
+    <string name="password_label">Password</string>
+    <string name="password_wrong">Wrong password. Try again.</string>
+    <string name="password_show">Show password</string>
+    <string name="password_hide">Hide password</string>
+    <string name="password_unsupported">This phone can’t open password-protected PDFs. It needs Android 12 or later with updated system services.</string>
+
+    <!-- Escaner -->
+    <string name="scan_saved">Scanned document saved</string>
+    <string name="scan_failed">The scan couldn’t be completed</string>
+    <string name="scan_cancelled">Scan cancelled</string>
+    <string name="scan_name_title">Document name</string>
+    <string name="scan_save_hint">It will be saved to %1$s, where you can find it from any app.</string>
+    <string name="scan_save_here">Save to My PDFs</string>
+    <string name="scan_choose_folder">Choose another folder…</string>
+    <string name="scan_saved_at">Saved to %1$s</string>
+    <string name="action_open_now">Open</string>
+
+    <!-- Acerca de -->
+    <string name="about">About</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_thumbnails_title">Document preview</string>
+    <string name="settings_thumbnails_desc">Show the first page instead of the icon.</string>
+    <string name="settings_dark_title">Dark theme</string>
+    <string name="settings_dark_desc">It’s also in the top bar.</string>
+    <string name="about_title">PDF GioSoft</string>
+    <string name="about_tagline">Your documents, with no ads and no fuss.</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_developed_by">Giovanny Tovar</string>
+    <string name="about_developer_label">Development</string>
+    <string name="about_why_title">Why it exists</string>
+    <string name="about_why_text">Almost every PDF reader fills the screen with ads or asks for permissions it doesn’t need. This app was born to offer a simple alternative to friends, family and neighbors: open a document, read it, and get on with your day.</string>
+    <string name="about_what_title">What it does</string>
+    <string name="about_what_text">It opens your original files without duplicating them, organizes them by category, scans documents with the camera, prints and shares. Nothing more, nothing less.</string>
+    <string name="about_thanks">Thanks for using it.</string>
+    <string name="about_close">Close</string>
+
+    <!-- Privacidad -->
+    <string name="about_privacy_title">Privacy</string>
+    <string name="privacy_tagline">Everything happens inside your phone.</string>
+    <string name="privacy_point_permissions_title">No dangerous permissions</string>
+    <string name="privacy_point_permissions_text">The app doesn’t ask for access to your storage or your camera. You open each file with the system picker, which grants access one file at a time.</string>
+    <string name="privacy_point_network_title">No connection to servers</string>
+    <string name="privacy_point_network_text">Your documents are not sent anywhere. There are no accounts, no analytics, no ads and no tracking.</string>
+    <string name="privacy_point_copies_title">No copies behind your back</string>
+    <string name="privacy_point_copies_text">The original file is the one being read. The only copy made is of documents shared with you through WhatsApp or email, whose access expires, and it is saved in Documents/My PDFs.</string>
+    <string name="privacy_point_delete_title">Nothing is deleted on its own</string>
+    <string name="privacy_point_delete_text">Removing a document from the list never deletes the file. It is only deleted from your phone if you ask for it and confirm.</string>
+    <string name="privacy_point_lock_title">Fingerprint protection</string>
+    <string name="privacy_point_lock_text">It protects the document inside this app and on this phone: the file is not encrypted. If you share it or open it with another app, it will open without asking for anything. For the protection to travel with the file, give it a password.</string>
+    <string name="privacy_point_isolated_title">Isolated reading</string>
+    <string name="privacy_point_isolated_text">PDFs are processed in a space separate from the rest of the app, so a damaged file can’t affect it.</string>
+
+    <!-- Comunes -->
+    <string name="cd_more_options">More options</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_search">Search</string>
+    <string name="file_unavailable">File not available</string>
+</resources>

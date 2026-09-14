@@ -28,7 +28,6 @@ android {
         versionName = "5.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        resourceConfigurations += listOf("es", "en")
     }
 
     signingConfigs {
@@ -64,6 +63,12 @@ android {
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
+    }
+
+    // Idiomas que se empaquetan. El resto de traducciones de las librerias se
+    // descarta, para no cargar el APK con 80 idiomas que la app no habla.
+    androidResources {
+        localeFilters += listOf("es", "en", "fr", "pt")
     }
 
     buildFeatures {

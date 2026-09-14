@@ -305,6 +305,13 @@ activarla (`ui/library/LockInfoDialog.kt`).
 | Si desinstalas | Se pierde la protección | Sigue ahí |
 | Efecto secundario | No se genera miniatura | El visor pedirá la contraseña (§5) |
 
+El diálogo de activación (`LockInfoDialog`) muestra primero lo que la protección
+sí hace, y deja sus dos límites —no cifra el archivo y no viaja con él— detrás
+de «Ver más», además de en *Acerca de → Privacidad*. Es deliberado: quien
+protege sus documentos puede leerlos cuando quiera, pero a quien coja un celular
+ajeno no se le regala en pantalla hasta dónde llega la protección que acaba de
+encontrarse.
+
 `DeviceLock` usa la API de la plataforma en vez de `androidx.biometric` porque
 la versión estable de esa librería es de 2021 y obliga a que la Activity sea una
 `FragmentActivity`. **La app nunca ve la huella ni el PIN**: solo recibe un sí o
@@ -362,6 +369,44 @@ nombres de las columnas.
   uso diario · protección · quitar de la lista · eliminar del celular. **El
   divisor y el color rojo de la última no son decoración**: separan la única
   acción destructiva.
+
+---
+
+## 9 bis. Idiomas
+
+La app habla **español (por defecto), inglés, francés y portugués**:
+
+```
+res/values/strings.xml      es  — el original; aquí se escribe primero
+res/values-en/strings.xml   en
+res/values-fr/strings.xml   fr  (cubre fr-CA y demás variantes)
+res/values-pt/strings.xml   pt  (cubre pt-BR)
+```
+
+`androidResources.localeFilters` en `app/build.gradle.kts` limita el empaquetado
+a esos cuatro, para no arrastrar los ochenta idiomas de las librerías.
+
+Reglas al tocar textos:
+
+1. **Toda cadena nueva va en los cuatro archivos.** `./gradlew lint` avisa de
+   las que falten (`MissingTranslation`), pero es más rápido comprobarlo así:
+
+   ```bash
+   grep -c "<string" app/src/main/res/values*/strings.xml
+   ```
+
+2. Los marcadores de formato (`%1$s`, `%1$d`) deben aparecer en todas las
+   traducciones y con el mismo índice.
+3. Usar comillas tipográficas (« », “ ”, ’) en vez de `"` y `'`, que en un
+   `strings.xml` hay que escapar y es fuente de errores tontos.
+4. El nombre de la app, «PDF GioSoft», no se traduce.
+
+Para comprobar cómo quedó una cadena en cada idioma sin cambiar el idioma del
+teléfono:
+
+```bash
+aapt2 dump resources app/build/outputs/apk/debug/app-debug.apk | grep -A 4 lock_scope_title
+```
 
 ---
 

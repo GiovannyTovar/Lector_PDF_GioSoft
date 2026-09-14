@@ -92,6 +92,7 @@ Tus documentos NO se borran: quedarán como «Sin categoría».</string>
     <string name="lock_scope_no_file">El archivo no se cifra ni cambia: la protección vive en esta app y en este celular.</string>
     <string name="lock_scope_no_other_apps">Si lo compartes o lo abres con otra aplicación, se abrirá sin pedir nada. Para eso usa «Poner contraseña al archivo».</string>
     <string name="lock_scope_confirm">Proteger</string>
+    <string name="lock_scope_more">Ver más</string>
     <string name="action_unfavorite">Quitar de favoritos</string>
     <string name="action_remove_from_history">Quitar de la lista</string>
     <string name="action_delete_device">Eliminar del celular</string>
@@ -190,6 +191,8 @@ Esta acción no se puede deshacer.</string>
     <string name="privacy_point_copies_text">Se lee el archivo original. La única copia que se hace es la de los documentos que te comparten por WhatsApp o correo, cuyo acceso caduca, y queda guardada en Documentos/Mis PDF.</string>
     <string name="privacy_point_delete_title">Nada se borra solo</string>
     <string name="privacy_point_delete_text">Quitar un documento de la lista nunca borra el archivo. Solo se elimina del celular si lo pides expresamente y lo confirmas.</string>
+    <string name="privacy_point_lock_title">Protección con huella</string>
+    <string name="privacy_point_lock_text">Protege el documento dentro de esta app y en este celular: el archivo no se cifra. Si lo compartes o lo abres con otra aplicación, se abrirá sin pedir nada. Para que la protección viaje con el archivo, ponle una contraseña.</string>
     <string name="privacy_point_isolated_title">Lectura aislada</string>
     <string name="privacy_point_isolated_text">Los PDF se procesan en un espacio separado del resto de la aplicación, de modo que un archivo dañado no puede afectarla.</string>
 
