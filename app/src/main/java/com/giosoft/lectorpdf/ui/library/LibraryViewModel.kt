@@ -123,8 +123,17 @@ class LibraryViewModel(
 
     // --- Categorias ---
 
-    fun createCategory(name: String) = viewModelScope.launch {
-        categories.create(name).onFailure { messages.send(UiMessage(R.string.category_empty)) }
+    fun createCategory(name: String, colorArgb: Int?) = viewModelScope.launch {
+        categories.create(name, colorArgb)
+            .onFailure { messages.send(UiMessage(R.string.category_empty)) }
+    }
+
+    fun moveCategory(from: Int, up: Boolean) = viewModelScope.launch {
+        categories.move(uiState.value.categories, from, up)
+    }
+
+    fun setCategoryColor(category: CategoryEntity, colorArgb: Int) = viewModelScope.launch {
+        categories.setColor(category, colorArgb)
     }
 
     fun renameCategory(category: CategoryEntity, newName: String) = viewModelScope.launch {
@@ -213,12 +222,11 @@ class LibraryViewModel(
     private fun groupDocuments(documents: List<DocumentEntity>): List<DocumentGroup> {
         if (documents.isEmpty()) return emptyList()
 
+        // Ya NO se crea un bloque "Favoritos": los favoritos tienen su propia
+        // ficha en la fila de filtros, y duplicar aqui cada documento hacia que
+        // apareciera dos veces en la lista (una en Favoritos y otra en su
+        // fecha). La estrella en la tarjeta basta para reconocerlos.
         val groups = mutableListOf<DocumentGroup>()
-
-        val favorites = documents.filter { it.isFavorite }
-        if (favorites.isNotEmpty()) {
-            groups += DocumentGroup(GroupTitle.Resource(R.string.favorites), favorites)
-        }
 
         val today = LocalDate.now()
         val yesterday = today.minusDays(1)

@@ -1,8 +1,15 @@
 <resources>
     <!-- Tema base. La interfaz real la dibuja Compose (ui/theme/Theme.kt);
-         este tema solo cubre el arranque de la Activity y el contexto que
-         necesitan las vistas internas del visor de androidx.pdf. -->
+         este tema cubre el arranque de la Activity, la pantalla de inicio y el
+         contexto que necesitan las vistas internas del visor de androidx.pdf. -->
     <style name="Theme.LectorPdf" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowBackground">?attr/colorSurface</item>
+
+        <!-- Pantalla de inicio. El fondo debe ser EL MISMO color que el fondo
+             del icono adaptativo (@color/ic_launcher_background); si no, se ve
+             el circulo del icono recortado sobre un color distinto. -->
+        <item name="android:windowSplashScreenBackground">@color/ic_launcher_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/ic_launcher_background</item>
     </style>
 </resources>

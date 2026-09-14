@@ -48,18 +48,37 @@ class CategoryRepository(
         settings.markCategoriesSeeded()
     }
 
-    suspend fun create(name: String): Result<Unit> = runCatching {
+    suspend fun create(name: String, colorArgb: Int? = null): Result<Unit> = runCatching {
         val clean = name.trim()
         require(clean.isNotEmpty()) { "El nombre no puede estar vacio" }
         val position = (categoryDao.maxPosition() ?: -1) + 1
         categoryDao.insert(
             CategoryEntity(
                 name = clean,
-                colorArgb = CATEGORY_COLORS[position % CATEGORY_COLORS.size],
+                colorArgb = colorArgb ?: CATEGORY_COLORS[position % CATEGORY_COLORS.size],
                 position = position,
             ),
         )
         Unit
+    }
+
+    /**
+     * Sube o baja una categoria en la fila de filtros.
+     *
+     * Intercambia la posicion con su vecina y reescribe ambas, para que el
+     * orden quede siempre consecutivo aunque se hayan borrado categorias.
+     */
+    suspend fun move(categories: List<CategoryEntity>, from: Int, up: Boolean) {
+        val to = if (up) from - 1 else from + 1
+        if (from !in categories.indices || to !in categories.indices) return
+        val reordered = categories.toMutableList()
+        val moved = reordered.removeAt(from)
+        reordered.add(to, moved)
+        reordered.forEachIndexed { index, category ->
+            if (category.position != index) {
+                categoryDao.update(category.copy(position = index))
+            }
+        }
     }
 
     suspend fun rename(category: CategoryEntity, newName: String): Result<Unit> = runCatching {

@@ -29,6 +29,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.DocumentScanner
 import androidx.compose.material.icons.outlined.LightMode
@@ -45,7 +46,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -64,6 +66,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -215,11 +218,45 @@ fun LibraryScreen(
             TopAppBar(
                 title = {
                     if (searching) {
-                        OutlinedTextField(
+                        // Sobre la barra azul, un campo normal queda con texto
+                        // oscuro y sin borde visible. Este va en blanco y con
+                        // una linea inferior que indica donde escribir.
+                        val onBar = if (isDark) {
+                            MaterialTheme.colorScheme.onSurface
+                        } else {
+                            MaterialTheme.colorScheme.onPrimary
+                        }
+                        TextField(
                             value = state.query,
                             onValueChange = viewModel::onQueryChange,
-                            placeholder = { Text(stringResource(R.string.library_search_hint)) },
+                            placeholder = {
+                                Text(
+                                    text = stringResource(R.string.library_search_hint),
+                                    color = onBar.copy(alpha = 0.6f),
+                                )
+                            },
                             singleLine = true,
+                            textStyle = MaterialTheme.typography.bodyLarge,
+                            trailingIcon = {
+                                if (state.query.isNotEmpty()) {
+                                    IconButton(onClick = { viewModel.onQueryChange("") }) {
+                                        Icon(
+                                            Icons.Outlined.Close,
+                                            stringResource(R.string.action_cancel),
+                                            tint = onBar,
+                                        )
+                                    }
+                                }
+                            },
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                                focusedTextColor = onBar,
+                                unfocusedTextColor = onBar,
+                                cursorColor = onBar,
+                                focusedIndicatorColor = onBar,
+                                unfocusedIndicatorColor = onBar.copy(alpha = 0.7f),
+                            ),
                             modifier = Modifier.fillMaxWidth(),
                         )
                     } else {
@@ -385,7 +422,13 @@ fun LibraryScreen(
                         GroupHeader(group.title)
                     }
                     items(group.documents, key = { "${group.title}-${it.uri}" }) { document ->
-                        DocumentCard(document = document, actions = documentActions)
+                        DocumentCard(
+                            document = document,
+                            actions = documentActions,
+                            categoryColor = state.categories
+                                .firstOrNull { it.id == document.categoryId }
+                                ?.let { Color(it.colorArgb) },
+                        )
                     }
                 }
             }
@@ -453,6 +496,8 @@ fun LibraryScreen(
             categories = state.categories,
             onCreate = viewModel::createCategory,
             onRename = viewModel::renameCategory,
+            onRecolor = viewModel::setCategoryColor,
+            onMove = viewModel::moveCategory,
             onDelete = viewModel::deleteCategory,
             onDismiss = { manageCategories = false },
         )

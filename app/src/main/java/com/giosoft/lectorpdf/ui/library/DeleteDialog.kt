@@ -2,15 +2,13 @@ package com.giosoft.lectorpdf.ui.library
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DeleteForever
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.giosoft.lectorpdf.R
 import com.giosoft.lectorpdf.data.db.DocumentEntity
+import com.giosoft.lectorpdf.ui.components.AppDialog
 
 /**
  * Confirmacion del unico borrado irreversible de la app.
@@ -27,40 +25,25 @@ fun DeleteDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        icon = {
-            Icon(
-                imageVector = Icons.Outlined.DeleteForever,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.error,
-            )
-        },
-        title = { Text(stringResource(R.string.delete_title)) },
-        text = {
-            Text(
-                text = if (canDelete) {
-                    stringResource(R.string.delete_message, document.name)
-                } else {
-                    stringResource(R.string.delete_failed)
-                },
-                style = MaterialTheme.typography.bodyMedium,
-            )
-        },
-        confirmButton = {
-            if (canDelete) {
-                TextButton(onClick = onConfirm) {
-                    Text(
-                        text = stringResource(R.string.delete_confirm),
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(if (canDelete) R.string.action_cancel else R.string.about_close))
-            }
-        },
-    )
+    AppDialog(
+        icon = Icons.Outlined.DeleteForever,
+        iconTint = MaterialTheme.colorScheme.error,
+        title = stringResource(R.string.delete_title),
+        onDismiss = onDismiss,
+        confirmText = stringResource(
+            if (canDelete) R.string.delete_confirm else R.string.about_close,
+        ),
+        confirmIsDestructive = canDelete,
+        onConfirm = { if (canDelete) onConfirm() else onDismiss() },
+        dismissText = if (canDelete) stringResource(R.string.action_cancel) else null,
+    ) {
+        Text(
+            text = if (canDelete) {
+                stringResource(R.string.delete_message, document.name)
+            } else {
+                stringResource(R.string.delete_failed)
+            },
+            style = MaterialTheme.typography.bodyMedium,
+        )
+    }
 }

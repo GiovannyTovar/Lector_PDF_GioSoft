@@ -25,6 +25,13 @@
     <string name="categories_empty">Aún no tienes categorías. Crea una abajo para empezar a organizar tus documentos.</string>
     <string name="category_new">Nueva categoría</string>
     <string name="category_add">Añadir</string>
+    <string name="category_color">Color</string>
+    <string name="category_move_up">Subir</string>
+    <string name="category_move_down">Bajar</string>
+    <string name="category_name_hint">Nombre de la categoría</string>
+    <string name="category_create_title">Nueva categoría</string>
+    <string name="category_edit_title">Editar categoría</string>
+    <string name="categories_reorder_hint">Usa las flechas para cambiar el orden en que aparecen.</string>
     <string name="category_rename">Renombrar categoría</string>
     <string name="category_empty">El nombre de la categoría no puede estar vacío</string>
     <string name="category_deleted">Categoría «%1$s» eliminada</string>
@@ -105,13 +112,31 @@ Esta acción no se puede deshacer.</string>
 
     <!-- Acerca de -->
     <string name="about">Acerca de</string>
-    <string name="about_title">Lector de PDF GioSoft</string>
+    <string name="about_title">Lector PDF GioSoft</string>
+    <string name="about_tagline">Tus documentos, sin publicidad y sin complicaciones.</string>
     <string name="about_version">Versión %1$s</string>
-    <string name="about_developed_by">Desarrollado por Giovanny Tovar</string>
-    <string name="about_text">Esta aplicación fue creada con el propósito de ofrecer una alternativa libre de publicidad para la lectura de documentos PDF.\n\nEstá dirigida especialmente a amigos, familiares y conocidos, con el objetivo de facilitar el manejo de sus archivos de forma rápida, privada y sin interrupciones.</string>
-    <string name="about_privacy_title">Tu privacidad</string>
-    <string name="about_privacy_text">Todo ocurre en tu celular. La app no envía tus documentos a ningún servidor, no pide permisos de almacenamiento y no muestra publicidad.</string>
+    <string name="about_developed_by">Giovanny Tovar</string>
+    <string name="about_developer_label">Desarrollo</string>
+    <string name="about_why_title">Por qué existe</string>
+    <string name="about_why_text">Casi todos los lectores de PDF llenan la pantalla de anuncios o piden permisos que no necesitan. Esta aplicación nació para ofrecer una alternativa sencilla a amigos, familiares y conocidos: abrir un documento, leerlo y seguir con lo tuyo.</string>
+    <string name="about_what_title">Qué hace</string>
+    <string name="about_what_text">Abre tus archivos originales sin duplicarlos, los organiza por categorías, escanea documentos con la cámara, imprime y comparte. Nada más, y nada menos.</string>
+    <string name="about_thanks">Gracias por usarla.</string>
     <string name="about_close">Cerrar</string>
+
+    <!-- Privacidad -->
+    <string name="about_privacy_title">Privacidad</string>
+    <string name="privacy_tagline">Todo ocurre dentro de tu celular.</string>
+    <string name="privacy_point_permissions_title">Sin permisos peligrosos</string>
+    <string name="privacy_point_permissions_text">La aplicación no declara ningún permiso. Cada archivo lo abres tú con el selector del sistema, que concede el acceso uno por uno.</string>
+    <string name="privacy_point_network_title">Sin conexión a servidores</string>
+    <string name="privacy_point_network_text">Tus documentos no se envían a ninguna parte. No hay cuentas, ni analítica, ni publicidad, ni rastreo.</string>
+    <string name="privacy_point_copies_title">Sin copias a tus espaldas</string>
+    <string name="privacy_point_copies_text">Se lee el archivo original. La única copia que se hace es la de los documentos que te comparten por WhatsApp o correo, cuyo acceso caduca, y queda guardada en Documentos/Mis PDF.</string>
+    <string name="privacy_point_delete_title">Nada se borra solo</string>
+    <string name="privacy_point_delete_text">Quitar un documento de la lista nunca borra el archivo. Solo se elimina del celular si lo pides expresamente y lo confirmas.</string>
+    <string name="privacy_point_isolated_title">Lectura aislada</string>
+    <string name="privacy_point_isolated_text">Los PDF se procesan en un espacio separado del resto de la aplicación, de modo que un archivo dañado no puede afectarla.</string>
 
     <!-- Comunes -->
     <string name="cd_more_options">Más opciones</string>

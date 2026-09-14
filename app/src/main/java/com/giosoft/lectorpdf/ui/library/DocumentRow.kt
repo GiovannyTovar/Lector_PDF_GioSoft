@@ -70,6 +70,7 @@ data class DocumentActions(
 fun DocumentCard(
     document: DocumentEntity,
     actions: DocumentActions,
+    categoryColor: Color? = null,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -78,7 +79,7 @@ fun DocumentCard(
         shape = RoundedCornerShape(18.dp),
         shadowElevation = 1.dp,
     ) {
-        DocumentRow(document, actions)
+        DocumentRow(document, actions, categoryColor)
     }
 }
 
@@ -86,6 +87,7 @@ fun DocumentCard(
 private fun DocumentRow(
     document: DocumentEntity,
     actions: DocumentActions,
+    categoryColor: Color?,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     val isDark = LocalIsDarkTheme.current
@@ -125,6 +127,12 @@ private fun DocumentRow(
 
         Column(Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
+                // Punto del color de su categoria: permite reconocerla de un
+                // vistazo cuando se esta viendo "Todos".
+                categoryColor?.let { color ->
+                    Surface(modifier = Modifier.size(9.dp), shape = CircleShape, color = color) {}
+                    Spacer(Modifier.width(6.dp))
+                }
                 if (document.isFavorite) {
                     Icon(
                         imageVector = Icons.Outlined.Star,
@@ -137,6 +145,7 @@ private fun DocumentRow(
                 Text(
                     text = document.name,
                     style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     // En MEDIO y no al final: en los nombres de archivo lo que
