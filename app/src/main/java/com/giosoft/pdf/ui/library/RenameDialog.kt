@@ -22,6 +22,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.giosoft.pdf.R
+import com.giosoft.pdf.data.RenameSupport
 import com.giosoft.pdf.data.db.DocumentEntity
 import com.giosoft.pdf.ui.components.AppDialog
 import com.giosoft.pdf.ui.components.AppTextField
@@ -35,10 +36,11 @@ import com.giosoft.pdf.ui.components.AppTextField
 @Composable
 fun RenameDialog(
     document: DocumentEntity,
-    canRename: Boolean,
+    support: RenameSupport,
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val canRename = support != RenameSupport.NO_DISPONIBLE
     val baseName = document.name.removeSuffix(".pdf").removeSuffix(".PDF")
     var value by remember {
         mutableStateOf(TextFieldValue(baseName, selection = TextRange(0, baseName.length)))
@@ -70,9 +72,16 @@ fun RenameDialog(
                 modifier = Modifier.focusRequester(focusRequester),
             )
             Spacer(Modifier.height(12.dp))
+            // Cuando el renombrado pasa por MediaStore, Android mostrara su
+            // propio dialogo pidiendo permiso sobre el archivo. Se avisa antes
+            // para que esa pregunta no llegue de la nada.
             Text(
                 text = stringResource(
-                    if (canRename) R.string.rename_explains else R.string.rename_failed,
+                    when (support) {
+                        RenameSupport.DIRECTO -> R.string.rename_explains
+                        RenameSupport.CON_PERMISO -> R.string.rename_explains_permission
+                        RenameSupport.NO_DISPONIBLE -> R.string.rename_failed
+                    },
                 ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = if (canRename) {

@@ -48,8 +48,8 @@
 
 Tus documentos NO se borran: quedarán como «Sin categoría».</string>
     <string name="action_delete_category">Eliminar categoría</string>
-    <string name="move_to_category">Mover a categoría</string>
-    <string name="move_to_category_many">Mover %1$d documentos</string>
+    <string name="move_to_category">Añadir a categoría</string>
+    <string name="move_to_category_many">Añadir %1$d documentos</string>
 
     <!-- Acciones sobre un documento -->
     <string name="action_open">Abrir</string>
@@ -84,6 +84,14 @@ Tus documentos NO se borran: quedarán como «Sin categoría».</string>
     <string name="lock_prompt_subtitle">Desbloquea para abrir «%1$s»</string>
     <string name="lock_unavailable">Configura una huella, un PIN o una contraseña en tu celular para usar esta función</string>
     <string name="lock_failed">No se pudo verificar tu identidad</string>
+    <string name="lock_scope_title">¿Proteger con huella?</string>
+    <string name="lock_scope_intro">Esto es lo que cambia para «%1$s»:</string>
+    <string name="lock_scope_yes_open">Se te pedirá tu huella (o el PIN del celular) cada vez que lo abras desde esta app.</string>
+    <string name="lock_scope_yes_change">También para quitarle la protección más adelante.</string>
+    <string name="lock_scope_yes_preview">La lista no mostrará una vista previa de su contenido.</string>
+    <string name="lock_scope_no_file">El archivo no se cifra ni cambia: la protección vive en esta app y en este celular.</string>
+    <string name="lock_scope_no_other_apps">Si lo compartes o lo abres con otra aplicación, se abrirá sin pedir nada. Para eso usa «Poner contraseña al archivo».</string>
+    <string name="lock_scope_confirm">Proteger</string>
     <string name="action_unfavorite">Quitar de favoritos</string>
     <string name="action_remove_from_history">Quitar de la lista</string>
     <string name="action_delete_device">Eliminar del celular</string>
@@ -110,6 +118,8 @@ Esta acción no se puede deshacer.</string>
     <string name="rename_done">Renombrado a «%1$s»</string>
     <string name="rename_failed">No se pudo renombrar. La app que guarda este archivo no lo permite.</string>
     <string name="rename_empty">El nombre no puede estar vacío</string>
+    <string name="rename_explains_permission">Se renombra el archivo original en tu celular. Android te pedirá permiso para modificarlo.</string>
+    <string name="rename_permission_denied">No se renombró: hace falta tu permiso para modificar el archivo.</string>
 
     <!-- Quitar del historial -->
     <string name="remove_title">Quitar del historial</string>

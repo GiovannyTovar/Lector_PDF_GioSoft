@@ -1,6 +1,7 @@
 package com.giosoft.pdf.data
 
 import android.content.Context
+import android.content.IntentSender
 import android.net.Uri
 import com.giosoft.pdf.data.db.DocumentDao
 import com.giosoft.pdf.data.db.DocumentEntity
@@ -142,32 +143,98 @@ class DocumentRepository(
     /**
      * Renombra el archivo original y sincroniza el historial.
      *
+     * Hay dos caminos y se prefiere siempre el primero:
+     *
+     * 1. El proveedor del documento admite renombrar. Es lo normal cuando el
+     *    PDF se abrio navegando por el almacenamiento.
+     * 2. El proveedor no lo admite, pero el archivo esta indexado en MediaStore
+     *    (el caso de los PDF elegidos desde "Recientes"). Entonces se renombra
+     *    por MediaStore, que exige el permiso del usuario la primera vez; ver
+     *    [MediaStoreDocuments].
+     *
      * Si el proveedor emite una URI distinta, migra la fila a la clave nueva:
      * de lo contrario el historial apuntaria a una URI que ya no resuelve.
      */
-    suspend fun rename(entity: DocumentEntity, newName: String): Result<DocumentEntity> {
+    suspend fun rename(entity: DocumentEntity, newName: String): RenameResult {
         val finalName = ensurePdfExtension(newName.trim())
         val oldUri = Uri.parse(entity.uri)
 
-        return SafDocuments.rename(context, oldUri, finalName).map { newUri ->
-            if (newUri.toString() == entity.uri) {
-                dao.updateName(entity.uri, finalName)
-                entity.copy(name = finalName)
-            } else {
-                val migrated = entity.copy(uri = newUri.toString(), name = finalName)
-                dao.upsert(migrated)
-                dao.deleteByUri(entity.uri)
-                migrated
-            }
+        if (SafDocuments.canRename(context, oldUri)) {
+            return SafDocuments.rename(context, oldUri, finalName).fold(
+                onSuccess = { RenameResult.Renombrado(applyName(entity, it, finalName)) },
+                onFailure = { RenameResult.Fallo(it) },
+            )
+        }
+
+        return when (val outcome = MediaStoreDocuments.rename(context, oldUri, finalName)) {
+            // MediaStore conserva el identificador del archivo, asi que la URI
+            // del historial sigue siendo valida tal cual.
+            is MediaStoreDocuments.RenameOutcome.Renombrado ->
+                RenameResult.Renombrado(applyName(entity, oldUri, finalName))
+
+            is MediaStoreDocuments.RenameOutcome.PermisoRequerido ->
+                RenameResult.PermisoRequerido(outcome.intentSender)
+
+            is MediaStoreDocuments.RenameOutcome.Fallo ->
+                RenameResult.Fallo(outcome.error)
         }
     }
 
-    suspend fun canRename(entity: DocumentEntity): Boolean =
-        SafDocuments.canRename(context, Uri.parse(entity.uri))
+    /** Deja el historial acorde con el archivo ya renombrado. */
+    private suspend fun applyName(
+        entity: DocumentEntity,
+        newUri: Uri,
+        finalName: String,
+    ): DocumentEntity =
+        if (newUri.toString() == entity.uri) {
+            dao.updateName(entity.uri, finalName)
+            entity.copy(name = finalName)
+        } else {
+            val migrated = entity.copy(uri = newUri.toString(), name = finalName)
+            dao.upsert(migrated)
+            dao.deleteByUri(entity.uri)
+            migrated
+        }
+
+    /**
+     * Como se puede renombrar este documento. La interfaz lo consulta antes de
+     * abrir el dialogo para avisar de que Android pedira confirmacion, en vez
+     * de soltar la peticion de permiso sin contexto.
+     */
+    suspend fun renameSupport(entity: DocumentEntity): RenameSupport {
+        val uri = Uri.parse(entity.uri)
+        return when {
+            SafDocuments.canRename(context, uri) -> RenameSupport.DIRECTO
+            MediaStoreDocuments.canRename(context, uri) -> RenameSupport.CON_PERMISO
+            else -> RenameSupport.NO_DISPONIBLE
+        }
+    }
 
     suspend fun isAvailable(entity: DocumentEntity): Boolean =
         SafDocuments.isAvailable(context, Uri.parse(entity.uri))
 
     private fun ensurePdfExtension(name: String): String =
         if (name.endsWith(".pdf", ignoreCase = true)) name else "$name.pdf"
+}
+
+/** Resultado de intentar renombrar un documento. */
+sealed interface RenameResult {
+    data class Renombrado(val entity: DocumentEntity) : RenameResult
+
+    /** Android necesita que el usuario autorice modificar SU archivo. */
+    data class PermisoRequerido(val intentSender: IntentSender) : RenameResult
+
+    data class Fallo(val error: Throwable) : RenameResult
+}
+
+/** Vias por las que un documento puede renombrarse. */
+enum class RenameSupport {
+    /** El proveedor lo admite: se renombra sin molestar al usuario. */
+    DIRECTO,
+
+    /** Solo por MediaStore, que pide el consentimiento del usuario. */
+    CON_PERMISO,
+
+    /** Ni una cosa ni la otra (Drive, proveedores de solo lectura...). */
+    NO_DISPONIBLE,
 }

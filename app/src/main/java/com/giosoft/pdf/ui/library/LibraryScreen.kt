@@ -79,6 +79,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.giosoft.pdf.R
+import com.giosoft.pdf.data.RenameSupport
 import com.giosoft.pdf.data.SafDocuments
 import com.giosoft.pdf.data.db.DocumentEntity
 import com.giosoft.pdf.data.PublicDocuments
@@ -119,12 +120,40 @@ fun LibraryScreen(
     var movingDocuments by remember { mutableStateOf<List<DocumentEntity>>(emptyList()) }
     var changingPassword by remember { mutableStateOf<DocumentEntity?>(null) }
     var renaming by remember { mutableStateOf<DocumentEntity?>(null) }
-    var renamingAllowed by remember { mutableStateOf(true) }
+    var renameSupport by remember { mutableStateOf(RenameSupport.DIRECTO) }
     var deleting by remember { mutableStateOf<DocumentEntity?>(null) }
     var deletingAllowed by remember { mutableStateOf(true) }
     var pendingScanPdf by remember { mutableStateOf<Uri?>(null) }
+    // Al ACTIVAR la proteccion se explica primero su alcance; para quitarla no
+    // hace falta, ahi basta con demostrar que eres tu.
+    var lockExplaining by remember { mutableStateOf<DocumentEntity?>(null) }
 
     val activity = context as? Activity
+
+    // Se pide desbloquear TAMBIEN para poner la proteccion, no solo para
+    // quitarla: de lo contrario alguien con el celular abierto podria
+    // protegerte documentos, o retirar tu proteccion, sin demostrar que eres tu.
+    val applyLockChange: (DocumentEntity) -> Unit = { document ->
+        if (activity == null) {
+            viewModel.toggleLocked(document)
+        } else {
+            scope.launch {
+                val ok = DeviceLock.authenticate(
+                    activity = activity,
+                    title = context.getString(
+                        if (document.isLocked) R.string.lock_confirm_remove
+                        else R.string.lock_confirm_add,
+                    ),
+                    subtitle = context.getString(R.string.lock_confirm_subtitle),
+                )
+                if (ok) {
+                    viewModel.toggleLocked(document)
+                } else {
+                    snackbarHost.showSnackbar(context.getString(R.string.lock_failed))
+                }
+            }
+        }
+    }
 
     val documentActions = DocumentActions(
         onOpen = { document ->
@@ -152,7 +181,7 @@ fun LibraryScreen(
         },
         onRename = { document ->
             scope.launch {
-                renamingAllowed = viewModel.canRename(document)
+                renameSupport = viewModel.renameSupport(document)
                 renaming = document
             }
         },
@@ -171,35 +200,31 @@ fun LibraryScreen(
         onChangePassword = { changingPassword = it },
         onToggleLocked = { document ->
             when {
-                activity == null -> viewModel.toggleLocked(document)
-
                 // Sin huella ni PIN configurados la proteccion no serviria.
-                !document.isLocked && !DeviceLock.isAvailable(activity) -> scope.launch {
-                    snackbarHost.showSnackbar(context.getString(R.string.lock_unavailable))
-                }
-
-                // Se pide desbloquear TAMBIEN para poner la proteccion, no solo
-                // para quitarla: de lo contrario alguien con el celular abierto
-                // podria protegerte documentos, o retirar tu proteccion, sin
-                // demostrar que eres tu.
-                else -> scope.launch {
-                    val ok = DeviceLock.authenticate(
-                        activity = activity,
-                        title = context.getString(
-                            if (document.isLocked) R.string.lock_confirm_remove
-                            else R.string.lock_confirm_add,
-                        ),
-                        subtitle = context.getString(R.string.lock_confirm_subtitle),
-                    )
-                    if (ok) {
-                        viewModel.toggleLocked(document)
-                    } else {
-                        snackbarHost.showSnackbar(context.getString(R.string.lock_failed))
+                activity != null && !document.isLocked && !DeviceLock.isAvailable(activity) ->
+                    scope.launch {
+                        snackbarHost.showSnackbar(context.getString(R.string.lock_unavailable))
                     }
-                }
+
+                !document.isLocked -> lockExplaining = document
+
+                else -> applyLockChange(document)
             }
         },
     )
+
+    // Renombrar por MediaStore exige que el usuario autorice modificar SU
+    // archivo; Android muestra su propio dialogo y aqui se recoge la respuesta.
+    val renamePermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult(),
+    ) { result ->
+        viewModel.resumeRename(result.resultCode == Activity.RESULT_OK)
+    }
+    LaunchedEffect(Unit) {
+        viewModel.renamePermissionFlow.collect { sender ->
+            renamePermission.launch(IntentSenderRequest.Builder(sender).build())
+        }
+    }
 
     // --- Selector del sistema: abre el archivo ORIGINAL, sin copiarlo ---
     val pickDocument = rememberLauncherForActivityResult(
@@ -539,10 +564,21 @@ fun LibraryScreen(
         }
     }
 
+    lockExplaining?.let { document ->
+        LockInfoDialog(
+            document = document,
+            onConfirm = {
+                lockExplaining = null
+                applyLockChange(document)
+            },
+            onDismiss = { lockExplaining = null },
+        )
+    }
+
     renaming?.let { document ->
         RenameDialog(
             document = document,
-            canRename = renamingAllowed,
+            support = renameSupport,
             onConfirm = { newName ->
                 viewModel.rename(document, newName)
                 renaming = null

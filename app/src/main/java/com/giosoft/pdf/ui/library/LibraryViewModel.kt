@@ -1,5 +1,6 @@
 package com.giosoft.pdf.ui.library
 
+import android.content.IntentSender
 import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
@@ -14,6 +15,8 @@ import com.giosoft.pdf.data.CategoryRepository
 import com.giosoft.pdf.data.DocumentRepository
 import com.giosoft.pdf.data.PdfEncryption
 import com.giosoft.pdf.data.PublicDocuments
+import com.giosoft.pdf.data.RenameResult
+import com.giosoft.pdf.data.RenameSupport
 import com.giosoft.pdf.data.SettingsRepository
 import com.giosoft.pdf.data.SafDocuments
 import com.giosoft.pdf.data.db.CategoryEntity
@@ -76,6 +79,10 @@ class LibraryViewModel(
 
     private val messages = Channel<UiMessage>(Channel.BUFFERED)
     val messageFlow = messages.receiveAsFlow()
+
+    // Peticiones de permiso del sistema que la pantalla debe lanzar.
+    private val renamePermission = Channel<IntentSender>(Channel.BUFFERED)
+    val renamePermissionFlow = renamePermission.receiveAsFlow()
 
     val uiState: StateFlow<LibraryUiState> =
         combine(
@@ -294,17 +301,53 @@ class LibraryViewModel(
         repository.restore(document)
     }
 
+    /**
+     * Renombrado a medias: cuando el archivo solo se puede renombrar por
+     * MediaStore, Android pide el consentimiento del usuario y la operacion
+     * queda esperando aqui hasta que vuelva de ese dialogo.
+     */
+    private var pendingRename: Pair<DocumentEntity, String>? = null
+
     fun rename(document: DocumentEntity, newName: String) = viewModelScope.launch {
         if (newName.isBlank()) {
             messages.send(UiMessage(R.string.rename_empty))
             return@launch
         }
-        repository.rename(document, newName)
-            .onSuccess { messages.send(UiMessage(R.string.rename_done, arg = it.name)) }
-            .onFailure { messages.send(UiMessage(R.string.rename_failed)) }
+        applyRename(document, newName)
     }
 
-    suspend fun canRename(document: DocumentEntity): Boolean = repository.canRename(document)
+    private suspend fun applyRename(document: DocumentEntity, newName: String) {
+        when (val result = repository.rename(document, newName)) {
+            is RenameResult.Renombrado -> {
+                pendingRename = null
+                messages.send(UiMessage(R.string.rename_done, arg = result.entity.name))
+            }
+
+            is RenameResult.PermisoRequerido -> {
+                pendingRename = document to newName
+                renamePermission.send(result.intentSender)
+            }
+
+            is RenameResult.Fallo -> {
+                pendingRename = null
+                messages.send(UiMessage(R.string.rename_failed))
+            }
+        }
+    }
+
+    /** Reintenta tras el dialogo del sistema. [granted] es su resultado. */
+    fun resumeRename(granted: Boolean) = viewModelScope.launch {
+        val (document, newName) = pendingRename ?: return@launch
+        pendingRename = null
+        if (granted) {
+            applyRename(document, newName)
+        } else {
+            messages.send(UiMessage(R.string.rename_permission_denied))
+        }
+    }
+
+    suspend fun renameSupport(document: DocumentEntity): RenameSupport =
+        repository.renameSupport(document)
 
     suspend fun canDelete(document: DocumentEntity): Boolean = repository.canDelete(document)
 
