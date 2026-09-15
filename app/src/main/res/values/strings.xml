@@ -9,6 +9,10 @@
     <string name="library_empty_body">Toca el botón de abajo para buscar un documento en tu celular, o escanea unas fotos para crear uno nuevo.</string>
     <string name="library_search_hint">Buscar…</string>
     <string name="library_no_results">Ningún documento coincide con «%1$s»</string>
+    <string name="library_empty_category">Aún no hay documentos en esta categoría.</string>
+    <string name="library_empty_favorites">Aún no tienes documentos favoritos.</string>
+    <string name="library_empty_uncategorized">Todos tus documentos ya tienen categoría.</string>
+    <string name="library_empty_filter">No hay documentos que mostrar aquí.</string>
     <string name="scan_short">Escanear</string>
     <string name="open_short">Abrir PDF</string>
     <string name="group_today">Hoy</string>

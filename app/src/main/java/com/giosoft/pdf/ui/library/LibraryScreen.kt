@@ -542,7 +542,15 @@ fun LibraryScreen(
         when {
             state.groups.isEmpty() && !state.hasAnyDocument -> EmptyLibrary(Modifier.padding(padding))
 
-            state.groups.isEmpty() -> NoResults(state.query, Modifier.padding(padding))
+            // Vacia por la busqueda ("Ningun documento coincide con «...»")
+            // solo cuando de verdad hay texto escrito. Si esta vacia por el
+            // filtro (una categoria sin documentos, por ejemplo), la consulta
+            // esta en blanco y el mensaje de busqueda quedaria roto: "con
+            // «»". Ese caso tiene su propio mensaje, segun el filtro.
+            state.groups.isEmpty() && state.query.isNotBlank() ->
+                NoResults(state.query, Modifier.padding(padding))
+
+            state.groups.isEmpty() -> EmptyFilter(state.filter, Modifier.padding(padding))
 
             else -> LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -751,6 +759,34 @@ private fun NoResults(query: String, modifier: Modifier = Modifier) {
     ) {
         Text(
             text = stringResource(R.string.library_no_results, query),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+/**
+ * Ficha vacia por el filtro (no por una busqueda): la categoria elegida
+ * todavia no tiene documentos, no hay favoritos, o ya no queda nada sin
+ * categoria. Cada caso tiene su propio texto en vez de un mensaje generico,
+ * para que quede claro que no es un error, solo que aun no hay nada ahi.
+ */
+@Composable
+private fun EmptyFilter(filter: LibraryFilter, modifier: Modifier = Modifier) {
+    val mensaje = when (filter) {
+        is LibraryFilter.Category -> R.string.library_empty_category
+        LibraryFilter.Favorites -> R.string.library_empty_favorites
+        LibraryFilter.Uncategorized -> R.string.library_empty_uncategorized
+        LibraryFilter.All -> R.string.library_empty_filter
+    }
+    Column(
+        modifier = modifier.fillMaxSize().padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = stringResource(mensaje),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

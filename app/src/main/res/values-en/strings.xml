@@ -10,6 +10,10 @@
     <string name="library_empty_body">Tap the button below to find a document on your phone, or scan a few photos to create a new one.</string>
     <string name="library_search_hint">Search…</string>
     <string name="library_no_results">No document matches “%1$s”</string>
+    <string name="library_empty_category">No documents in this category yet.</string>
+    <string name="library_empty_favorites">No favorite documents yet.</string>
+    <string name="library_empty_uncategorized">All your documents already have a category.</string>
+    <string name="library_empty_filter">No documents to show here.</string>
     <string name="scan_short">Scan</string>
     <string name="open_short">Open PDF</string>
     <string name="group_today">Today</string>

@@ -10,6 +10,10 @@
     <string name="library_empty_body">Toque no botão abaixo para procurar um documento no seu celular, ou digitalize algumas fotos para criar um novo.</string>
     <string name="library_search_hint">Pesquisar…</string>
     <string name="library_no_results">Nenhum documento corresponde a “%1$s”</string>
+    <string name="library_empty_category">Ainda não há documentos nesta categoria.</string>
+    <string name="library_empty_favorites">Você ainda não tem documentos favoritos.</string>
+    <string name="library_empty_uncategorized">Todos os seus documentos já têm categoria.</string>
+    <string name="library_empty_filter">Não há documentos para mostrar aqui.</string>
     <string name="scan_short">Digitalizar</string>
     <string name="open_short">Abrir PDF</string>
     <string name="group_today">Hoje</string>

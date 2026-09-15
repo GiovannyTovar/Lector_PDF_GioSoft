@@ -10,6 +10,10 @@
     <string name="library_empty_body">Touchez le bouton ci-dessous pour chercher un document sur votre téléphone, ou numérisez quelques photos pour en créer un.</string>
     <string name="library_search_hint">Rechercher…</string>
     <string name="library_no_results">Aucun document ne correspond à « %1$s »</string>
+    <string name="library_empty_category">Aucun document dans cette catégorie pour le moment.</string>
+    <string name="library_empty_favorites">Aucun document en favori pour le moment.</string>
+    <string name="library_empty_uncategorized">Tous vos documents ont déjà une catégorie.</string>
+    <string name="library_empty_filter">Aucun document à afficher ici.</string>
     <string name="scan_short">Numériser</string>
     <string name="open_short">Ouvrir un PDF</string>
     <string name="group_today">Aujourd’hui</string>
