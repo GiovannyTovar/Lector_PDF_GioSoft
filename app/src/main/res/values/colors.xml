@@ -3,4 +3,8 @@
     <!-- Color de marca heredado de la version 4.x. La paleta completa se
          genera desde Kotlin en ui/theme/Color.kt. -->
     <color name="brand_navy">#0E314A</color>
+
+    <!-- Fondo de la pantalla de bienvenida: blanco, con el icono de la app
+         (fondo navy + marca) centrado encima. -->
+    <color name="splash_background">#FFFFFF</color>
 </resources>

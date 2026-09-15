@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -40,7 +42,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -272,20 +273,24 @@ private fun InfoLine(label: String, value: String) {
 /**
  * El logo de la app, el mismo que se ve en el lanzador.
  *
- * Se compone a mano la capa frontal sobre su color de fondo. No se puede usar
- * `R.mipmap.ic_launcher_round` directamente: desde Android 8 ese recurso es un
- * XML de icono adaptativo, y `painterResource` solo admite vectores y mapas de
- * bits ("Only VectorDrawables and rasterized asset types are supported").
+ * Se componen a mano las dos capas del icono adaptativo (fondo + frente): no
+ * se puede usar `R.mipmap.ic_launcher_round` directamente, porque desde
+ * Android 8 ese recurso es un XML de icono adaptativo y `painterResource`
+ * solo admite vectores y mapas de bits ("Only VectorDrawables and rasterized
+ * asset types are supported").
  */
 @Composable
 private fun AppLogo() {
     Box(
-        modifier = Modifier
-            .size(64.dp)
-            .clip(CircleShape)
-            .background(colorResource(R.color.ic_launcher_background)),
+        modifier = Modifier.size(64.dp).clip(CircleShape),
         contentAlignment = Alignment.Center,
     ) {
+        Image(
+            painter = painterResource(R.mipmap.ic_launcher_adaptive_back),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+        )
         // La capa frontal reserva como margen un tercio de su lienzo, y la
         // marca ocupa aun menos: dibujada al tamano del circulo se veria
         // diminuta, flotando en un mar de azul. Ampliada llena el hueco, y el
@@ -295,7 +300,7 @@ private fun AppLogo() {
         // sus hijos esas mismas restricciones, asi que un size() mayor se
         // quedaria recortado al del circulo y la imagen no creceria nada.
         Image(
-            painter = painterResource(R.mipmap.ic_launcher_foreground),
+            painter = painterResource(R.mipmap.ic_launcher_adaptive_fore),
             contentDescription = null,
             modifier = Modifier.requiredSize(100.dp),
         )
