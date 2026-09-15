@@ -785,6 +785,13 @@ private fun EmptyFilter(filter: LibraryFilter, modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
+        Icon(
+            imageVector = Icons.Outlined.MenuBook,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.outline,
+        )
+        Spacer(Modifier.height(16.dp))
         Text(
             text = stringResource(mensaje),
             style = MaterialTheme.typography.bodyLarge,
