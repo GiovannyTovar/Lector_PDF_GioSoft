@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -36,6 +37,8 @@ class SettingsRepository(private val context: Context) {
     private val thumbnailsKey = booleanPreferencesKey("show_thumbnails")
     private val categoriesSeededKey = booleanPreferencesKey("categories_seeded")
     private val favoritesPositionKey = intPreferencesKey("favorites_position")
+    private val lastFilterTypeKey = stringPreferencesKey("last_filter_type")
+    private val lastFilterCategoryIdKey = longPreferencesKey("last_filter_category_id")
 
     val themeMode: Flow<ThemeMode> = context.dataStore.data.map { preferences ->
         preferences[themeKey]
@@ -80,5 +83,30 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun markCategoriesSeeded() {
         context.dataStore.edit { it[categoriesSeededKey] = true }
+    }
+
+    /**
+     * La ficha de filtro que el usuario tenia abierta (Todos, Favoritos, Sin
+     * categoria o una categoria concreta), para volver a ella al reabrir la
+     * app en vez de empezar siempre en Todos.
+     *
+     * Se guarda como un par simple (tipo + id opcional) y no como el tipo
+     * `LibraryFilter` de la interfaz: esta clase vive en `data` y no debe
+     * depender de un tipo de `ui`. Quien traduce entre ambos es
+     * `LibraryViewModel`, que ya conoce los dos lados.
+     */
+    val lastFilter: Flow<Pair<String, Long?>> = context.dataStore.data.map { preferences ->
+        (preferences[lastFilterTypeKey] ?: "all") to preferences[lastFilterCategoryIdKey]
+    }
+
+    suspend fun setLastFilter(type: String, categoryId: Long?) {
+        context.dataStore.edit { preferences ->
+            preferences[lastFilterTypeKey] = type
+            if (categoryId != null) {
+                preferences[lastFilterCategoryIdKey] = categoryId
+            } else {
+                preferences.remove(lastFilterCategoryIdKey)
+            }
+        }
     }
 }

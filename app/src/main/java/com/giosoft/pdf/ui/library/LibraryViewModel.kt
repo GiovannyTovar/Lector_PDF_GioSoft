@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -76,6 +77,16 @@ class LibraryViewModel(
     private val query = MutableStateFlow("")
     private val filter = MutableStateFlow<LibraryFilter>(LibraryFilter.All)
     private val selection = MutableStateFlow<Set<String>>(emptySet())
+
+    init {
+        // Se restaura la ficha en la que el usuario se quedo (Trabajo,
+        // Favoritos...) en vez de arrancar siempre en Todos. Si la categoria
+        // guardada ya no existe, el propio combine() de uiState la corrige
+        // sola a Todos, asi que aqui no hace falta comprobarlo.
+        viewModelScope.launch {
+            filter.value = settings.lastFilter.first().toLibraryFilter()
+        }
+    }
 
     private val messages = Channel<UiMessage>(Channel.BUFFERED)
     val messageFlow = messages.receiveAsFlow()
@@ -151,6 +162,9 @@ class LibraryViewModel(
 
     fun onFilterChange(value: LibraryFilter) {
         filter.value = value
+        viewModelScope.launch {
+            settings.setLastFilter(value.toRawType(), (value as? LibraryFilter.Category)?.id)
+        }
     }
 
     // --- Categorias ---
@@ -411,6 +425,25 @@ class LibraryViewModel(
 
     private fun Long.toLocalDate(): LocalDate =
         Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
+
+    /** El nombre crudo con el que `SettingsRepository` guarda este filtro. */
+    private fun LibraryFilter.toRawType(): String = when (this) {
+        LibraryFilter.All -> "all"
+        LibraryFilter.Favorites -> "favorites"
+        LibraryFilter.Uncategorized -> "uncategorized"
+        is LibraryFilter.Category -> "category"
+    }
+
+    /** El filtro guardado, de vuelta al tipo que usa la interfaz. */
+    private fun Pair<String, Long?>.toLibraryFilter(): LibraryFilter {
+        val (type, categoryId) = this
+        return when (type) {
+            "favorites" -> LibraryFilter.Favorites
+            "uncategorized" -> LibraryFilter.Uncategorized
+            "category" -> categoryId?.let { LibraryFilter.Category(it) } ?: LibraryFilter.All
+            else -> LibraryFilter.All
+        }
+    }
 
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
