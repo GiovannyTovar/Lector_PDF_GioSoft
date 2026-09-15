@@ -291,15 +291,15 @@ private fun AppLogo() {
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize(),
         )
-        // La capa frontal ya trae su propio margen de seguridad (el mismo
-        // que usa el lanzador para que el recorte circular no toque la
-        // marca), asi que basta con llenar el mismo circulo, sin ampliarla:
-        // ampliarla es lo que hacia que se viera grande y el circulo le
-        // cortara el texto.
+        // La capa frontal trae su propio margen de seguridad, pensado para
+        // que el recorte circular del lanzador no toque la marca -llenar el
+        // circulo tal cual (sin ampliar) deja la marca chica, con mucho azul
+        // alrededor. Un poco mas grande que el circulo llena mejor el hueco
+        // sin llegar a cortar el texto como pasaba a 100dp.
         Image(
             painter = painterResource(R.mipmap.ic_launcher_adaptive_fore),
             contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.requiredSize(88.dp),
         )
     }
 }
