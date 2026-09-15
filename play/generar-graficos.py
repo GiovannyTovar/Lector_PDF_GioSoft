@@ -9,10 +9,10 @@ Produce, en esta misma carpeta:
     icono-512.png                  icono de la ficha (512x512, obligatorio)
     grafico-destacado-1024x500.png cabecera de la ficha (obligatorio)
 
-Se parte del icono real de la app (`mipmap-xxxhdpi/ic_launcher_foreground.webp`
-y el color `ic_launcher_background`), de modo que lo que ve la gente en Play es
-exactamente lo que vera luego en su lanzador. Si algun dia cambia el icono,
-basta con volver a ejecutar este script.
+Se parte del icono real de la app (las dos capas del icono adaptativo,
+`mipmap-xxxhdpi/ic_launcher_adaptive_back.png` y `..._fore.png`), de modo que
+lo que ve la gente en Play es exactamente lo que vera luego en su lanzador. Si
+algun dia cambia el icono, basta con volver a ejecutar este script.
 
 Requiere Pillow:  py -3 -m pip install pillow
 """
@@ -21,7 +21,9 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 RAIZ = Path(__file__).resolve().parent.parent
-FOREGROUND = RAIZ / "app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.webp"
+_MIPMAP = RAIZ / "app/src/main/res/mipmap-xxxhdpi"
+FONDO_ICONO = _MIPMAP / "ic_launcher_adaptive_back.png"
+FRENTE_ICONO = _MIPMAP / "ic_launcher_adaptive_fore.png"
 SALIDA = Path(__file__).resolve().parent
 
 # Los mismos colores de la app: el azul de la barra superior y el rojo del PDF.
@@ -42,18 +44,27 @@ def icono(lado, radio=0):
     """
     El icono de la app en un cuadrado de `lado` pixeles.
 
-    La capa frontal del icono adaptativo no es solo la marca: trae su propio
-    recuadro con textura. Se recorta a ese recuadro y se escala al lienzo
-    entero, de modo que la textura llena el icono en vez de quedar como un
-    parche mas oscuro flotando sobre el fondo.
+    Se componen las dos capas del icono adaptativo, igual que hace Android:
+    el fondo (degradado navy) primero, y encima la marca. La capa frontal
+    reserva un margen de seguridad transparente alrededor (para que ningun
+    lanzador la recorte); se recorta a su contenido real antes de escalar,
+    si no la marca saldria mas chica de lo que se ve en el telefono.
 
     Con `radio` se redondean las esquinas, para verlo como lo muestra Play.
     """
-    logo = Image.open(FOREGROUND).convert("RGBA")
-    logo = logo.crop(logo.getbbox()).resize((lado, lado), Image.LANCZOS)
+    fondo = Image.open(FONDO_ICONO).convert("RGBA").resize((lado, lado), Image.LANCZOS)
 
-    fondo = Image.new("RGBA", (lado, lado), AZUL + (255,))
-    fondo.alpha_composite(logo)
+    frente = Image.open(FRENTE_ICONO).convert("RGBA")
+    bbox = frente.getbbox()
+    # Que proporcion del lienzo ocupa el contenido real (sin el margen de
+    # seguridad transparente), para escalar la marca a esa misma proporcion
+    # sobre el `lado` final y que quede igual de grande que en el telefono.
+    proporcion = (bbox[2] - bbox[0]) / frente.width
+    marca = frente.crop(bbox)
+    lado_marca = round(lado * proporcion)
+    marca = marca.resize((lado_marca, lado_marca), Image.LANCZOS)
+    pos = ((lado - lado_marca) // 2, (lado - lado_marca) // 2)
+    fondo.alpha_composite(marca, pos)
 
     if radio:
         mascara = Image.new("L", (lado, lado), 0)

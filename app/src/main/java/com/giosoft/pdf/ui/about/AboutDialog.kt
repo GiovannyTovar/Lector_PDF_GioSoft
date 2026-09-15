@@ -291,18 +291,15 @@ private fun AppLogo() {
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize(),
         )
-        // La capa frontal reserva como margen un tercio de su lienzo, y la
-        // marca ocupa aun menos: dibujada al tamano del circulo se veria
-        // diminuta, flotando en un mar de azul. Ampliada llena el hueco, y el
-        // recorte del circulo se come solo el margen sobrante.
-        //
-        // requiredSize y no size: el Box de arriba tiene tamano fijo y pasa a
-        // sus hijos esas mismas restricciones, asi que un size() mayor se
-        // quedaria recortado al del circulo y la imagen no creceria nada.
+        // La capa frontal ya trae su propio margen de seguridad (el mismo
+        // que usa el lanzador para que el recorte circular no toque la
+        // marca), asi que basta con llenar el mismo circulo, sin ampliarla:
+        // ampliarla es lo que hacia que se viera grande y el circulo le
+        // cortara el texto.
         Image(
             painter = painterResource(R.mipmap.ic_launcher_adaptive_fore),
             contentDescription = null,
-            modifier = Modifier.requiredSize(100.dp),
+            modifier = Modifier.fillMaxSize(),
         )
     }
 }

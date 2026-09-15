@@ -5,10 +5,14 @@
     <style name="Theme.LectorPdf" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowBackground">?attr/colorSurface</item>
 
-        <!-- Pantalla de inicio: fondo blanco con el icono de la app (que ya
-             trae su propio fondo navy) centrado encima. -->
+        <!-- Pantalla de inicio: fondo blanco con el icono de la app (fondo +
+             marca, ya compuestos con las esquinas redondeadas en
+             ic_launcher_splash.png) centrado encima. No se usa
+             ic_launcher_adaptive_fore aqui: esta pantalla no aplica la
+             mascara redondeada que sí aplica el lanzador sobre el icono
+             adaptativo, así que saldría con las esquinas rectas. -->
         <item name="android:windowSplashScreenBackground">@color/splash_background</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_adaptive_fore</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_splash</item>
         <item name="android:windowSplashScreenIconBackgroundColor">@color/splash_background</item>
     </style>
 </resources>
